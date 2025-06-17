@@ -9,8 +9,8 @@ apk add --no-cache jq
 
 echo "[keycloak-init] 환경 변수 설정"
 KEYCLOAK_URL="http://keycloak:8083"
-ADMIN_USER="admin"
-ADMIN_PASS="admin"
+ADMIN_USER="keycloak_admin"
+ADMIN_PASS="keycloak_admin_password123!"
 REALM="myrealm"
 CLIENT_ID="springboot-client"
 CLIENT_SECRET="springboot-secret"

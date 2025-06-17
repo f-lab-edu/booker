@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8084
 
 spring:
   security:
@@ -7,16 +7,16 @@ spring:
       client:
         provider:
           keycloak:
-            issuer-uri: http://keycloak:8083/realms/myrealm
-            authorization-uri: http://localhost:8083/realms/myrealm/protocol/openid-connect/auth
-            token-uri: http://keycloak:8083/realms/myrealm/protocol/openid-connect/token
-            user-info-uri: http://keycloak:8083/realms/myrealm/protocol/openid-connect/userinfo
-            jwk-set-uri: http://keycloak:8083/realms/myrealm/protocol/openid-connect/certs
+            issuer-uri: ${KEYCLOAK_INTERNAL_URL}/realms/myrealm
+            authorization-uri: ${KEYCLOAK_EXTERNAL_URL}/realms/myrealm/protocol/openid-connect/auth
+            token-uri: ${KEYCLOAK_INTERNAL_URL}/realms/myrealm/protocol/openid-connect/token
+            user-info-uri: ${KEYCLOAK_INTERNAL_URL}/realms/myrealm/protocol/openid-connect/userinfo
+            jwk-set-uri: ${KEYCLOAK_INTERNAL_URL}/realms/myrealm/protocol/openid-connect/certs
             user-name-attribute: preferred_username
         registration:
           keycloak:
             client-id: springboot-client
             client-secret: springboot-secret
             authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8084/login/oauth2/code/keycloak
+            redirect-uri: ${KEYCLOAK_EXTERNAL_URL}/login/oauth2/code/keycloak
             scope: openid,profile,email 
