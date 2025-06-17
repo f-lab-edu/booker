@@ -7,11 +7,11 @@ spring:
       client:
         provider:
           keycloak:
-            issuer-uri: http://keycloak:8080/realms/myrealm
+            issuer-uri: http://keycloak:8083/realms/myrealm
             authorization-uri: http://localhost:8083/realms/myrealm/protocol/openid-connect/auth
-            token-uri: http://keycloak:8080/realms/myrealm/protocol/openid-connect/token
-            user-info-uri: http://keycloak:8080/realms/myrealm/protocol/openid-connect/userinfo
-            jwk-set-uri: http://keycloak:8080/realms/myrealm/protocol/openid-connect/certs
+            token-uri: http://keycloak:8083/realms/myrealm/protocol/openid-connect/token
+            user-info-uri: http://keycloak:8083/realms/myrealm/protocol/openid-connect/userinfo
+            jwk-set-uri: http://keycloak:8083/realms/myrealm/protocol/openid-connect/certs
             user-name-attribute: preferred_username
         registration:
           keycloak:

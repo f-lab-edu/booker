@@ -8,7 +8,7 @@ echo "[keycloak-init] apk add jq"
 apk add --no-cache jq
 
 echo "[keycloak-init] 환경 변수 설정"
-KEYCLOAK_URL="http://keycloak:8080"
+KEYCLOAK_URL="http://keycloak:8083"
 ADMIN_USER="admin"
 ADMIN_PASS="admin"
 REALM="myrealm"
