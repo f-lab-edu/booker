@@ -85,4 +85,17 @@ curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM/users" \
   -H "Content-Type: application/json" \
   -d '{"username":"'$USER_NAME'","enabled":true,"credentials":[{"type":"password","value":"'$USER_PASS'","temporary":false}]}'
 
+echo "[keycloak-init] user 생성 확인"
+# 6. Verify user creation
+USER_INFO=$(curl -s -X GET "$KEYCLOAK_URL/admin/realms/$REALM/users?username=$USER_NAME" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json")
+
+if echo "$USER_INFO" | jq -e '. | length > 0' > /dev/null; then
+    echo "[keycloak-init] ✅ User '$USER_NAME' created successfully"
+else
+    echo "[keycloak-init] ❌ Failed to verify user '$USER_NAME' creation"
+    exit 1
+fi
+
 echo "[keycloak-init] Keycloak realm, client, and user created successfully." 
