@@ -18,5 +18,5 @@ spring:
             client-id: springboot-client
             client-secret: springboot-secret
             authorization-grant-type: authorization_code
-            redirect-uri: ${KEYCLOAK_EXTERNAL_URL}/login/oauth2/code/keycloak
+            redirect-uri: http://localhost:8084/login/oauth2/code/keycloak
             scope: openid,profile,email 
