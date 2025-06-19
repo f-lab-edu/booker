@@ -49,7 +49,7 @@ services:
 
   springboot:
     build:
-      context: springboot
+      context: booker-server
       dockerfile: Dockerfile
     container_name: springboot
     ports:
