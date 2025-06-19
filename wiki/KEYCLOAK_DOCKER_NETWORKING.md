@@ -17,7 +17,7 @@
 ## 2. Problem Identification
 
 ### Symptoms
-- Authentication redirect fails when accessing Spring Boot from browser
+- Keycloak Authentication redirect fails when accessing Spring Boot from browser
 - Incorrect hostname handling between Docker containers and local machine
 - OAuth2 client registration errors due to hostname mismatches
 
@@ -50,11 +50,15 @@ REDIRECT_URIS='["http://localhost:8083/login/oauth2/code/keycloak","http://local
 - Supported both Keycloak and Spring Boot domains
 - Configured web origins for cross-origin authentication
 
+![Keycloak Docker Networking Diagram](diagram/KEYCLOAK_DOCKER_NETWORKING.png)
+
+*Figure 1: Keycloak and Spring Boot networking interaction diagram showing Docker internal communication, local machine perspective, and configuration challenges.*
+
+
 ## 4. Lessons Learned and Best Practices
 
 ### Technical Insights
 1. **Containerized Authentication Complexity**
-   - Docker networking creates unique challenges for authentication
    - Hostname resolution differs between container internal and external networks
 
 2. **Flexible Configuration is Key**
