@@ -14,7 +14,7 @@ ADMIN_PASS="keycloak_admin_password123!"
 REALM="myrealm"
 CLIENT_ID="springboot-client"
 CLIENT_SECRET="springboot-secret"
-REDIRECT_URIS="[\"http://localhost:8083/login/oauth2/code/keycloak\"]"
+REDIRECT_URIS="[\"http://localhost:8083/login/oauth2/code/keycloak\",\"http://localhost:8084/*\"]"
 USER_NAME="testuser"
 USER_PASS="testuser"
 
@@ -74,6 +74,7 @@ curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM/clients" \
     "protocol": "openid-connect",
     "publicClient": false,
     "redirectUris": '$REDIRECT_URIS',
+    "webOrigins": ["http://localhost:8084"],
     "standardFlowEnabled": true
   }'
 
