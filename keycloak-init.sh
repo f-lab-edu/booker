@@ -106,6 +106,42 @@ if [ "$HTTP_CODE" != "201" ] && [ "$HTTP_CODE" != "409" ]; then
     exit 1
 fi
 
+# Get client ID for updating settings if client already exists
+CLIENT_ID_UUID=$(curl -s -X GET "$KEYCLOAK_URL/admin/realms/$REALM/clients" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  | jq -r '.[] | select(.clientId=="'$CLIENT_ID'") | .id')
+
+check_curl_response "$CLIENT_ID_UUID" "Failed to get client ID"
+
+# Update client settings to ensure direct access grants are enabled
+echo "[keycloak-init] client 설정 업데이트"
+UPDATE_RESPONSE=$(curl -s -w "\n%{http_code}" -X PUT "$KEYCLOAK_URL/admin/realms/$REALM/clients/$CLIENT_ID_UUID" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "clientId": "'$CLIENT_ID'",
+    "secret": "'$CLIENT_SECRET'",
+    "enabled": true,
+    "protocol": "openid-connect",
+    "publicClient": false,
+    "redirectUris": '$REDIRECT_URIS',
+    "webOrigins": ["http://localhost:8084"],
+    "rootUrl": "http://localhost:8084",
+    "baseUrl": "/",
+    "standardFlowEnabled": true,
+    "directAccessGrantsEnabled": true,
+    "serviceAccountsEnabled": true,
+    "authorizationServicesEnabled": true,
+    "clientAuthenticatorType": "client-secret"
+  }')
+
+HTTP_CODE=$(echo "$UPDATE_RESPONSE" | tail -n1)
+if [ "$HTTP_CODE" != "204" ]; then
+    echo "Failed to update client settings. HTTP code: $HTTP_CODE"
+    exit 1
+fi
+
 echo "[keycloak-init] roles 생성"
 # Create roles
 for role in $ROLES; do
@@ -131,11 +167,18 @@ USER_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$KEYCLOAK_URL/admin/realms/
     "username": "'$USER_NAME'",
     "enabled": true,
     "emailVerified": true,
+    "firstName": "Test",
+    "lastName": "User",
+    "email": "testuser@example.com",
+    "requiredActions": [],
     "credentials": [{
       "type": "password",
       "value": "'$USER_PASS'",
       "temporary": false
-    }]
+    }],
+    "attributes": {
+      "locale": ["en"]
+    }
   }')
 
 HTTP_CODE=$(echo "$USER_RESPONSE" | tail -n1)
