@@ -1,17 +1,35 @@
 server:
   port: 8084
 
+keycloak:
+  server-url: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}
+  realm: myrealm
+  client-id: springboot-client
+  client-secret: springboot-secret
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+  api-docs:
+    path: /v3/api-docs
+  packages-to-scan: com.example.demo.controller
+
 spring:
   security:
     oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_EXTERNAL_URL:http://localhost:8083}/realms/myrealm
+          jwk-set-uri: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}/realms/myrealm/protocol/openid-connect/certs
       client:
         provider:
           keycloak:
-            issuer-uri: ${KEYCLOAK_INTERNAL_URL}/realms/myrealm
-            authorization-uri: ${KEYCLOAK_EXTERNAL_URL}/realms/myrealm/protocol/openid-connect/auth
-            token-uri: ${KEYCLOAK_INTERNAL_URL}/realms/myrealm/protocol/openid-connect/token
-            user-info-uri: ${KEYCLOAK_INTERNAL_URL}/realms/myrealm/protocol/openid-connect/userinfo
-            jwk-set-uri: ${KEYCLOAK_INTERNAL_URL}/realms/myrealm/protocol/openid-connect/certs
+            issuer-uri: ${KEYCLOAK_EXTERNAL_URL:http://localhost:8083}/realms/myrealm
+            authorization-uri: ${KEYCLOAK_EXTERNAL_URL:http://localhost:8083}/realms/myrealm/protocol/openid-connect/auth
+            token-uri: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}/realms/myrealm/protocol/openid-connect/token
+            user-info-uri: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}/realms/myrealm/protocol/openid-connect/userinfo
+            jwk-set-uri: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}/realms/myrealm/protocol/openid-connect/certs
             user-name-attribute: preferred_username
         registration:
           keycloak:

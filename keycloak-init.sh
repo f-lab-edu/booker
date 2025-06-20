@@ -75,7 +75,11 @@ curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM/clients" \
     "publicClient": false,
     "redirectUris": '$REDIRECT_URIS',
     "webOrigins": ["http://localhost:8084"],
-    "standardFlowEnabled": true
+    "standardFlowEnabled": true,
+    "directAccessGrantsEnabled": true,
+    "serviceAccountsEnabled": true,
+    "authorizationServicesEnabled": true,
+    "clientAuthenticatorType": "client-secret"
   }'
 
 echo "[keycloak-init] user 생성"
@@ -98,4 +102,4 @@ else
     exit 1
 fi
 
-echo "[keycloak-init] Keycloak realm, client, and user created successfully." 
+echo "[keycloak-init] Keycloak realm, client, and user created successfully" 
