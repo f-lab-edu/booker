@@ -75,6 +75,8 @@ curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM/clients" \
     "publicClient": false,
     "redirectUris": '$REDIRECT_URIS',
     "webOrigins": ["http://localhost:8084"],
+    "rootUrl": "http://localhost:8084",
+    "baseUrl": "/",
     "standardFlowEnabled": true,
     "directAccessGrantsEnabled": true,
     "serviceAccountsEnabled": true,
