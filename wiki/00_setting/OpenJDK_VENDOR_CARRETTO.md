@@ -14,14 +14,17 @@
 
 # **🎯 Problem-Solving 🎯**
 
-## AWS EC2 환경, Java 런타임(JDK) 선택
-`기술적 목표` | AWS EC2에 배포할 개인 프로젝트의 Java 런타임(JDK) 선택  
+## ARM CPU 플랫폼, Java 런타임(JDK) 선택
+`기술적 목표` | ARM CPU 플랫폼 JVM 프로젝트에 알맞는 JDK 선택  
 `비즈니스적 목표` | 비용 효율성, 장기적 유지보수성, 안정성
 
 **SITUATION**  
-- 프로젝트 배포 전후 각 각, 동일하게 사용할 JDK 선택 필요  
-(Oracle JDK, OpenJDK, Amazon Corretto...)  
-- 개인 노트북 (개발활경) = aarch64 _ M2 ARM 칩(64비트/ARMv8-A 이상)
+- 작업환경 | aarch64 CPU  
+Apple Silicon(M1/M2) : 개발환경  
+AWS Graviton CPU : 운영환경  
+- 프로젝트 환경에 맞는 JDK 고려 필요   
+Oracle JDK, OpenJDK, Amazon Corretto...
+
 
 **PROBLEM**  
 - 프로젝트 시작전, 이후 불필요한 유지보수를 피하기 위해 적절한 JDK 선택필요
@@ -39,7 +42,7 @@
 [ aarch64 ] ARM 환경에서, 불필요한 x86 에뮬레이션 과정 제거 → 성능향상
 - 작업환경 | Apple Silicon(M1/M2) : 개발환경 / AWS Graviton CPU : 운영환경  
 - x86 JDK → ARM 환경에서 x86 머신코드 연산필요   
-→ Rosetta 2 x86 에뮬레이션 발생 → 추가 작업 → 서버성능에 영향
+→ Rosetta 2 x86 에뮬레이션 필요 = 추가 작업 → 서버성능에 영향
 - aarch64 JDK → JVM JIT 컴파일러가 바이트코드를 ARM 머신코드 변환 → ARM CPU 연산  
 (추가 에뮬레이션 작업 X)
 - ARM 작업환경에 맞는 aarch64 JDK 선택  
