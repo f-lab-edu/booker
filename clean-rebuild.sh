@@ -8,7 +8,6 @@ docker compose down -v
 echo "Removing Docker images..."
 docker rmi booker-springboot:latest
 
-
 # Remove dangling images
 echo "Removing dangling images..."
 docker image prune -f

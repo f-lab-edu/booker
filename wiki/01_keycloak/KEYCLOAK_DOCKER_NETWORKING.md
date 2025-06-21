@@ -28,7 +28,7 @@ Root Cause | Incorrect hostname handling between **Docker containers and local m
 ```
 
 
-![Keycloak Docker Networking Diagram](../diagram/KEYCLOAK_DOCKER_NETWORKING.png)
+![Keycloak Docker Networking Diagram](diagram/KEYCLOAK_DOCKER_NETWORKING.png)
 
 *Figure 1: Keycloak and Spring Boot networking interaction diagram showing Docker internal communication, local machine perspective, and configuration challenges.*
 
