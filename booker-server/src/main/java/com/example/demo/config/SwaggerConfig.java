@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.security.Scopes;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,13 +15,16 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
     
-    @Value("${spring.security.oauth2.client.provider.keycloak.token-uri}")
+    @Value("${KEYCLOAK_EXTERNAL_URL:http://localhost:8083}/realms/${keycloak.realm}/protocol/openid-connect/token")
     private String tokenUri;
     
-    @Value("${spring.security.oauth2.client.provider.keycloak.authorization-uri}")
+    @Value("${KEYCLOAK_EXTERNAL_URL:http://localhost:8083}/realms/${keycloak.realm}/protocol/openid-connect/auth")
     private String authorizationUri;
-    
-    @Value("${spring.security.oauth2.client.registration.keycloak.client-id}")
+
+    @Value("${keycloak.realm:myrealm}")
+    private String realm;
+
+    @Value("${keycloak.client-id:springboot-client}")
     private String clientId;
 
     @Bean
@@ -31,11 +35,14 @@ public class SwaggerConfig {
             .name(securitySchemeName)
             .type(SecurityScheme.Type.OAUTH2)
             .flows(new OAuthFlows()
-                .password(new OAuthFlow()
-                    .tokenUrl(tokenUri))
                 .authorizationCode(new OAuthFlow()
                     .authorizationUrl(authorizationUri)
-                    .tokenUrl(tokenUri)));
+                    .tokenUrl(tokenUri)
+                    .scopes(new Scopes()
+                        .addString("openid", "OpenID Connect")
+                        .addString("profile", "Profile information")
+                        .addString("email", "Email information"))
+                    .refreshUrl(tokenUri)));
 
         return new OpenAPI()
             .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
@@ -45,8 +52,7 @@ public class SwaggerConfig {
                 .title("Booker API")
                 .version("1.0")
                 .description("Booker REST API Documentation with OAuth2 Authentication\n\n" +
-                    "Available roles:\n" +
-                    "- USER: Can read books\n" +
-                    "- ADMIN: Can read, create, update, and delete books"));
+                    "Client ID: " + clientId + "\n" +
+                    "Available scopes: openid, profile, email"));
     }
 } 

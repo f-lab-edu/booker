@@ -33,6 +33,8 @@ Browser → Spring Boot App (localhost:8084) → Keycloak Container (keycloak:80
 - **인가(Authorization)**: "무엇을 할 수 있는가?" - JWT 토큰의 역할 정보로 접근 제어
 - **무상태성(Stateless)**: JWT 토큰으로 서버 확장성 확보
 
+https://apidog.com/kr/blog/oauth-vs-jwt-2/
+
 **2. 해결하는 핵심 문제**
 - **중앙화된 인증**: 여러 서비스가 하나의 인증 서버를 공유
 - **토큰 기반 보안**: 세션 의존성 제거로 분산 서버 환경 최적화

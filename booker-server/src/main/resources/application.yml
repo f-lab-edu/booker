@@ -5,10 +5,12 @@ keycloak:
   server-url: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}
   realm: myrealm
   client-id: springboot-client
-  client-secret: springboot-secret
 
 springdoc:
   swagger-ui:
+    oauth:
+      client-id: ${keycloak.client-id}
+      use-pkce-with-authorization-code-grant: true
     path: /swagger-ui.html
     operationsSorter: method
   api-docs:
@@ -19,14 +21,7 @@ logging:
   level:
     root: INFO
     org.springframework.security: TRACE
-    org.springframework.security.oauth2: TRACE
-    org.springframework.web: TRACE
     com.example.demo: DEBUG
-    org.springframework.security.web.access: TRACE
-    org.springframework.security.web.authentication: TRACE
-    org.springframework.security.access: TRACE
-    org.springframework.security.authorization: TRACE
-    org.springframework.aop: TRACE
 
 spring:
   security:
@@ -34,20 +29,4 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_EXTERNAL_URL:http://localhost:8083}/realms/myrealm
-          jwk-set-uri: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}/realms/myrealm/protocol/openid-connect/certs
-      client:
-        provider:
-          keycloak:
-            issuer-uri: ${KEYCLOAK_EXTERNAL_URL:http://localhost:8083}/realms/myrealm
-            authorization-uri: ${KEYCLOAK_EXTERNAL_URL:http://localhost:8083}/realms/myrealm/protocol/openid-connect/auth
-            token-uri: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}/realms/myrealm/protocol/openid-connect/token
-            user-info-uri: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}/realms/myrealm/protocol/openid-connect/userinfo
-            jwk-set-uri: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}/realms/myrealm/protocol/openid-connect/certs
-            user-name-attribute: preferred_username
-        registration:
-          keycloak:
-            client-id: springboot-client
-            client-secret: springboot-secret
-            authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8084/login/oauth2/code/keycloak
-            scope: openid,profile,email 
+          jwk-set-uri: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}/realms/myrealm/protocol/openid-connect/certs 
