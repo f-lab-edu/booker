@@ -231,7 +231,7 @@ public ResponseEntity<List<Book>> getAllBooks() {
 - [x] 자동화된 테스트 스크립트 통과 -> test-api.sh 를 통해 테스트 검증
 - [x] Docker Compose 환경에서 모든 서비스 정상 기동
 - [x] API 문서화 (Swagger) 완료
+- [x] Swagger api 토큰 발급 및 세션 관리 기능 추가
+- [ ] 로그아웃 api 만들기 (브라우져 쿠키 삭제 + 키클락 해당 유저 세션 정보 삭제)
 - [ ] 역할 기반 API 접근 제어 동작 실패 케이스 테스트
-- [ ] Swagger api 토큰 발급 및 세션 관리 기능 추가
-- [ ] Refresh Token: 장기간 세션 관리
 - [ ] Social Login: Google 소셜 로그인 연동
