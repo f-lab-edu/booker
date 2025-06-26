@@ -15,13 +15,13 @@ springdoc:
     operationsSorter: method
   api-docs:
     path: /v3/api-docs
-  packages-to-scan: com.example.demo.controller
+  packages-to-scan: com.bookerapp.core.controller
 
 logging:
   level:
     root: INFO
     org.springframework.security: TRACE
-    com.example.demo: DEBUG
+    com.bookerapp.core: DEBUG
 
 spring:
   security:
