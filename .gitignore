@@ -45,4 +45,17 @@ gradle-app.setting
 
 # virtual machine crash logs
 hs_err_pid*
-replay_pid* 
+replay_pid*
+
+# Additional build artifacts
+build/
+target/
+bin/
+out/
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Spring Boot
+spring-boot-devtools.properties
