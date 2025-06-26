@@ -1,63 +1,89 @@
 package com.bookerapp.core.presentation.controller;
 
+import com.bookerapp.core.domain.model.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/books")
+@RequestMapping("/api")
 @Tag(name = "Book", description = "Book management APIs")
 public class BookController {
     private static final Logger logger = LoggerFactory.getLogger(BookController.class);
 
-    @GetMapping
-    @Operation(summary = "Get all books", security = @SecurityRequirement(name = "bearerAuth"))
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    public String getAllBooks() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        logger.info("getAllBooks called by user with authorities: {}", auth.getAuthorities());
+    @GetMapping("/books")
+    @Operation(summary = "Get all books")
+    public String getAllBooks(UserContext userContext) {
+        validateUserAccess(userContext, "USER", "ADMIN");
+        logger.info("getAllBooks called by user: {} with roles: {}", userContext.getUserId(), userContext.getRoles());
         return "List of all books";
     }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Get book by ID", security = @SecurityRequirement(name = "bearerAuth"))
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    public String getBookById(@PathVariable String id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        logger.info("getBookById called for id: {} by user with authorities: {}", id, auth.getAuthorities());
+    @GetMapping("/books/{id}")
+    @Operation(summary = "Get book by ID")
+    public String getBookById(@PathVariable String id, UserContext userContext) {
+        validateUserAccess(userContext, "USER", "ADMIN");
+        logger.info("getBookById called for id: {} by user: {} with roles: {}", id, userContext.getUserId(), userContext.getRoles());
         return "Book with ID: " + id;
     }
 
-    @PostMapping
-    @Operation(summary = "Create a new book", security = @SecurityRequirement(name = "bearerAuth"))
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public String createBook(@RequestBody String bookData) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        logger.info("createBook called with data: {} by user with authorities: {}", bookData, auth.getAuthorities());
+    @PostMapping("/books")
+    @Operation(summary = "Create a new book")
+    public String createBook(@RequestBody String bookData, UserContext userContext) {
+        validateAdminAccess(userContext);
+        logger.info("createBook called with data: {} by user: {} with roles: {}", bookData, userContext.getUserId(), userContext.getRoles());
         return "Created book: " + bookData;
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Update a book", security = @SecurityRequirement(name = "bearerAuth"))
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public String updateBook(@PathVariable String id, @RequestBody String bookData) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        logger.info("updateBook called for id: {} with data: {} by user with authorities: {}", id, bookData, auth.getAuthorities());
+    @PutMapping("/books/{id}")
+    @Operation(summary = "Update a book")
+    public String updateBook(@PathVariable String id, @RequestBody String bookData, UserContext userContext) {
+        validateAdminAccess(userContext);
+        logger.info("updateBook called for id: {} with data: {} by user: {} with roles: {}", id, bookData, userContext.getUserId(), userContext.getRoles());
         return "Updated book " + id + " with: " + bookData;
     }
 
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a book", security = @SecurityRequirement(name = "bearerAuth"))
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public String deleteBook(@PathVariable String id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        logger.info("deleteBook called for id: {} by user with authorities: {}", id, auth.getAuthorities());
+    @DeleteMapping("/books/{id}")
+    @Operation(summary = "Delete a book")
+    public String deleteBook(@PathVariable String id, UserContext userContext) {
+        validateAdminAccess(userContext);
+        logger.info("deleteBook called for id: {} by user: {} with roles: {}", id, userContext.getUserId(), userContext.getRoles());
         return "Deleted book: " + id;
     }
-} 
+    
+    @GetMapping("/user/info")
+    @Operation(summary = "Get current user information")
+    public Map<String, Object> getUserInfo(UserContext userContext) {
+        logger.info("getUserInfo called by user: {} with roles: {}", userContext.getUserId(), userContext.getRoles());
+        
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("userId", userContext.getUserId());
+        userInfo.put("username", userContext.getUsername());
+        userInfo.put("email", userContext.getEmail());
+        userInfo.put("roles", userContext.getRoles());
+        userInfo.put("authenticated", userContext.getUserId() != null);
+        
+        return userInfo;
+    }
+    
+    private void validateUserAccess(UserContext userContext, String... allowedRoles) {
+        if (userContext == null || userContext.getUserId() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        }
+        
+        if (!userContext.hasAnyRole(allowedRoles)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Insufficient permissions");
+        }
+    }
+    
+    private void validateAdminAccess(UserContext userContext) {
+        validateUserAccess(userContext, "ADMIN");
+    }
+}

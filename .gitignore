@@ -59,3 +59,6 @@ out/
 
 # Spring Boot
 spring-boot-devtools.properties
+
+.env
+.env.*

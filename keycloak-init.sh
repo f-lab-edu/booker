@@ -14,9 +14,39 @@ ADMIN_PASS="keycloak_admin_password123!"
 REALM="myrealm"
 CLIENT_ID="springboot-client"
 CLIENT_SECRET="springboot-secret"
-REDIRECT_URIS="[\"http://localhost:8083/login/oauth2/code/keycloak\",\"http://localhost:8084/*\"]"
+REDIRECT_URIS="[\"http://localhost:8083/realms/myrealm/broker/google/endpoint\",\"http://localhost:3000/*\",\"http://localhost:8084/*\"]"
 USER_NAME="testuser"
 USER_PASS="testuser"
+
+# Google OAuth 설정 (환경변수로 주입받거나 기본값 사용)
+# 실제 사용시 Google Cloud Console에서 OAuth 2.0 클라이언트 ID를 생성하고 아래 값들을 설정하세요
+# https://console.cloud.google.com/apis/credentials
+GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID}"
+GOOGLE_CLIENT_SECRET="${GOOGLE_CLIENT_SECRET}"
+
+# Google OAuth 정보 확인
+if [ -n "$GOOGLE_CLIENT_ID" ] && [ -n "$GOOGLE_CLIENT_SECRET" ] && [ "$GOOGLE_CLIENT_ID" != "your-google-client-id" ]; then
+    echo ""
+    echo "🔑 Google OAuth 설정 감지됨!"
+    echo "Client ID: ${GOOGLE_CLIENT_ID:0:20}..."
+    echo ""
+else
+    echo ""
+    echo "🔧 Google OAuth 설정이 필요합니다!"
+    echo ""
+    echo "1. Google Cloud Console에 접속: https://console.cloud.google.com/apis/credentials"
+    echo "2. OAuth 2.0 클라이언트 ID 생성"
+    echo "3. 승인된 리디렉션 URI 추가: http://localhost:8083/realms/myrealm/broker/google/endpoint"
+    echo "4. 환경변수 설정 후 다시 실행:"
+    echo "   export GOOGLE_CLIENT_ID='your-google-client-id'"
+    echo "   export GOOGLE_CLIENT_SECRET='your-google-client-secret'"
+    echo ""
+    echo "또는 docker-compose.yml에서 환경변수 설정 후 실행:"
+    echo "   GOOGLE_CLIENT_ID=your-id GOOGLE_CLIENT_SECRET=your-secret docker-compose up"
+    echo ""
+    echo "Google OAuth 없이 계속 진행합니다..."
+    echo ""
+fi
 
 # Define roles as space-separated string
 ROLES="ADMIN USER"
@@ -272,4 +302,149 @@ else
     exit 1
 fi
 
-echo "[keycloak-init] Keycloak realm, client, roles, and user created successfully" 
+echo "[keycloak-init] Keycloak realm, client, roles, and user created successfully"
+
+echo "[keycloak-init] Google Identity Provider 설정"
+# Google Identity Provider 생성
+if [ -n "$GOOGLE_CLIENT_ID" ] && [ -n "$GOOGLE_CLIENT_SECRET" ] && [ "$GOOGLE_CLIENT_ID" != "your-google-client-id" ]; then
+    echo "🔑 Google OAuth 설정 중..."
+    echo "Client ID: ${GOOGLE_CLIENT_ID:0:20}..."
+    
+    # Create Google Identity Provider
+    GOOGLE_IDP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$KEYCLOAK_URL/admin/realms/$REALM/identity-provider/instances" \
+      -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "alias": "google",
+        "providerId": "google",
+        "enabled": true,
+        "updateProfileFirstLoginMode": "on",
+        "trustEmail": true,
+        "storeToken": false,
+        "addReadTokenRoleOnCreate": false,
+        "authenticateByDefault": false,
+        "linkOnly": false,
+        "firstBrokerLoginFlowAlias": "first broker login",
+        "config": {
+          "clientId": "'$GOOGLE_CLIENT_ID'",
+          "clientSecret": "'$GOOGLE_CLIENT_SECRET'",
+          "syncMode": "IMPORT",
+          "useJwksUrl": "true"
+        }
+      }')
+    
+    HTTP_CODE=$(echo "$GOOGLE_IDP_RESPONSE" | tail -n1)
+    if [ "$HTTP_CODE" != "201" ] && [ "$HTTP_CODE" != "409" ]; then
+        echo "❌ Google Identity Provider 생성 실패. HTTP code: $HTTP_CODE"
+        echo "Response: $GOOGLE_IDP_RESPONSE"
+        exit 1
+    fi
+    
+    echo "✅ Google Identity Provider 생성 완료"
+    
+    # Create email attribute mapper for Google
+    EMAIL_MAPPER_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$KEYCLOAK_URL/admin/realms/$REALM/identity-provider/instances/google/mappers" \
+      -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "google-email-mapper",
+        "identityProviderAlias": "google",
+        "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+        "config": {
+          "syncMode": "INHERIT",
+          "user.attribute": "email",
+          "claim": "email"
+        }
+      }')
+    
+    HTTP_CODE=$(echo "$EMAIL_MAPPER_RESPONSE" | tail -n1)
+    if [ "$HTTP_CODE" != "201" ] && [ "$HTTP_CODE" != "409" ]; then
+        echo "⚠️  Google 이메일 매퍼 생성 실패. HTTP code: $HTTP_CODE"
+    else
+        echo "✅ Google 이메일 매퍼 생성 완료"
+    fi
+    
+    # Create first name attribute mapper for Google
+    FIRSTNAME_MAPPER_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$KEYCLOAK_URL/admin/realms/$REALM/identity-provider/instances/google/mappers" \
+      -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "google-firstname-mapper",
+        "identityProviderAlias": "google",
+        "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+        "config": {
+          "syncMode": "INHERIT",
+          "user.attribute": "firstName",
+          "claim": "given_name"
+        }
+      }')
+    
+    HTTP_CODE=$(echo "$FIRSTNAME_MAPPER_RESPONSE" | tail -n1)
+    if [ "$HTTP_CODE" != "201" ] && [ "$HTTP_CODE" != "409" ]; then
+        echo "⚠️  Google 이름 매퍼 생성 실패. HTTP code: $HTTP_CODE"
+    else
+        echo "✅ Google 이름 매퍼 생성 완료"
+    fi
+    
+    # Create last name attribute mapper for Google
+    LASTNAME_MAPPER_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$KEYCLOAK_URL/admin/realms/$REALM/identity-provider/instances/google/mappers" \
+      -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "google-lastname-mapper",
+        "identityProviderAlias": "google",
+        "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+        "config": {
+          "syncMode": "INHERIT",
+          "user.attribute": "lastName",
+          "claim": "family_name"
+        }
+      }')
+    
+    HTTP_CODE=$(echo "$LASTNAME_MAPPER_RESPONSE" | tail -n1)
+    if [ "$HTTP_CODE" != "201" ] && [ "$HTTP_CODE" != "409" ]; then
+        echo "⚠️  Google 성 매퍼 생성 실패. HTTP code: $HTTP_CODE"
+    else
+        echo "✅ Google 성 매퍼 생성 완료"
+    fi
+    
+    # Create role mapper for Google users (assign USER role to all Google users)
+    ROLE_MAPPER_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$KEYCLOAK_URL/admin/realms/$REALM/identity-provider/instances/google/mappers" \
+      -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "google-user-role-mapper",
+        "identityProviderAlias": "google",
+        "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
+        "config": {
+          "syncMode": "INHERIT",
+          "role": "USER"
+        }
+      }')
+    
+    HTTP_CODE=$(echo "$ROLE_MAPPER_RESPONSE" | tail -n1)
+    if [ "$HTTP_CODE" != "201" ] && [ "$HTTP_CODE" != "409" ]; then
+        echo "⚠️  Google 역할 매퍼 생성 실패. HTTP code: $HTTP_CODE"
+    else
+        echo "✅ Google 역할 매퍼 생성 완료"
+    fi
+    
+    echo ""
+    echo "🎉 Google OAuth 설정이 완료되었습니다!"
+    echo "📍 Keycloak 로그인 페이지에서 'google' 버튼을 통해 Google 로그인이 가능합니다."
+    echo "🌐 로그인 URL: http://localhost:8083/realms/myrealm/account"
+    echo ""
+    
+else
+    echo "⏭️  Google OAuth 설정을 건너뜁니다."
+    echo "   Google OAuth를 사용하려면 GOOGLE_CLIENT_ID와 GOOGLE_CLIENT_SECRET 환경변수를 설정하세요."
+fi
+
+echo "[keycloak-init] ✅ Keycloak 초기화 완료!"
+echo ""
+echo "🔗 접속 정보:"
+echo "   - Keycloak Admin: http://localhost:8083/admin (keycloak_admin / keycloak_admin_password123!)"
+echo "   - Keycloak User: http://localhost:8083/realms/myrealm/account"
+echo "   - Spring Boot API: http://localhost:8084/swagger-ui.html"
+echo "   - Test User: testuser / testuser"
+echo "" 
