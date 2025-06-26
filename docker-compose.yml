@@ -79,7 +79,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=booker
       - SPRING_DATASOURCE_PASSWORD=booker123
       - KEYCLOAK_REALM=myrealm
-      - KEYCLOAK_AUTH_SERVER_URL=http://localhost:8083
+      - KEYCLOAK_AUTH_SERVER_URL=http://keycloak:8083
       - KEYCLOAK_CLIENT_ID=springboot-client
       - KEYCLOAK_CLIENT_SECRET=springboot-secret
     depends_on:

@@ -74,13 +74,22 @@ public class BookController {
     }
     
     private void validateUserAccess(UserContext userContext, String... allowedRoles) {
+        logger.debug("Validating user access - UserContext: {}, Required roles: {}", 
+                    userContext != null ? userContext.getRoles() : "null", 
+                    java.util.Arrays.toString(allowedRoles));
+        
         if (userContext == null || userContext.getUserId() == null) {
+            logger.warn("User not authenticated - UserContext: {}", userContext);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
         }
         
         if (!userContext.hasAnyRole(allowedRoles)) {
+            logger.warn("Insufficient permissions - User roles: {}, Required roles: {}", 
+                       userContext.getRoles(), java.util.Arrays.toString(allowedRoles));
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Insufficient permissions");
         }
+        
+        logger.debug("Access granted - User roles: {}", userContext.getRoles());
     }
     
     private void validateAdminAccess(UserContext userContext) {

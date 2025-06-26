@@ -22,7 +22,7 @@ spring:
   
 # Keycloak Configuration
 keycloak:
-  auth-server-url: http://localhost:8083
+  auth-server-url: http://keycloak:8083
   realm: myrealm
   client-id: springboot-client
 
@@ -41,4 +41,6 @@ logging:
     root: INFO    
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    com.bookerapp.core: DEBUG 
+    com.bookerapp.core: DEBUG
+    com.bookerapp.core.infrastructure.config.JwtConfig: DEBUG
+    com.bookerapp.core.presentation.interceptor.JwtAuthInterceptor: DEBUG 
