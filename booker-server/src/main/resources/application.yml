@@ -1,32 +1,57 @@
 server:
   port: 8084
 
-keycloak:
-  server-url: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}
-  realm: myrealm
-  client-id: springboot-client
-
-springdoc:
-  swagger-ui:
-    oauth:
-      client-id: ${keycloak.client-id}
-      use-pkce-with-authorization-code-grant: true
-    path: /swagger-ui.html
-    operationsSorter: method
-  api-docs:
-    path: /v3/api-docs
-  packages-to-scan: com.bookerapp.core.controller
-
-logging:
-  level:
-    root: INFO
-    org.springframework.security: TRACE
-    com.bookerapp.core: DEBUG
-
 spring:
+  # Database Configuration
+  datasource:
+    url: jdbc:mysql://localhost:3306/booker?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    username: booker
+    password: booker123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+    defer-datasource-initialization: true
+  
+  # Security Configuration
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_EXTERNAL_URL:http://localhost:8083}/realms/myrealm
           jwk-set-uri: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}/realms/myrealm/protocol/openid-connect/certs 
+
+# Keycloak Configuration
+keycloak:
+  server-url: ${KEYCLOAK_INTERNAL_URL:http://keycloak:8083}
+  realm: myrealm
+  client-id: springboot-client
+
+# Swagger Configuration
+springdoc:
+  swagger-ui:
+    oauth:
+      client-id: ${keycloak.client-id}
+      use-pkce-with-authorization-code-grant: true
+      # realm: ${keycloak.realm}
+    path: /swagger-ui.html
+    operationsSorter: method
+  api-docs:
+    path: /v3/api-docs
+  packages-to-scan: com.bookerapp.core.controller
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO    
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.bookerapp.core: DEBUG 

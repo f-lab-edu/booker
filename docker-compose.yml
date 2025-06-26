@@ -17,6 +17,26 @@ services:
     ports:
       - "5432:5432"
 
+  mysql:
+    image: mysql:8.0
+    container_name: booker_mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root123
+      - MYSQL_DATABASE=booker
+      - MYSQL_USER=booker
+      - MYSQL_PASSWORD=booker123
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "booker", "-pbooker123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
@@ -57,7 +77,12 @@ services:
     environment:
       - KEYCLOAK_EXTERNAL_URL=http://localhost:8083
       - KEYCLOAK_INTERNAL_URL=http://keycloak:8083
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/booker?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+      - SPRING_DATASOURCE_USERNAME=booker
+      - SPRING_DATASOURCE_PASSWORD=booker123
     depends_on:
+      mysql:
+        condition: service_healthy
       keycloak:
         condition: service_healthy
       keycloak-init:
@@ -75,4 +100,5 @@ services:
       - ./keycloak-init.sh:/opt/keycloak-init.sh:ro
 
 volumes:
-  postgres_data: 
+  postgres_data:
+  mysql_data: 
