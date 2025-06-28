@@ -8,10 +8,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-/**
- * 모든 엔티티의 공통 속성을 정의하는 기본 엔티티 클래스
- * JPA Auditing을 통해 생성/수정 시간을 자동으로 관리합니다.
- */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 @Getter
