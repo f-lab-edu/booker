@@ -62,71 +62,89 @@ public class JwtConfig {
 
     private PublicKey getPublicKeyFromKeycloak(String token) {
         try {
-            // JWT 헤더에서 kid 추출
-            String headerEncoded = token.split("\\.")[0];
-            String headerJson = new String(Base64.getUrlDecoder().decode(headerEncoded));
-            
-            // 간단한 JSON 파싱으로 kid 추출
-            String kid = extractKidFromHeader(headerJson);
-            logger.debug("JWT kid: {}", kid);
-            
-            String jwksUri = keycloakUrl + "/realms/" + realm + "/protocol/openid-connect/certs";
-            logger.debug("Fetching JWK Set from: {}", jwksUri);
-            
-            Map<String, Object> jwks = restTemplate.getForObject(jwksUri, Map.class);
-            List<Map<String, Object>> keys = (List<Map<String, Object>>) jwks.get("keys");
-            
-            // kid가 매칭되는 키 찾기
-            Map<String, Object> matchingKey = null;
-            for (Map<String, Object> key : keys) {
-                String keyId = (String) key.get("kid");
-                String use = (String) key.get("use");
-                String alg = (String) key.get("alg");
-                
-                logger.debug("Available key - kid: {}, use: {}, alg: {}", keyId, use, alg);
-                
-                if (kid.equals(keyId) && "sig".equals(use)) {
-                    matchingKey = key;
-                    break;
-                }
-            }
-            
-            if (matchingKey == null) {
-                // kid가 매칭되지 않으면 서명용 첫 번째 키 사용
-                for (Map<String, Object> key : keys) {
-                    String use = (String) key.get("use");
-                    if ("sig".equals(use)) {
-                        matchingKey = key;
-                        logger.warn("Using first available signing key instead of kid match");
-                        break;
-                    }
-                }
-            }
-            
-            if (matchingKey == null) {
-                throw new RuntimeException("No suitable signing key found in JWK Set");
-            }
-            
-            String n = (String) matchingKey.get("n");
-            String e = (String) matchingKey.get("e");
-            
-            byte[] nBytes = Base64.getUrlDecoder().decode(n);
-            byte[] eBytes = Base64.getUrlDecoder().decode(e);
-            
-            BigInteger modulus = new BigInteger(1, nBytes);
-            BigInteger exponent = new BigInteger(1, eBytes);
-            
-            RSAPublicKeySpec spec = new RSAPublicKeySpec(modulus, exponent);
-            KeyFactory factory = KeyFactory.getInstance("RSA");
-            
-            PublicKey publicKey = factory.generatePublic(spec);
-            logger.debug("Successfully created public key from JWK");
-            
-            return publicKey;
+            String kid = extractKidFromToken(token);
+            List<Map<String, Object>> jwkKeys = fetchJwkKeysFromKeycloak();
+            Map<String, Object> signingKey = findSigningKeyByKid(jwkKeys, kid);
+            return createRsaPublicKey(signingKey);
         } catch (Exception e) {
             logger.error("Failed to get public key from Keycloak: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to get public key from Keycloak: " + e.getMessage(), e);
         }
+    }
+
+    private String extractKidFromToken(String token) {
+        String headerEncoded = token.split("\\.")[0];
+        String headerJson = new String(Base64.getUrlDecoder().decode(headerEncoded));
+        String kid = extractKidFromHeader(headerJson);
+        logger.debug("JWT kid: {}", kid);
+        return kid;
+    }
+
+    private List<Map<String, Object>> fetchJwkKeysFromKeycloak() {
+        String jwksUri = keycloakUrl + "/realms/" + realm + "/protocol/openid-connect/certs";
+        logger.debug("Fetching JWK Set from: {}", jwksUri);
+        
+        Map<String, Object> jwks = restTemplate.getForObject(jwksUri, Map.class);
+        return (List<Map<String, Object>>) jwks.get("keys");
+    }
+
+    private Map<String, Object> findSigningKeyByKid(List<Map<String, Object>> keys, String kid) {
+        Map<String, Object> matchingKey = findKeyByKidAndUse(keys, kid, "sig");
+        
+        if (matchingKey == null) {
+            matchingKey = findFirstSigningKey(keys);
+            logger.warn("Using first available signing key instead of kid match");
+        }
+        
+        if (matchingKey == null) {
+            throw new RuntimeException("No suitable signing key found in JWK Set");
+        }
+        
+        return matchingKey;
+    }
+
+    private Map<String, Object> findKeyByKidAndUse(List<Map<String, Object>> keys, String kid, String use) {
+        for (Map<String, Object> key : keys) {
+            String keyId = (String) key.get("kid");
+            String keyUse = (String) key.get("use");
+            String alg = (String) key.get("alg");
+            
+            logger.debug("Available key - kid: {}, use: {}, alg: {}", keyId, keyUse, alg);
+            
+            if (kid.equals(keyId) && use.equals(keyUse)) {
+                return key;
+            }
+        }
+        return null;
+    }
+
+    private Map<String, Object> findFirstSigningKey(List<Map<String, Object>> keys) {
+        for (Map<String, Object> key : keys) {
+            String use = (String) key.get("use");
+            if ("sig".equals(use)) {
+                return key;
+            }
+        }
+        return null;
+    }
+
+    private PublicKey createRsaPublicKey(Map<String, Object> jwkKey) throws Exception {
+        String n = (String) jwkKey.get("n");
+        String e = (String) jwkKey.get("e");
+        
+        byte[] nBytes = Base64.getUrlDecoder().decode(n);
+        byte[] eBytes = Base64.getUrlDecoder().decode(e);
+        
+        BigInteger modulus = new BigInteger(1, nBytes);
+        BigInteger exponent = new BigInteger(1, eBytes);
+        
+        RSAPublicKeySpec spec = new RSAPublicKeySpec(modulus, exponent);
+        KeyFactory factory = KeyFactory.getInstance("RSA");
+        
+        PublicKey publicKey = factory.generatePublic(spec);
+        logger.debug("Successfully created public key from JWK");
+        
+        return publicKey;
     }
     
     private String extractKidFromHeader(String headerJson) {
