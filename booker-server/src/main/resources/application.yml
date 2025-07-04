@@ -2,14 +2,12 @@ server:
   port: 8084
 
 spring:
-  # Database Configuration
   datasource:
     url: jdbc:mysql://localhost:3306/booker?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
     username: booker
     password: booker123
     driver-class-name: com.mysql.cj.jdbc.Driver
   
-  # JPA Configuration
   jpa:
     hibernate:
       ddl-auto: update
@@ -20,13 +18,11 @@ spring:
         format_sql: true
     defer-datasource-initialization: true
   
-# Keycloak Configuration
 keycloak:
   auth-server-url: http://keycloak:8083
   realm: myrealm
   client-id: springboot-client
 
-# Swagger Configuration
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
@@ -35,7 +31,6 @@ springdoc:
     path: /v3/api-docs
   packages-to-scan: com.bookerapp.core.presentation.controller
 
-# Logging Configuration
 logging:
   level:
     root: INFO    

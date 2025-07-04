@@ -1,23 +1,25 @@
 package com.bookerapp.core.presentation.interceptor;
 
-import com.bookerapp.core.infrastructure.config.JwtConfig;
+import com.bookerapp.core.infrastructure.jwt.KeycloakJwtParser;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
+@RequiredArgsConstructor
 public class JwtAuthInterceptor implements HandlerInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthInterceptor.class);
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
 
-    @Autowired
-    private JwtConfig jwtConfig;
+    private final KeycloakJwtParser keycloakJwtParser;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -36,8 +38,8 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
         }
 
         // Authorization 헤더 확인
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String token = extractToken(request);
+        if (token == null) {
             logger.warn("Missing or invalid Authorization header for request: {}", requestURI);
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.getWriter().write("{\"error\":\"Missing or invalid Authorization header\"}");
@@ -45,10 +47,10 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
         }
 
         try {
-            String token = authHeader.substring(7);
-            Claims claims = jwtConfig.parseToken(token);
+            Claims claims = keycloakJwtParser.parseToken(token);
             
             logger.debug("JWT token validated successfully for user: {}", claims.getSubject());
+            request.setAttribute("claims", claims);
             return true;
         } catch (Exception e) {
             logger.warn("JWT token validation failed for request: {} - {}", requestURI, e.getMessage());
@@ -57,5 +59,13 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
             response.getWriter().write("{\"error\":\"Invalid JWT token\"}");
             return false;
         }
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        String authHeader = request.getHeader(AUTHORIZATION_HEADER);
+        if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
+            return authHeader.substring(BEARER_PREFIX.length());
+        }
+        return null;
     }
 } 
