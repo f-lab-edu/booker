@@ -2,6 +2,7 @@ package com.bookerapp.core.presentation.controller;
 
 import com.bookerapp.core.domain.model.UserContext;
 import com.bookerapp.core.domain.model.Role;
+import com.bookerapp.core.domain.model.UserResponse;
 import com.bookerapp.core.presentation.aspect.RequireRoles;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -60,17 +61,15 @@ public class BookController {
     
     @GetMapping("/user/info")
     @Operation(summary = "Get current user information")
-    public Map<String, Object> getUserInfo(UserContext userContext) {
+    public UserResponse getUserInfo(UserContext userContext) {
         logger.info("getUserInfo called by user: {} with roles: {}", userContext.getUserId(), userContext.getRoles());
-        
-        Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put("userId", userContext.getUserId());
-        userInfo.put("username", userContext.getUsername());
-        userInfo.put("email", userContext.getEmail());
-        userInfo.put("roles", userContext.getRoles());
-        userInfo.put("authenticated", userContext.getUserId() != null);
-        
-        return userInfo;
+        return new UserResponse(
+            userContext.getUserId(),
+            userContext.getUsername(),
+            userContext.getEmail(),
+            userContext.getRoles(),
+            userContext.getUserId() != null
+        );
     }
 
 }
