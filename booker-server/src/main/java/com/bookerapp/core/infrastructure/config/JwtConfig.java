@@ -1,13 +1,12 @@
 package com.bookerapp.core.infrastructure.config;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -28,7 +27,11 @@ public class JwtConfig {
     @Value("${keycloak.realm}")
     private String realm;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final WebClient webClient;
+
+    public JwtConfig(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.build();
+    }
 
     public Claims parseToken(String token) {
         try {
@@ -84,7 +87,11 @@ public class JwtConfig {
         String jwksUri = keycloakUrl + "/realms/" + realm + "/protocol/openid-connect/certs";
         logger.debug("Fetching JWK Set from: {}", jwksUri);
         
-        Map<String, Object> jwks = restTemplate.getForObject(jwksUri, Map.class);
+        Map<String, Object> jwks = webClient.get()
+                .uri(jwksUri)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
         return (List<Map<String, Object>>) jwks.get("keys");
     }
 
@@ -103,7 +110,6 @@ public class JwtConfig {
         return matchingKey;
     }
 
-    @Nullable
     private Map<String, Object> findKeyByKidAndUse(List<Map<String, Object>> keys, String kid, String use) {
         for (Map<String, Object> key : keys) {
             String keyId = (String) key.get("kid");
@@ -119,7 +125,6 @@ public class JwtConfig {
         return null;
     }
 
-    @Nullable
     private Map<String, Object> findFirstSigningKey(List<Map<String, Object>> keys) {
         for (Map<String, Object> key : keys) {
             String use = (String) key.get("use");
