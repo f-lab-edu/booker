@@ -1,4 +1,4 @@
-package com.bookerapp.core.domain.model;
+package com.bookerapp.core.domain.model.auth;
 
 import io.jsonwebtoken.Claims;
 import lombok.Getter;

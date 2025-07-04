@@ -1,4 +1,4 @@
-package com.bookerapp.core.domain.model;
+package com.bookerapp.core.domain.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

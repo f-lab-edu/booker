@@ -1,8 +1,9 @@
-package com.bookerapp.core.domain.model;
+package com.bookerapp.core.domain.model.response;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
+import com.bookerapp.core.domain.model.auth.Role;
 
 @Getter
 @RequiredArgsConstructor
