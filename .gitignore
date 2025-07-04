@@ -62,3 +62,5 @@ spring-boot-devtools.properties
 
 .env
 .env.*
+booker-server/gradlew.bat
+booker-server/gradlew
