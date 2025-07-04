@@ -103,6 +103,7 @@ public class JwtConfig {
         return matchingKey;
     }
 
+    @Nullable
     private Map<String, Object> findKeyByKidAndUse(List<Map<String, Object>> keys, String kid, String use) {
         for (Map<String, Object> key : keys) {
             String keyId = (String) key.get("kid");
@@ -118,6 +119,7 @@ public class JwtConfig {
         return null;
     }
 
+    @Nullable
     private Map<String, Object> findFirstSigningKey(List<Map<String, Object>> keys) {
         for (Map<String, Object> key : keys) {
             String use = (String) key.get("use");
