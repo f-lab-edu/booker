@@ -16,8 +16,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Optional<Book> findByIsbn(String isbn);
     
     @Query("SELECT b FROM Book b WHERE " +
-           "(:title IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%'))) AND " +
-           "(:author IS NULL OR LOWER(b.author) LIKE LOWER(CONCAT('%', :author, '%'))) AND " +
+           "(:title IS NULL OR b.title LIKE %:title%) AND " +
+           "(:author IS NULL OR b.author LIKE %:author%) AND " +
            "(:status IS NULL OR b.status = :status) AND " +
            "b.isDeleted = false")
     Page<Book> searchBooks(

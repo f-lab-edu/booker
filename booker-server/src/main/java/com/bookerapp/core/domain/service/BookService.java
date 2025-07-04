@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class BookService {
 
     private final BookRepository bookRepository;
@@ -33,6 +32,7 @@ public class BookService {
         return BookDto.Response.from(book);
     }
 
+    @Transactional(readOnly = true)
     public Page<BookDto.Response> searchBooks(BookDto.SearchRequest request) {
         PageRequest pageRequest = PageRequest.of(request.getPage(), request.getSize());
         return bookRepository.searchBooks(
