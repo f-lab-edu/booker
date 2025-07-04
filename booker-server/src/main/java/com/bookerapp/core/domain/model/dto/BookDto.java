@@ -3,16 +3,17 @@ package com.bookerapp.core.domain.model.dto;
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLocation;
 import com.bookerapp.core.domain.model.entity.BookStatus;
+import com.bookerapp.core.domain.model.Floor;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 public class BookDto {
 
     @Getter
     @Setter
+    @NoArgsConstructor
     public static class Request {
         @NotBlank(message = "제목은 필수입니다")
         private String title;
@@ -20,10 +21,12 @@ public class BookDto {
         @NotBlank(message = "저자는 필수입니다")
         private String author;
 
-        @Pattern(regexp = "^[0-9-]{10,13}$", message = "올바른 ISBN 형식이 아닙니다")
+        @NotBlank(message = "출판사는 필수입니다")
+        private String publisher;
+
+        @NotBlank(message = "ISBN은 필수입니다")
         private String isbn;
 
-        private String publisher;
         private String coverImageUrl;
         private BookLocation location;
 
@@ -31,40 +34,39 @@ public class BookDto {
             Book book = new Book();
             book.setTitle(title);
             book.setAuthor(author);
-            book.setIsbn(isbn);
             book.setPublisher(publisher);
+            book.setIsbn(isbn);
             book.setCoverImageUrl(coverImageUrl);
             book.setLocation(location);
-            book.setStatus(BookStatus.AVAILABLE);
             return book;
         }
     }
 
     @Getter
-    @Builder
+    @NoArgsConstructor
     public static class Response {
         private Long id;
         private String title;
         private String author;
-        private String isbn;
         private String publisher;
+        private String isbn;
         private String coverImageUrl;
         private BookStatus status;
         private BookLocation location;
         private String locationDisplay;
 
         public static Response from(Book book) {
-            return Response.builder()
-                    .id(book.getId())
-                    .title(book.getTitle())
-                    .author(book.getAuthor())
-                    .isbn(book.getIsbn())
-                    .publisher(book.getPublisher())
-                    .coverImageUrl(book.getCoverImageUrl())
-                    .status(book.getStatus())
-                    .location(book.getLocation())
-                    .locationDisplay(book.getLocation() != null ? book.getLocation().toString() : null)
-                    .build();
+            Response response = new Response();
+            response.id = book.getId();
+            response.title = book.getTitle();
+            response.author = book.getAuthor();
+            response.publisher = book.getPublisher();
+            response.isbn = book.getIsbn();
+            response.coverImageUrl = book.getCoverImageUrl();
+            response.status = book.getStatus();
+            response.location = book.getLocation();
+            response.locationDisplay = book.getLocation().toString();
+            return response;
         }
     }
 

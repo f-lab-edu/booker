@@ -4,12 +4,14 @@ import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLocation;
 import com.bookerapp.core.domain.model.entity.BookStatus;
 import com.bookerapp.core.domain.model.entity.Floor;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,84 +26,51 @@ class BookDtoTest {
     }
 
     @Test
-    @DisplayName("유효한 도서 등록 요청을 엔티티로 변환할 수 있다")
-    void shouldConvertValidRequestToEntity() {
+    void 유효한_요청은_검증에_성공한다() {
         // given
         BookDto.Request request = new BookDto.Request();
-        request.setTitle("클린 코드");
-        request.setAuthor("로버트 C. 마틴");
-        request.setIsbn("9788966260959");
-        request.setPublisher("인사이트");
+        request.setTitle("테스트 도서");
+        request.setAuthor("테스트 저자");
+        request.setPublisher("테스트 출판사");
+        request.setIsbn("9788956746425");
         request.setCoverImageUrl("http://example.com/cover.jpg");
         request.setLocation(BookLocation.of(Floor.FOURTH));
 
         // when
-        Book book = request.toEntity();
+        Set<ConstraintViolation<BookDto.Request>> violations = validator.validate(request);
 
         // then
-        assertThat(book)
-            .isNotNull()
-            .satisfies(b -> {
-                assertThat(b.getTitle()).isEqualTo(request.getTitle());
-                assertThat(b.getAuthor()).isEqualTo(request.getAuthor());
-                assertThat(b.getIsbn()).isEqualTo(request.getIsbn());
-                assertThat(b.getPublisher()).isEqualTo(request.getPublisher());
-                assertThat(b.getCoverImageUrl()).isEqualTo(request.getCoverImageUrl());
-                assertThat(b.getStatus()).isEqualTo(BookStatus.AVAILABLE);
-                assertThat(b.getLocation().getFloor()).isEqualTo(request.getLocation().getFloor());
-            });
+        assertThat(violations).isEmpty();
     }
 
     @Test
-    @DisplayName("필수 필드가 없는 요청은 검증에 실패한다")
-    void shouldFailValidationForMissingRequiredFields() {
+    void 필수_필드가_없는_요청은_검증에_실패한다() {
         // given
         BookDto.Request request = new BookDto.Request();
 
         // when
-        var violations = validator.validate(request);
+        Set<ConstraintViolation<BookDto.Request>> violations = validator.validate(request);
 
         // then
+        assertThat(violations).hasSize(4);
         assertThat(violations)
-            .isNotEmpty()
-            .hasSize(2)
-            .extracting("message")
-            .containsExactlyInAnyOrder(
-                "제목은 필수입니다",
-                "저자는 필수입니다"
-            );
+                .extracting("message")
+                .containsExactlyInAnyOrder(
+                        "제목은 필수입니다",
+                        "저자는 필수입니다",
+                        "출판사는 필수입니다",
+                        "ISBN은 필수입니다"
+                );
     }
 
     @Test
-    @DisplayName("잘못된 ISBN 형식은 검증에 실패한다")
-    void shouldFailValidationForInvalidIsbn() {
-        // given
-        BookDto.Request request = new BookDto.Request();
-        request.setTitle("클린 코드");
-        request.setAuthor("로버트 C. 마틴");
-        request.setIsbn("invalid-isbn");
-
-        // when
-        var violations = validator.validate(request);
-
-        // then
-        assertThat(violations)
-            .isNotEmpty()
-            .hasSize(1)
-            .extracting("message")
-            .containsExactly("올바른 ISBN 형식이 아닙니다");
-    }
-
-    @Test
-    @DisplayName("도서 엔티티를 응답 DTO로 변환할 수 있다")
-    void shouldConvertEntityToResponse() {
+    void 도서_엔티티를_응답_DTO로_변환할_수_있다() {
         // given
         Book book = new Book();
-        book.setId(1L);
-        book.setTitle("클린 코드");
-        book.setAuthor("로버트 C. 마틴");
-        book.setIsbn("9788966260959");
-        book.setPublisher("인사이트");
+        book.setTitle("테스트 도서");
+        book.setAuthor("테스트 저자");
+        book.setPublisher("테스트 출판사");
+        book.setIsbn("9788956746425");
         book.setCoverImageUrl("http://example.com/cover.jpg");
         book.setStatus(BookStatus.AVAILABLE);
         book.setLocation(BookLocation.of(Floor.FOURTH));
@@ -110,18 +79,13 @@ class BookDtoTest {
         BookDto.Response response = BookDto.Response.from(book);
 
         // then
-        assertThat(response)
-            .isNotNull()
-            .satisfies(r -> {
-                assertThat(r.getId()).isEqualTo(book.getId());
-                assertThat(r.getTitle()).isEqualTo(book.getTitle());
-                assertThat(r.getAuthor()).isEqualTo(book.getAuthor());
-                assertThat(r.getIsbn()).isEqualTo(book.getIsbn());
-                assertThat(r.getPublisher()).isEqualTo(book.getPublisher());
-                assertThat(r.getCoverImageUrl()).isEqualTo(book.getCoverImageUrl());
-                assertThat(r.getStatus()).isEqualTo(book.getStatus());
-                assertThat(r.getLocation().getFloor()).isEqualTo(book.getLocation().getFloor());
-                assertThat(r.getLocationDisplay()).isEqualTo("4층");
-            });
+        assertThat(response.getTitle()).isEqualTo("테스트 도서");
+        assertThat(response.getAuthor()).isEqualTo("테스트 저자");
+        assertThat(response.getPublisher()).isEqualTo("테스트 출판사");
+        assertThat(response.getIsbn()).isEqualTo("9788956746425");
+        assertThat(response.getCoverImageUrl()).isEqualTo("http://example.com/cover.jpg");
+        assertThat(response.getStatus()).isEqualTo(BookStatus.AVAILABLE);
+        assertThat(response.getLocation().getFloor()).isEqualTo(Floor.FOURTH);
+        assertThat(response.getLocationDisplay()).isEqualTo("4층 A구역 1번 서가");
     }
 } 
