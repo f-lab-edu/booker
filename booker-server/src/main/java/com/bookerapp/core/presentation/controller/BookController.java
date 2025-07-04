@@ -67,7 +67,7 @@ public class BookController {
             userContext.getUserId(),
             userContext.getUsername(),
             userContext.getEmail(),
-            userContext.getRoles(),
+            userContext.getRolesAsRole(),
             userContext.getUserId() != null
         );
     }
