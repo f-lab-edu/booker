@@ -44,13 +44,14 @@ class BookTest {
         book.setLocation(newLocation);
 
         // then
-        BookLocation location = book.getLocation();
-        assertThat(location)
-            .isNotNull()
-            .satisfies(loc -> {
-                assertThat(loc.getFloor()).isEqualTo(Floor.TWELFTH);
-                assertThat(loc.getFloor().getValue()).isEqualTo(12);
-            });
+        assertThat(book.getLocation())
+                .isNotNull()
+                .satisfies(loc -> {
+                    assertThat(loc.getFloor()).isEqualTo(Floor.TWELFTH);
+                    assertThat(loc.getFloor().getValue()).isEqualTo(12);
+                    assertThat(loc.getSection()).isEqualTo("A");
+                    assertThat(loc.getShelf()).isEqualTo("1");
+                });
     }
 
     @Test

@@ -35,7 +35,7 @@ public class Book extends BaseEntity {
     @Column(nullable = false)
     private BookStatus status = BookStatus.AVAILABLE;
 
-    @Embedded
+    @ManyToOne
     private BookLocation location;
 
     public boolean isAvailableForLoan() {
