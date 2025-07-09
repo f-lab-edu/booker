@@ -48,9 +48,10 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("도서를 찾을 수 없습니다: " + id));
 
-        // ISBN이 변경되었고, 새로운 ISBN이 이미 존재하는 경우 체크
-        if (request.getIsbn() != null && !request.getIsbn().equals(book.getIsbn()) &&
-                bookRepository.findByIsbn(request.getIsbn()).isPresent()) {
+        if (request.getIsbn() != null &&
+                bookRepository.findByIsbn(request.getIsbn())
+                        .filter(existingBook -> !existingBook.getId().equals(id))
+                        .isPresent()) {
             throw new IllegalArgumentException("이미 등록된 ISBN입니다: " + request.getIsbn());
         }
 
