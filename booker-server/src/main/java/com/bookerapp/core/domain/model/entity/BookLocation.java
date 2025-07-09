@@ -1,5 +1,6 @@
 package com.bookerapp.core.domain.model.entity;
 
+import com.bookerapp.core.domain.model.Floor;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,7 +21,7 @@ public class BookLocation extends BaseEntity {
     private String shelf;
 
     // 도서 위치 객체를 생성 복잡성 줄이기 위해 팩토리 메서드 사용
-    // 기본 구역(A)과 서가(1)가 설정됩니다.
+    // 기본 구역(A)과 서가(1)가 설정
     public static BookLocation of(Floor floor) {
         BookLocation bookLocation = new BookLocation();
         bookLocation.setFloor(floor);

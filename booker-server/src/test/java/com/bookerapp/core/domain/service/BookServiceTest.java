@@ -4,7 +4,7 @@ import com.bookerapp.core.domain.model.dto.BookDto;
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLocation;
 import com.bookerapp.core.domain.model.entity.BookStatus;
-import com.bookerapp.core.domain.model.entity.Floor;
+import com.bookerapp.core.domain.model.Floor;
 import com.bookerapp.core.domain.repository.BookRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
