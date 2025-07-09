@@ -37,7 +37,6 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        // Authorization 헤더 확인
         String token = extractToken(request);
         if (token == null) {
             logger.warn("Missing or invalid Authorization header for request: {}", requestURI);
