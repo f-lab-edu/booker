@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Entity
 @Table(name = "books")
@@ -37,15 +38,37 @@ public class Book extends BaseEntity {
     @ManyToOne
     private BookLocation location;
 
-    @Builder
+    @Builder(builderClassName = "BookBuilder")
     private Book(String title, String author, String isbn, String publisher,
-                String coverImageUrl, BookLocation location) {
+            String coverImageUrl, BookLocation location) {
+        validateTitle(title);
+        validateAuthor(author);
+        validateIsbn(isbn);
+
         this.title = title;
         this.author = author;
         this.isbn = isbn;
         this.publisher = publisher;
         this.coverImageUrl = coverImageUrl;
         this.location = location;
+    }
+
+    private static void validateTitle(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("제목은 필수입니다.");
+        }
+    }
+
+    private static void validateAuthor(String author) {
+        if (author == null || author.trim().isEmpty()) {
+            throw new IllegalArgumentException("저자는 필수입니다.");
+        }
+    }
+
+    private static void validateIsbn(String isbn) {
+        if (isbn != null && !isbn.matches("^\\d{10}|\\d{13}$")) {
+            throw new IllegalArgumentException("ISBN은 10자리 또는 13자리 숫자여야 합니다.");
+        }
     }
 
     public boolean isAvailableForLoan() {
