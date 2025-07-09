@@ -27,4 +27,4 @@ public class BookLocation extends BaseEntity {
     public String toString() {
         return String.format("%d층", floor.getValue());
     }
-} 
+}

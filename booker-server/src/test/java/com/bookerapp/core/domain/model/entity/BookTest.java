@@ -23,10 +23,10 @@ class BookTest {
     void shouldUpdateBookStatus() {
         // given
         Book book = new Book();
-        
+
         // when
         book.updateStatus(BookStatus.LOANED);
-        
+
         // then
         assertThat(book.getStatus()).isEqualTo(BookStatus.LOANED);
         assertThat(book.isAvailableForLoan()).isFalse();
@@ -60,10 +60,10 @@ class BookTest {
         // given
         Book book = new Book();
         assertThat(book.isDeleted()).isFalse();
-        
+
         // when
         book.markAsDeleted();
-        
+
         // then
         assertThat(book.isDeleted()).isTrue();
     }
@@ -75,11 +75,11 @@ class BookTest {
         Book book = new Book();
         book.markAsDeleted();
         assertThat(book.isDeleted()).isTrue();
-        
+
         // when
         book.unmarkAsDeleted();
-        
+
         // then
         assertThat(book.isDeleted()).isFalse();
     }
-} 
+}

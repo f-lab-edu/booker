@@ -33,25 +33,25 @@ public class JwtConfig {
     public Claims parseToken(String token) {
         try {
             logger.debug("Parsing JWT token...");
-            
+
             // JWT 헤더에서 kid 추출
             String[] tokenParts = token.split("\\.");
             if (tokenParts.length != 3) {
                 throw new RuntimeException("Invalid JWT token format");
             }
-            
+
             String headerJson = new String(Base64.getUrlDecoder().decode(tokenParts[0]));
             logger.debug("JWT Header: {}", headerJson);
-            
+
             // Keycloak의 JWK Set에서 공개키 가져오기
             PublicKey publicKey = getPublicKeyFromKeycloak(token);
-            
+
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(publicKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-                    
+
             logger.debug("JWT token parsed successfully for user: {}", claims.getSubject());
             return claims;
         } catch (Exception e) {
@@ -83,23 +83,23 @@ public class JwtConfig {
     private List<Map<String, Object>> fetchJwkKeysFromKeycloak() {
         String jwksUri = keycloakUrl + "/realms/" + realm + "/protocol/openid-connect/certs";
         logger.debug("Fetching JWK Set from: {}", jwksUri);
-        
+
         Map<String, Object> jwks = restTemplate.getForObject(jwksUri, Map.class);
         return (List<Map<String, Object>>) jwks.get("keys");
     }
 
     private Map<String, Object> findSigningKeyByKid(List<Map<String, Object>> keys, String kid) {
         Map<String, Object> matchingKey = findKeyByKidAndUse(keys, kid, "sig");
-        
+
         if (matchingKey == null) {
             matchingKey = findFirstSigningKey(keys);
             logger.warn("Using first available signing key instead of kid match");
         }
-        
+
         if (matchingKey == null) {
             throw new RuntimeException("No suitable signing key found in JWK Set");
         }
-        
+
         return matchingKey;
     }
 
@@ -108,9 +108,9 @@ public class JwtConfig {
             String keyId = (String) key.get("kid");
             String keyUse = (String) key.get("use");
             String alg = (String) key.get("alg");
-            
+
             logger.debug("Available key - kid: {}, use: {}, alg: {}", keyId, keyUse, alg);
-            
+
             if (kid.equals(keyId) && use.equals(keyUse)) {
                 return key;
             }
@@ -131,22 +131,22 @@ public class JwtConfig {
     private PublicKey createRsaPublicKey(Map<String, Object> jwkKey) throws Exception {
         String n = (String) jwkKey.get("n");
         String e = (String) jwkKey.get("e");
-        
+
         byte[] nBytes = Base64.getUrlDecoder().decode(n);
         byte[] eBytes = Base64.getUrlDecoder().decode(e);
-        
+
         BigInteger modulus = new BigInteger(1, nBytes);
         BigInteger exponent = new BigInteger(1, eBytes);
-        
+
         RSAPublicKeySpec spec = new RSAPublicKeySpec(modulus, exponent);
         KeyFactory factory = KeyFactory.getInstance("RSA");
-        
+
         PublicKey publicKey = factory.generatePublic(spec);
         logger.debug("Successfully created public key from JWK");
-        
+
         return publicKey;
     }
-    
+
     private String extractKidFromHeader(String headerJson) {
         // 간단한 JSON 파싱으로 kid 추출
         String[] parts = headerJson.split("\"kid\"\\s*:\\s*\"");
@@ -159,4 +159,4 @@ public class JwtConfig {
         }
         throw new RuntimeException("Could not extract kid from JWT header");
     }
-} 
+}

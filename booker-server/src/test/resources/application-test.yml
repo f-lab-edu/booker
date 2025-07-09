@@ -4,7 +4,7 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
-  
+
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -22,4 +22,4 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    com.bookerapp.core: DEBUG 
+    com.bookerapp.core: DEBUG

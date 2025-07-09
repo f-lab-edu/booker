@@ -49,4 +49,4 @@ public class Book extends BaseEntity {
     public void updateLocation(BookLocation newLocation) {
         this.location = newLocation;
     }
-} 
+}

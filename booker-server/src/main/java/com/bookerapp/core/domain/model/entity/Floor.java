@@ -16,4 +16,4 @@ public enum Floor {
     public int getValue() {
         return number;
     }
-} 
+}

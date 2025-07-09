@@ -225,4 +225,4 @@ class BookServiceTest {
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("도서를 찾을 수 없습니다");
     }
-} 
+}

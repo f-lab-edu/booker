@@ -43,4 +43,4 @@ class BookLocationTest {
         // then
         assertThat(locationString).isEqualTo("4층");
     }
-} 
+}

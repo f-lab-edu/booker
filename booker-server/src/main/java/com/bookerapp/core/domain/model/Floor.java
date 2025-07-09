@@ -22,4 +22,4 @@ public enum Floor {
         }
         throw new IllegalArgumentException("Invalid floor value: " + value);
     }
-} 
+}

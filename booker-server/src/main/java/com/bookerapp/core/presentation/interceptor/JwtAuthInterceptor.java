@@ -21,7 +21,7 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        
+
         // OPTIONS 요청은 통과
         if ("OPTIONS".equals(request.getMethod())) {
             return true;
@@ -29,8 +29,8 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
 
         // Swagger UI 관련 경로는 통과
         String requestURI = request.getRequestURI();
-        if (requestURI.startsWith("/swagger-ui") || 
-            requestURI.startsWith("/v3/api-docs") || 
+        if (requestURI.startsWith("/swagger-ui") ||
+            requestURI.startsWith("/v3/api-docs") ||
             requestURI.equals("/swagger-ui.html")) {
             return true;
         }
@@ -47,7 +47,7 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
         try {
             String token = authHeader.substring(7);
             Claims claims = jwtConfig.parseToken(token);
-            
+
             logger.debug("JWT token validated successfully for user: {}", claims.getSubject());
             return true;
         } catch (Exception e) {
@@ -58,4 +58,4 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
             return false;
         }
     }
-} 
+}

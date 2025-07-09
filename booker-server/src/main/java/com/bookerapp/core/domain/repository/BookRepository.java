@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
-    
+
     Optional<Book> findByIsbn(String isbn);
-    
+
     @Query("SELECT b FROM Book b WHERE " +
            "(:title IS NULL OR b.title LIKE %:title%) AND " +
            "(:author IS NULL OR b.author LIKE %:author%) AND " +
@@ -26,9 +26,9 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             @Param("status") BookStatus status,
             Pageable pageable
     );
-    
+
     List<Book> findByStatusAndIsDeletedFalse(BookStatus status);
-    
+
     @Query("SELECT COUNT(b) FROM Book b WHERE b.status = :status AND b.isDeleted = false")
     long countByStatus(@Param("status") BookStatus status);
-} 
+}

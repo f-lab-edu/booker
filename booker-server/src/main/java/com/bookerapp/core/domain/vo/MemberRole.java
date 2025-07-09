@@ -10,12 +10,12 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum MemberRole {
-    
+
     /**
      * 일반 사용자 - 도서 대출/반납, 이벤트 참여 등 기본 기능 사용 가능
      */
     USER("USER", "일반 사용자"),
-    
+
     /**
      * 관리자 - 시스템 전체 관리 권한 보유
      */
@@ -26,7 +26,7 @@ public enum MemberRole {
 
     /**
      * 코드 값으로 MemberRole을 찾습니다.
-     * 
+     *
      * @param code 역할 코드
      * @return MemberRole 또는 null
      */
@@ -34,7 +34,7 @@ public enum MemberRole {
         if (code == null) {
             return null;
         }
-        
+
         for (MemberRole role : values()) {
             if (role.code.equals(code)) {
                 return role;
@@ -45,7 +45,7 @@ public enum MemberRole {
 
     /**
      * 관리자 권한 여부를 확인합니다.
-     * 
+     *
      * @return 관리자인 경우 true
      */
     public boolean isAdmin() {
@@ -54,10 +54,10 @@ public enum MemberRole {
 
     /**
      * 일반 사용자 권한 여부를 확인합니다.
-     * 
+     *
      * @return 일반 사용자인 경우 true
      */
     public boolean isUser() {
         return this == USER;
     }
-} 
+}

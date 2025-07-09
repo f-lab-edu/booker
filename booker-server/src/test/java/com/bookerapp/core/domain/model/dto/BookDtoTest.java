@@ -88,4 +88,4 @@ class BookDtoTest {
         assertThat(response.getLocation().getFloor()).isEqualTo(Floor.FOURTH);
         assertThat(response.getLocationDisplay()).isEqualTo("4층 A구역 1번 서가");
     }
-} 
+}

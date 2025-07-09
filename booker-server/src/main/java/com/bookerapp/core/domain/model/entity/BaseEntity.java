@@ -49,4 +49,4 @@ public abstract class BaseEntity {
     public void unmarkAsDeleted() {
         this.isDeleted = false;
     }
-} 
+}

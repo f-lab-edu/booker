@@ -32,34 +32,34 @@ public class UserContextArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-        
+
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        
+
         // Authorization 헤더에서 JWT 토큰 추출
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authorization token is required");
         }
-        
+
         String token = authHeader.substring(7);
-        
+
         try {
             Claims claims = jwtConfig.parseToken(token);
-            
+
             String userId = claims.getSubject();
             String email = claims.get("email", String.class);
             String username = claims.get("preferred_username", String.class);
-            
+
             // realm_access.roles에서 역할 정보 추출
             Map<String, Object> realmAccess = claims.get("realm_access", Map.class);
             List<String> roles = Collections.emptyList();
             if (realmAccess != null && realmAccess.get("roles") != null) {
                 roles = (List<String>) realmAccess.get("roles");
             }
-            
+
             return new UserContext(userId, username, email, roles);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
         }
     }
-} 
+}

@@ -8,7 +8,7 @@ spring:
     username: booker
     password: booker123
     driver-class-name: com.mysql.cj.jdbc.Driver
-  
+
   # JPA Configuration
   jpa:
     hibernate:
@@ -19,7 +19,7 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
     defer-datasource-initialization: true
-  
+
 # Keycloak Configuration
 keycloak:
   auth-server-url: http://keycloak:8083
@@ -38,9 +38,9 @@ springdoc:
 # Logging Configuration
 logging:
   level:
-    root: INFO    
+    root: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     com.bookerapp.core: DEBUG
     com.bookerapp.core.infrastructure.config.JwtConfig: DEBUG
-    com.bookerapp.core.presentation.interceptor.JwtAuthInterceptor: DEBUG 
+    com.bookerapp.core.presentation.interceptor.JwtAuthInterceptor: DEBUG
