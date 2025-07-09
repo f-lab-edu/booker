@@ -1,14 +1,13 @@
 package com.bookerapp.core.domain.model.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "books")
 @Getter
-@Setter
 @NoArgsConstructor
 public class Book extends BaseEntity {
 
@@ -37,6 +36,17 @@ public class Book extends BaseEntity {
 
     @ManyToOne
     private BookLocation location;
+
+    @Builder
+    private Book(String title, String author, String isbn, String publisher,
+                String coverImageUrl, BookLocation location) {
+        this.title = title;
+        this.author = author;
+        this.isbn = isbn;
+        this.publisher = publisher;
+        this.coverImageUrl = coverImageUrl;
+        this.location = location;
+    }
 
     public boolean isAvailableForLoan() {
         return status == BookStatus.AVAILABLE;

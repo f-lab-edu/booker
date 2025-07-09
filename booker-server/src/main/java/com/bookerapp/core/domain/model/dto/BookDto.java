@@ -31,14 +31,14 @@ public class BookDto {
         private BookLocation location;
 
         public Book toEntity() {
-            Book book = new Book();
-            book.setTitle(title);
-            book.setAuthor(author);
-            book.setPublisher(publisher);
-            book.setIsbn(isbn);
-            book.setCoverImageUrl(coverImageUrl);
-            book.setLocation(location);
-            return book;
+            return Book.builder()
+                    .title(title)
+                    .author(author)
+                    .publisher(publisher)
+                    .isbn(isbn)
+                    .coverImageUrl(coverImageUrl)
+                    .location(location)
+                    .build();
         }
     }
 
