@@ -1,5 +1,6 @@
 package com.bookerapp.core.domain.model.entity;
 
+import com.bookerapp.core.domain.exception.InvalidBookException;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -55,19 +56,19 @@ public class Book extends BaseEntity {
 
     private static void validateTitle(String title) {
         if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("제목은 필수입니다.");
+            throw new InvalidBookException("제목은 필수입니다.");
         }
     }
 
     private static void validateAuthor(String author) {
         if (author == null || author.trim().isEmpty()) {
-            throw new IllegalArgumentException("저자는 필수입니다.");
+            throw new InvalidBookException("저자는 필수입니다.");
         }
     }
 
     private static void validateIsbn(String isbn) {
         if (isbn != null && !isbn.matches("^\\d{10}|\\d{13}$")) {
-            throw new IllegalArgumentException("ISBN은 10자리 또는 13자리 숫자여야 합니다.");
+            throw new InvalidBookException("ISBN은 10자리 또는 13자리 숫자여야 합니다.");
         }
     }
 
@@ -81,5 +82,19 @@ public class Book extends BaseEntity {
 
     public void updateLocation(BookLocation newLocation) {
         this.location = newLocation;
+    }
+
+    public void updateInformation(String title, String author, String isbn,
+            String publisher, String coverImageUrl, BookLocation location) {
+        validateTitle(title);
+        validateAuthor(author);
+        validateIsbn(isbn);
+
+        this.title = title;
+        this.author = author;
+        this.isbn = isbn;
+        this.publisher = publisher;
+        this.coverImageUrl = coverImageUrl;
+        this.location = location;
     }
 }

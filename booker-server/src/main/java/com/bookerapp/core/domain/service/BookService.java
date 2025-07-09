@@ -1,5 +1,6 @@
 package com.bookerapp.core.domain.service;
 
+import com.bookerapp.core.domain.exception.DuplicateIsbnException;
 import com.bookerapp.core.domain.model.dto.BookDto;
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.repository.BookRepository;
@@ -19,7 +20,7 @@ public class BookService {
     @Transactional
     public BookDto.Response createBook(BookDto.Request request) {
         if (bookRepository.findByIsbn(request.getIsbn()).isPresent()) {
-            throw new IllegalArgumentException("이미 등록된 ISBN입니다: " + request.getIsbn());
+            throw new DuplicateIsbnException(request.getIsbn());
         }
         Book book = request.toEntity();
         Book savedBook = bookRepository.save(book);
@@ -52,15 +53,17 @@ public class BookService {
                 bookRepository.findByIsbn(request.getIsbn())
                         .filter(existingBook -> !existingBook.getId().equals(id))
                         .isPresent()) {
-            throw new IllegalArgumentException("이미 등록된 ISBN입니다: " + request.getIsbn());
+            throw new DuplicateIsbnException(request.getIsbn());
         }
 
-        book.setTitle(request.getTitle());
-        book.setAuthor(request.getAuthor());
-        book.setIsbn(request.getIsbn());
-        book.setPublisher(request.getPublisher());
-        book.setCoverImageUrl(request.getCoverImageUrl());
-        book.setLocation(request.getLocation());
+        book.updateInformation(
+            request.getTitle(),
+            request.getAuthor(),
+            request.getIsbn(),
+            request.getPublisher(),
+            request.getCoverImageUrl(),
+            request.getLocation()
+        );
 
         Book updatedBook = bookRepository.save(book);
         return BookDto.Response.from(updatedBook);

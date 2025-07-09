@@ -1,5 +1,7 @@
 package com.bookerapp.core.domain.model;
 
+import com.bookerapp.core.domain.exception.InvalidFloorException;
+
 public enum Floor {
     FOURTH(4),
     TWELFTH(12);
@@ -20,6 +22,6 @@ public enum Floor {
                 return floor;
             }
         }
-        throw new IllegalArgumentException("Invalid floor value: " + value);
+        throw new InvalidFloorException(value);
     }
 }
