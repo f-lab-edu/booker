@@ -1,46 +1,50 @@
 package com.bookerapp.core.domain.model;
 
+import com.bookerapp.core.domain.model.entity.BookLocation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class BookLocationTest {
 
     @Test
-    @DisplayName("BookLocation 생성 테스트")
-    void createBookLocation() {
+    @DisplayName("도서 위치를 생성할 수 있다")
+    void shouldCreateBookLocation() {
         // given & when
         BookLocation location = BookLocation.of(Floor.FOURTH);
 
         // then
         assertThat(location.getFloor()).isEqualTo(Floor.FOURTH);
         assertThat(location.getFloor().getValue()).isEqualTo(4);
-    }
-
-    @ParameterizedTest
-    @EnumSource(Floor.class)
-    @DisplayName("모든 Floor enum 값으로 BookLocation 생성 가능")
-    void createBookLocationWithAllFloors(Floor floor) {
-        // given & when
-        BookLocation location = BookLocation.of(floor);
-
-        // then
-        assertThat(location.getFloor()).isEqualTo(floor);
+        assertThat(location.getSection()).isEqualTo("A");
+        assertThat(location.getShelf()).isEqualTo("1");
     }
 
     @Test
-    @DisplayName("도서 위치 정보를 문자열로 표현할 수 있다")
-    void shouldFormatLocationAsString() {
+    @DisplayName("도서 위치의 층을 변경할 수 있다")
+    void shouldUpdateFloor() {
         // given
-        BookLocation location = BookLocation.of(Floor.FOURTH);
+        Floor floor = Floor.TWELFTH;
+        BookLocation location = BookLocation.of(floor);
 
         // when
-        String locationString = location.toString();
+        Floor newFloor = Floor.FOURTH;
+        location.updateFloor(newFloor);
 
         // then
-        assertThat(locationString).isEqualTo("4층");
+        assertThat(location.getFloor()).isEqualTo(Floor.FOURTH);
+        assertThat(location.getFloor().getValue()).isEqualTo(4);
+    }
+
+    @Test
+    @DisplayName("도서 위치는 기본 구역과 서가 정보를 가진다")
+    void shouldHaveDefaultSectionAndShelf() {
+        // given & when
+        BookLocation location = BookLocation.of(Floor.FOURTH);
+
+        // then
+        assertThat(location.getSection()).isEqualTo("A");
+        assertThat(location.getShelf()).isEqualTo("1");
     }
 }

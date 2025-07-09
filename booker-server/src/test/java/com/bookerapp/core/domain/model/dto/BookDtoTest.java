@@ -66,14 +66,16 @@ class BookDtoTest {
     @Test
     void 도서_엔티티를_응답_DTO로_변환할_수_있다() {
         // given
-        Book book = new Book();
-        book.setTitle("테스트 도서");
-        book.setAuthor("테스트 저자");
-        book.setPublisher("테스트 출판사");
-        book.setIsbn("9788956746425");
-        book.setCoverImageUrl("http://example.com/cover.jpg");
-        book.setStatus(BookStatus.AVAILABLE);
-        book.setLocation(BookLocation.of(Floor.FOURTH));
+        BookLocation location = BookLocation.of(Floor.FOURTH);
+        Book book = Book.builder()
+                .title("테스트 도서")
+                .author("테스트 저자")
+                .publisher("테스트 출판사")
+                .isbn("9788956746425")
+                .coverImageUrl("http://example.com/cover.jpg")
+                .location(location)
+                .build();
+        book.updateStatus(BookStatus.AVAILABLE);
 
         // when
         BookDto.Response response = BookDto.Response.from(book);

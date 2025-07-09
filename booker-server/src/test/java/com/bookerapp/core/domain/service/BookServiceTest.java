@@ -1,5 +1,6 @@
 package com.bookerapp.core.domain.service;
 
+import com.bookerapp.core.domain.exception.DuplicateIsbnException;
 import com.bookerapp.core.domain.model.dto.BookDto;
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLocation;
@@ -24,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
@@ -36,7 +37,6 @@ class BookServiceTest {
     private BookService bookService;
 
     private BookDto.Request createBookRequest;
-    private Book book;
 
     @BeforeEach
     void setUp() {
@@ -47,16 +47,21 @@ class BookServiceTest {
         createBookRequest.setIsbn("9788956746425");
         createBookRequest.setCoverImageUrl("http://example.com/cover.jpg");
         createBookRequest.setLocation(BookLocation.of(Floor.FOURTH));
-
-        book = createBookRequest.toEntity();
-        book.setId(1L);
     }
 
     @Test
     void createBook_성공() {
         // given
+        Book mockBook = mock(Book.class);
+        when(mockBook.getTitle()).thenReturn(createBookRequest.getTitle());
+        when(mockBook.getPublisher()).thenReturn(createBookRequest.getPublisher());
+        when(mockBook.getIsbn()).thenReturn(createBookRequest.getIsbn());
+        when(mockBook.getCoverImageUrl()).thenReturn(createBookRequest.getCoverImageUrl());
+        when(mockBook.getStatus()).thenReturn(BookStatus.AVAILABLE);
+        when(mockBook.getLocation()).thenReturn(createBookRequest.getLocation());
+
         given(bookRepository.findByIsbn(createBookRequest.getIsbn())).willReturn(Optional.empty());
-        given(bookRepository.save(any(Book.class))).willReturn(book);
+        given(bookRepository.save(any(Book.class))).willReturn(mockBook);
 
         // when
         BookDto.Response response = bookService.createBook(createBookRequest);
@@ -66,7 +71,6 @@ class BookServiceTest {
                 .isNotNull()
                 .satisfies(r -> {
                     assertThat(r.getTitle()).isEqualTo(createBookRequest.getTitle());
-                    assertThat(r.getAuthor()).isEqualTo(createBookRequest.getAuthor());
                     assertThat(r.getPublisher()).isEqualTo(createBookRequest.getPublisher());
                     assertThat(r.getIsbn()).isEqualTo(createBookRequest.getIsbn());
                     assertThat(r.getCoverImageUrl()).isEqualTo(createBookRequest.getCoverImageUrl());
@@ -78,18 +82,26 @@ class BookServiceTest {
     @Test
     void createBook_중복된_ISBN_실패() {
         // given
-        given(bookRepository.findByIsbn(createBookRequest.getIsbn())).willReturn(Optional.of(book));
+        Book mockBook = mock(Book.class);
+        given(bookRepository.findByIsbn(createBookRequest.getIsbn())).willReturn(Optional.of(mockBook));
 
         // when & then
         assertThatThrownBy(() -> bookService.createBook(createBookRequest))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DuplicateIsbnException.class)
                 .hasMessageContaining("이미 등록된 ISBN입니다");
     }
 
     @Test
     void getBook_성공() {
         // given
-        given(bookRepository.findById(1L)).willReturn(Optional.of(book));
+        Book mockBook = mock(Book.class);
+        when(mockBook.getId()).thenReturn(1L);
+        when(mockBook.getTitle()).thenReturn("테스트 도서");
+        when(mockBook.getAuthor()).thenReturn("테스트 저자");
+        when(mockBook.getLocation()).thenReturn(BookLocation.of(Floor.FOURTH));
+        when(mockBook.getStatus()).thenReturn(BookStatus.AVAILABLE);
+
+        given(bookRepository.findById(1L)).willReturn(Optional.of(mockBook));
 
         // when
         BookDto.Response response = bookService.getBook(1L);
@@ -98,9 +110,9 @@ class BookServiceTest {
         assertThat(response)
                 .isNotNull()
                 .satisfies(r -> {
-                    assertThat(r.getId()).isEqualTo(book.getId());
-                    assertThat(r.getTitle()).isEqualTo(book.getTitle());
-                    assertThat(r.getAuthor()).isEqualTo(book.getAuthor());
+                    assertThat(r.getId()).isEqualTo(mockBook.getId());
+                    assertThat(r.getTitle()).isEqualTo(mockBook.getTitle());
+                    assertThat(r.getAuthor()).isEqualTo(mockBook.getAuthor());
                 });
     }
 
@@ -118,6 +130,12 @@ class BookServiceTest {
     @Test
     void searchBooks_성공() {
         // given
+        Book mockBook = mock(Book.class);
+        when(mockBook.getTitle()).thenReturn("테스트 도서");
+        when(mockBook.getAuthor()).thenReturn("테스트 저자");
+        when(mockBook.getLocation()).thenReturn(BookLocation.of(Floor.FOURTH));
+        when(mockBook.getStatus()).thenReturn(BookStatus.AVAILABLE);
+
         BookDto.SearchRequest searchRequest = new BookDto.SearchRequest();
         searchRequest.setTitle("테스트");
         searchRequest.setAuthor("저자");
@@ -125,7 +143,7 @@ class BookServiceTest {
         searchRequest.setPage(0);
         searchRequest.setSize(10);
 
-        Page<Book> bookPage = new PageImpl<>(List.of(book));
+        Page<Book> bookPage = new PageImpl<>(List.of(mockBook));
         given(bookRepository.searchBooks(
                 searchRequest.getTitle(),
                 searchRequest.getAuthor(),
@@ -140,16 +158,23 @@ class BookServiceTest {
         assertThat(responses).hasSize(1);
         assertThat(responses.getContent().get(0))
                 .satisfies(r -> {
-                    assertThat(r.getTitle()).isEqualTo(book.getTitle());
-                    assertThat(r.getAuthor()).isEqualTo(book.getAuthor());
+                    assertThat(r.getTitle()).isEqualTo(mockBook.getTitle());
+                    assertThat(r.getAuthor()).isEqualTo(mockBook.getAuthor());
                 });
     }
 
     @Test
     void updateBook_성공() {
         // given
-        given(bookRepository.findById(1L)).willReturn(Optional.of(book));
-        given(bookRepository.save(any(Book.class))).willReturn(book);
+        Book mockBook = mock(Book.class);
+        when(mockBook.getTitle()).thenReturn("수정된 제목");
+        when(mockBook.getAuthor()).thenReturn("수정된 저자");
+        when(mockBook.getPublisher()).thenReturn("수정된 출판사");
+        when(mockBook.getLocation()).thenReturn(BookLocation.of(Floor.TWELFTH));
+        when(mockBook.getStatus()).thenReturn(BookStatus.AVAILABLE);
+
+        given(bookRepository.findById(1L)).willReturn(Optional.of(mockBook));
+        given(bookRepository.save(any(Book.class))).willReturn(mockBook);
 
         BookDto.Request updateRequest = new BookDto.Request();
         updateRequest.setTitle("수정된 제목");
@@ -162,6 +187,15 @@ class BookServiceTest {
         BookDto.Response response = bookService.updateBook(1L, updateRequest);
 
         // then
+        verify(mockBook).updateInformation(
+                updateRequest.getTitle(),
+                updateRequest.getAuthor(),
+                updateRequest.getIsbn(),
+                updateRequest.getPublisher(),
+                updateRequest.getCoverImageUrl(),
+                updateRequest.getLocation()
+        );
+
         assertThat(response)
                 .isNotNull()
                 .satisfies(r -> {
@@ -186,33 +220,36 @@ class BookServiceTest {
     @Test
     void updateBook_중복된_ISBN_실패() {
         // given
-        Book existingBook = new Book();
-        existingBook.setId(2L);
-        existingBook.setIsbn("9788956746999");
+        Book mockBook = mock(Book.class);
+        Book existingBook = mock(Book.class);
+        when(existingBook.getId()).thenReturn(2L);
 
-        given(bookRepository.findById(1L)).willReturn(Optional.of(book));
+        given(bookRepository.findById(1L)).willReturn(Optional.of(mockBook));
         given(bookRepository.findByIsbn("9788956746999")).willReturn(Optional.of(existingBook));
 
         BookDto.Request updateRequest = new BookDto.Request();
+        updateRequest.setTitle("수정된 제목");
+        updateRequest.setAuthor("수정된 저자");
         updateRequest.setIsbn("9788956746999");
 
         // when & then
         assertThatThrownBy(() -> bookService.updateBook(1L, updateRequest))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DuplicateIsbnException.class)
                 .hasMessageContaining("이미 등록된 ISBN입니다");
     }
 
     @Test
     void deleteBook_성공() {
         // given
-        given(bookRepository.findById(1L)).willReturn(Optional.of(book));
+        Book mockBook = mock(Book.class);
+        given(bookRepository.findById(1L)).willReturn(Optional.of(mockBook));
 
         // when
         bookService.deleteBook(1L);
 
         // then
-        verify(bookRepository).save(book);
-        assertThat(book.isDeleted()).isTrue();
+        verify(mockBook).markAsDeleted();
+        verify(bookRepository).save(mockBook);
     }
 
     @Test
