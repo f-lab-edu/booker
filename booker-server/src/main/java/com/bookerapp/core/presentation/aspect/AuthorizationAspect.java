@@ -1,7 +1,7 @@
 package com.bookerapp.core.presentation.aspect;
 
-import com.bookerapp.core.domain.model.Role;
-import com.bookerapp.core.domain.model.UserContext;
+import com.bookerapp.core.domain.model.auth.Role;
+import com.bookerapp.core.domain.model.auth.UserContext;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -19,14 +19,14 @@ import java.util.stream.Collectors;
 @Aspect
 @Component
 public class AuthorizationAspect {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationAspect.class);
 
     @Before("@annotation(com.bookerapp.core.presentation.aspect.RequireRoles)")
     public void checkRoles(JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         RequireRoles requireRoles = signature.getMethod().getAnnotation(RequireRoles.class);
-        
+
         UserContext userContext = Arrays.stream(joinPoint.getArgs())
                 .filter(arg -> arg instanceof UserContext)
                 .map(arg -> (UserContext) arg)
@@ -43,9 +43,9 @@ public class AuthorizationAspect {
         if (!hasRequiredRole) {
             throw new IllegalStateException("User does not have required roles: " + requiredRoles);
         }
-        
-        logger.debug("Access granted - User: {}, Roles: {}, Method: {}", 
-                    userContext.getUserId(), userContext.getRoles(), 
+
+        logger.debug("Access granted - User: {}, Roles: {}, Method: {}",
+                    userContext.getUserId(), userContext.getRoles(),
                     joinPoint.getSignature().getName());
     }
-} 
+}
