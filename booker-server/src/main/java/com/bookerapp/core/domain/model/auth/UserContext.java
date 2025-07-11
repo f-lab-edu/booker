@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.bookerapp.core.domain.model.JwtClaims.*;
+import static com.bookerapp.core.domain.model.auth.JwtClaims.*;
 
 @Getter
 @RequiredArgsConstructor
@@ -24,7 +24,7 @@ public class UserContext {
         this.userId = claims.getSubject();
         this.email = claims.get(EMAIL, String.class);
         this.username = claims.get(PREFERRED_USERNAME, String.class);
-        
+
         Map<String, Object> realmAccess = claims.get(REALM_ACCESS, Map.class);
         if (realmAccess != null && realmAccess.get(ROLES) != null) {
             this.roles = (List<String>) realmAccess.get(ROLES);
@@ -39,4 +39,4 @@ public class UserContext {
                 .map(Role::valueOf)
                 .collect(Collectors.toList());
     }
-} 
+}
