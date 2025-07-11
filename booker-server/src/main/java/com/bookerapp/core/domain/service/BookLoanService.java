@@ -92,8 +92,8 @@ public class BookLoanService {
 
     @Transactional(readOnly = true)
     public Page<BookLoanDto.Response> getMyLoans(String memberId, BookLoanDto.SearchRequest request) {
-        List<LoanStatus> statuses = request.getStatuses() != null && !request.getStatuses().isEmpty() 
-                ? request.getStatuses() 
+        List<LoanStatus> statuses = request.getStatuses() != null && !request.getStatuses().isEmpty()
+                ? request.getStatuses()
                 : Arrays.asList(LoanStatus.values());
 
         return bookLoanRepository.findByMemberIdAndStatusIn(
@@ -124,10 +124,10 @@ public class BookLoanService {
     public void checkAndUpdateOverdueStatus() {
         List<BookLoan> activeLoans = bookLoanRepository.findByStatus(LoanStatus.ACTIVE);
         for (BookLoan loan : activeLoans) {
-            loan.isOverdue(); // This will update the status if overdue
-            if (loan.getStatus() == LoanStatus.OVERDUE) {
+            loan.checkAndUpdateOverdueStatus();
+            if (loan.isOverdue()) {
                 bookLoanRepository.save(loan);
             }
         }
     }
-} 
+}
