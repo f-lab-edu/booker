@@ -1,6 +1,6 @@
 package com.bookerapp.core.presentation.argumentresolver;
 
-import com.bookerapp.core.domain.model.UserContext;
+import com.bookerapp.core.domain.model.auth.UserContext;
 import com.bookerapp.core.infrastructure.jwt.KeycloakJwtParser;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,12 +31,12 @@ public class UserContextArgumentResolver implements HandlerMethodArgumentResolve
                                 NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         String token = extractToken(request);
-        
+
         if (token != null) {
             Claims claims = keycloakJwtParser.parseToken(token);
             return new UserContext(claims);
         }
-        
+
         return null;
     }
 
@@ -47,4 +47,4 @@ public class UserContextArgumentResolver implements HandlerMethodArgumentResolve
         }
         return null;
     }
-} 
+}
