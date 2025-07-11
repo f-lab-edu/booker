@@ -3,15 +3,14 @@ package com.bookerapp.core.domain.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.AccessLevel;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "book_loans")
 @Getter
-@Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BookLoan extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,6 +36,12 @@ public class BookLoan extends BaseEntity {
     private final int DEFAULT_LOAN_DURATION = 2;
     private final int EXTEND_DURATION = 1;
     private final int WARNING_DUE_DAY = 3;
+
+    public BookLoan(Book book, String memberId) {
+        this.book = book;
+        this.memberId = memberId;
+        this.status = LoanStatus.PENDING;
+    }
 
     public void processLoan() {
         if (status != LoanStatus.PENDING) {

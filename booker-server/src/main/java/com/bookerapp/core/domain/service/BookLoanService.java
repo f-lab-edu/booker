@@ -35,9 +35,7 @@ public class BookLoanService {
             return BookLoanDto.Response.from(bookLoanRepository.save(waitingLoan));
         }
 
-        BookLoan loan = new BookLoan();
-        loan.setBook(book);
-        loan.setMemberId(memberId);
+        BookLoan loan = new BookLoan(book, memberId);
 
         if (book.isAvailableForLoan()) {
             loan.processLoan();
