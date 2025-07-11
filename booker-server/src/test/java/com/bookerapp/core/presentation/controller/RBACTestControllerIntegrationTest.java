@@ -3,15 +3,17 @@ package com.bookerapp.core.presentation.controller;
 import com.bookerapp.core.domain.model.auth.Role;
 import com.bookerapp.core.domain.model.auth.UserContext;
 import com.bookerapp.core.presentation.argumentresolver.UserContextArgumentResolver;
-import com.bookerapp.core.presentation.aspect.AuthorizationAspect;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.bookerapp.core.infrastructure.client.KeycloakClient;
+import com.bookerapp.core.infrastructure.jwt.KeycloakJwtParser;
+import com.bookerapp.core.infrastructure.jwt.JwtParser;
+import com.bookerapp.core.presentation.interceptor.JwtAuthInterceptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,8 +25,11 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(RBACTestController.class)
-@Import(AuthorizationAspect.class)
+
+
+
+@SpringBootTest
+@AutoConfigureMockMvc
 class RBACTestControllerIntegrationTest {
 
     @Autowired
@@ -33,8 +38,17 @@ class RBACTestControllerIntegrationTest {
     @MockBean
     private UserContextArgumentResolver userContextArgumentResolver;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @MockBean
+    private KeycloakClient keycloakClient;
+
+    @MockBean
+    private KeycloakJwtParser keycloakJwtParser;
+
+    @MockBean
+    private JwtParser jwtParser;
+
+    @MockBean
+    private JwtAuthInterceptor jwtAuthInterceptor;
 
     private static final String TEST_USER_ID = "test-user-id";
     private static final String TEST_USERNAME = "test-user";
@@ -46,8 +60,9 @@ class RBACTestControllerIntegrationTest {
     }
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         given(userContextArgumentResolver.supportsParameter(any())).willReturn(true);
+        given(jwtAuthInterceptor.preHandle(any(), any(), any())).willReturn(true);
     }
 
     @Nested
@@ -131,7 +146,7 @@ class RBACTestControllerIntegrationTest {
             // when & then
             mockMvc.perform(get("/api/test/books")
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isInternalServerError()); // IllegalStateException으로 인한 500 에러
+                    .andExpect(status().isForbidden());
         }
 
         @Test
@@ -144,7 +159,7 @@ class RBACTestControllerIntegrationTest {
             mockMvc.perform(post("/api/test/books")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("test book data"))
-                    .andExpect(status().isInternalServerError()); // IllegalStateException으로 인한 500 에러
+                    .andExpect(status().isForbidden());
         }
 
         @Test
@@ -157,7 +172,7 @@ class RBACTestControllerIntegrationTest {
             mockMvc.perform(put("/api/test/books/{id}", TEST_BOOK_ID)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("updated book data"))
-                    .andExpect(status().isInternalServerError()); // IllegalStateException으로 인한 500 에러
+                    .andExpect(status().isForbidden());
         }
 
         @Test
@@ -169,7 +184,7 @@ class RBACTestControllerIntegrationTest {
             // when & then
             mockMvc.perform(delete("/api/test/books/{id}", TEST_BOOK_ID)
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isInternalServerError()); // IllegalStateException으로 인한 500 에러
+                    .andExpect(status().isForbidden());
         }
 
         @Test
@@ -182,7 +197,7 @@ class RBACTestControllerIntegrationTest {
             mockMvc.perform(post("/api/test/books")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("test book data"))
-                    .andExpect(status().isInternalServerError()); // IllegalStateException으로 인한 500 에러
+                    .andExpect(status().isForbidden());
         }
     }
 
@@ -239,4 +254,6 @@ class RBACTestControllerIntegrationTest {
                     .andExpect(jsonPath("$.authenticated").value(true));
         }
     }
+
+
 }
