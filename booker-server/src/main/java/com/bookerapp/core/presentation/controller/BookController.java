@@ -1,8 +1,8 @@
 package com.bookerapp.core.presentation.controller;
 
-import com.bookerapp.core.domain.model.UserContext;
-import com.bookerapp.core.domain.model.Role;
-import com.bookerapp.core.domain.model.UserResponse;
+import com.bookerapp.core.domain.model.auth.UserContext;
+import com.bookerapp.core.domain.model.auth.Role;
+import com.bookerapp.core.domain.model.response.UserResponse;
 import com.bookerapp.core.presentation.aspect.RequireRoles;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -74,7 +74,7 @@ public class BookController {
         logger.info("deleteBook called for id: {} by user: {} with roles: {}", id, userContext.getUserId(), userContext.getRoles());
         return "Deleted book: " + id;
     }
-    
+
     @GetMapping("/user/info")
     @Operation(summary = "Get current user information")
     public UserResponse getUserInfo(

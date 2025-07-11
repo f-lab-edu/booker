@@ -1,6 +1,6 @@
 package com.bookerapp.core.presentation.aspect;
 
-import com.bookerapp.core.domain.model.Role;
+import com.bookerapp.core.domain.model.auth.Role;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,4 +11,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequireRoles {
     Role[] value();
-} 
+}
