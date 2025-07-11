@@ -16,11 +16,11 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
-@Tag(name = "Book", description = "Book management APIs")
-public class BookController {
-    private static final Logger logger = LoggerFactory.getLogger(BookController.class);
+@Tag(name = "RBACTest", description = "RBACTest APIs")
+public class RBACTestController {
+    private static final Logger logger = LoggerFactory.getLogger(RBACTestController.class);
 
-    @GetMapping("/books")
+    @GetMapping("/test/books")
     @Operation(summary = "Get all books")
     @RequireRoles({Role.USER, Role.ADMIN})
     public String getAllBooks(
@@ -30,7 +30,7 @@ public class BookController {
         return "List of all books";
     }
 
-    @GetMapping("/books/{id}")
+    @GetMapping("/test/books/{id}")
     @Operation(summary = "Get book by ID")
     @RequireRoles({Role.USER, Role.ADMIN})
     public String getBookById(
@@ -41,7 +41,7 @@ public class BookController {
         return "Book with ID: " + id;
     }
 
-    @PostMapping("/books")
+    @PostMapping("/test/books")
     @Operation(summary = "Create a new book")
     @RequireRoles({Role.ADMIN})
     public String createBook(
@@ -52,7 +52,7 @@ public class BookController {
         return "Created book: " + bookData;
     }
 
-    @PutMapping("/books/{id}")
+    @PutMapping("/test/books/{id}")
     @Operation(summary = "Update a book")
     @RequireRoles({Role.ADMIN})
     public String updateBook(
@@ -64,7 +64,7 @@ public class BookController {
         return "Updated book " + id + " with: " + bookData;
     }
 
-    @DeleteMapping("/books/{id}")
+    @DeleteMapping("/test/books/{id}")
     @Operation(summary = "Delete a book")
     @RequireRoles({Role.ADMIN})
     public String deleteBook(
@@ -75,7 +75,7 @@ public class BookController {
         return "Deleted book: " + id;
     }
 
-    @GetMapping("/user/info")
+    @GetMapping("/test/user/info")
     @Operation(summary = "Get current user information")
     public UserResponse getUserInfo(
             @Parameter(hidden = true) UserContext userContext
