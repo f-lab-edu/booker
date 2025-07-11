@@ -15,19 +15,19 @@ import java.time.LocalDateTime;
 public class BookLoan extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Book book;
 
-    @Column(name = "member_id", nullable = false)
+    @Column(nullable = false)
     private String memberId;
 
-    @Column(name = "loan_date")
+    @Column
     private LocalDateTime loanDate;
 
-    @Column(name = "due_date")
+    @Column
     private LocalDateTime dueDate;
 
-    @Column(name = "return_date")
+    @Column
     private LocalDateTime returnDate;
 
     @Enumerated(EnumType.STRING)
@@ -79,4 +79,4 @@ public class BookLoan extends BaseEntity {
             }
         }
     }
-} 
+}
