@@ -86,6 +86,30 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 
+    @ExceptionHandler(NotPendingStatusException.class)
+    public ResponseEntity<ErrorResponse> handleNotPendingStatusException(NotPendingStatusException e) {
+        logger.warn("승인 대기 상태 아님: {}", e.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "승인 대기 상태 아님",
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(NotApprovedStatusException.class)
+    public ResponseEntity<ErrorResponse> handleNotApprovedStatusException(NotApprovedStatusException e) {
+        logger.warn("승인된 상태 아님: {}", e.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "승인된 상태 아님",
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
     public static class ErrorResponse {
         private int status;
         private String error;
