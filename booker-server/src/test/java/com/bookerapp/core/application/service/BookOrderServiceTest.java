@@ -1,8 +1,6 @@
 package com.bookerapp.core.application.service;
 
-import com.bookerapp.core.application.dto.BookOrderActionDto;
-import com.bookerapp.core.application.dto.BookOrderRequestDto;
-import com.bookerapp.core.application.dto.BookOrderResponseDto;
+import com.bookerapp.core.application.dto.BookOrderDto;
 import com.bookerapp.core.domain.model.entity.BookOrder;
 import com.bookerapp.core.infrastructure.repository.BookOrderRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,8 +51,8 @@ class BookOrderServiceTest {
         return order;
     }
 
-    private BookOrderRequestDto createTestBookOrderRequest() {
-        return new BookOrderRequestDto(
+    private BookOrderDto.Request createTestBookOrderRequest() {
+        return new BookOrderDto.Request(
                 "클린 아키텍처",
                 "로버트 마틴",
                 "인사이트",
@@ -68,13 +66,13 @@ class BookOrderServiceTest {
         @Test
         void 도서주문요청_생성_성공() {
             // given
-            BookOrderRequestDto request = createTestBookOrderRequest();
+            BookOrderDto.Request request = createTestBookOrderRequest();
             BookOrder savedOrder = createTestBookOrder();
 
             given(bookOrderRepository.save(any(BookOrder.class))).willReturn(savedOrder);
 
             // when
-            BookOrderResponseDto result = bookOrderService.createBookOrder(request, TEST_USER_ID, TEST_USERNAME);
+            BookOrderDto.Response result = bookOrderService.createBookOrder(request, TEST_USER_ID, TEST_USERNAME);
 
             // then
             assertThat(result).isNotNull();
@@ -89,7 +87,7 @@ class BookOrderServiceTest {
         @Test
         void 도서주문요청_생성시_BaseEntity_필드_설정_확인() {
             // given
-            BookOrderRequestDto request = createTestBookOrderRequest();
+            BookOrderDto.Request request = createTestBookOrderRequest();
             BookOrder savedOrder = createTestBookOrder();
 
             given(bookOrderRepository.save(any(BookOrder.class))).willReturn(savedOrder);
@@ -116,7 +114,7 @@ class BookOrderServiceTest {
             given(bookOrderRepository.findByRequesterIdAndIsDeletedFalse(anyString())).willReturn(orders);
 
             // when
-            List<BookOrderResponseDto> result = bookOrderService.getBookOrdersByUser(TEST_USER_ID);
+            List<BookOrderDto.Response> result = bookOrderService.getBookOrdersByUser(TEST_USER_ID);
 
             // then
             assertThat(result).hasSize(1);
@@ -132,7 +130,7 @@ class BookOrderServiceTest {
             given(bookOrderRepository.findAllByIsDeletedFalse()).willReturn(orders);
 
             // when
-            List<BookOrderResponseDto> result = bookOrderService.getAllBookOrders();
+            List<BookOrderDto.Response> result = bookOrderService.getAllBookOrders();
 
             // then
             assertThat(result).hasSize(1);
@@ -146,7 +144,7 @@ class BookOrderServiceTest {
             given(bookOrderRepository.findByStatusOrderByCreatedAtDesc(any())).willReturn(orders);
 
             // when
-            List<BookOrderResponseDto> result = bookOrderService.getBookOrdersByStatus(BookOrder.BookOrderStatus.PENDING);
+            List<BookOrderDto.Response> result = bookOrderService.getBookOrdersByStatus(BookOrder.BookOrderStatus.PENDING);
 
             // then
             assertThat(result).hasSize(1);
@@ -160,7 +158,7 @@ class BookOrderServiceTest {
             given(bookOrderRepository.findById(anyLong())).willReturn(Optional.of(order));
 
             // when
-            BookOrderResponseDto result = bookOrderService.getBookOrder(TEST_ORDER_ID);
+            BookOrderDto.Response result = bookOrderService.getBookOrder(TEST_ORDER_ID);
 
             // then
             assertThat(result).isNotNull();
@@ -202,13 +200,13 @@ class BookOrderServiceTest {
         void 도서주문요청_승인_성공() {
             // given
             BookOrder order = createTestBookOrder();
-            BookOrderActionDto actionDto = new BookOrderActionDto("승인합니다");
+            BookOrderDto.Action actionDto = new BookOrderDto.Action("승인합니다");
 
             given(bookOrderRepository.findById(anyLong())).willReturn(Optional.of(order));
             given(bookOrderRepository.save(any(BookOrder.class))).willReturn(order);
 
             // when
-            BookOrderResponseDto result = bookOrderService.approveBookOrder(TEST_ORDER_ID, actionDto, TEST_ADMIN_ID);
+            BookOrderDto.Response result = bookOrderService.approveBookOrder(TEST_ORDER_ID, actionDto, TEST_ADMIN_ID);
 
             // then
             assertThat(result).isNotNull();
@@ -226,7 +224,7 @@ class BookOrderServiceTest {
             // given
             BookOrder approvedOrder = createTestBookOrder();
             approvedOrder.approve(TEST_ADMIN_ID, "이미 승인됨");
-            BookOrderActionDto actionDto = new BookOrderActionDto("승인합니다");
+            BookOrderDto.Action actionDto = new BookOrderDto.Action("승인합니다");
 
             given(bookOrderRepository.findById(anyLong())).willReturn(Optional.of(approvedOrder));
 
@@ -239,7 +237,7 @@ class BookOrderServiceTest {
         @Test
         void 존재하지않는_도서주문요청_승인시_예외발생() {
             // given
-            BookOrderActionDto actionDto = new BookOrderActionDto("승인합니다");
+            BookOrderDto.Action actionDto = new BookOrderDto.Action("승인합니다");
             given(bookOrderRepository.findById(anyLong())).willReturn(Optional.empty());
 
             // when & then
@@ -256,13 +254,13 @@ class BookOrderServiceTest {
         void 도서주문요청_거부_성공() {
             // given
             BookOrder order = createTestBookOrder();
-            BookOrderActionDto actionDto = new BookOrderActionDto("재고 부족으로 거부합니다");
+            BookOrderDto.Action actionDto = new BookOrderDto.Action("재고 부족으로 거부합니다");
 
             given(bookOrderRepository.findById(anyLong())).willReturn(Optional.of(order));
             given(bookOrderRepository.save(any(BookOrder.class))).willReturn(order);
 
             // when
-            BookOrderResponseDto result = bookOrderService.rejectBookOrder(TEST_ORDER_ID, actionDto, TEST_ADMIN_ID);
+            BookOrderDto.Response result = bookOrderService.rejectBookOrder(TEST_ORDER_ID, actionDto, TEST_ADMIN_ID);
 
             // then
             assertThat(result).isNotNull();
@@ -280,7 +278,7 @@ class BookOrderServiceTest {
             // given
             BookOrder rejectedOrder = createTestBookOrder();
             rejectedOrder.reject(TEST_ADMIN_ID, "이미 거부됨");
-            BookOrderActionDto actionDto = new BookOrderActionDto("거부합니다");
+            BookOrderDto.Action actionDto = new BookOrderDto.Action("거부합니다");
 
             given(bookOrderRepository.findById(anyLong())).willReturn(Optional.of(rejectedOrder));
 
@@ -304,7 +302,7 @@ class BookOrderServiceTest {
             given(bookOrderRepository.save(any(BookOrder.class))).willReturn(approvedOrder);
 
             // when
-            BookOrderResponseDto result = bookOrderService.markAsReceived(TEST_ORDER_ID, TEST_ADMIN_ID);
+            BookOrderDto.Response result = bookOrderService.markAsReceived(TEST_ORDER_ID, TEST_ADMIN_ID);
 
             // then
             assertThat(result).isNotNull();
