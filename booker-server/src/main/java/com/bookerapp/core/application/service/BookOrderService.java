@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import com.bookerapp.core.presentation.exception.NotPendingStatusException;
+import com.bookerapp.core.presentation.exception.NotApprovedStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -89,7 +91,7 @@ public class BookOrderService {
         }
 
         if (order.getStatus() != BookOrder.BookOrderStatus.PENDING) {
-            throw new IllegalStateException("승인 대기 중인 요청만 승인할 수 있습니다.");
+            throw new NotPendingStatusException();
         }
 
         order.approve(adminId, actionDto.getComments());
@@ -113,7 +115,7 @@ public class BookOrderService {
         }
 
         if (order.getStatus() != BookOrder.BookOrderStatus.PENDING) {
-            throw new IllegalStateException("승인 대기 중인 요청만 거부할 수 있습니다.");
+            throw new NotPendingStatusException();
         }
 
         order.reject(adminId, actionDto.getComments());
@@ -137,7 +139,7 @@ public class BookOrderService {
         }
 
         if (order.getStatus() != BookOrder.BookOrderStatus.APPROVED) {
-            throw new IllegalStateException("승인된 요청만 입고 처리할 수 있습니다.");
+            throw new NotApprovedStatusException();
         }
 
         order.markAsReceived(adminId);
