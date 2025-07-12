@@ -1,8 +1,6 @@
 package com.bookerapp.core.application.service;
 
-import com.bookerapp.core.application.dto.BookOrderActionDto;
-import com.bookerapp.core.application.dto.BookOrderRequestDto;
-import com.bookerapp.core.application.dto.BookOrderResponseDto;
+import com.bookerapp.core.application.dto.BookOrderDto;
 import com.bookerapp.core.domain.model.entity.BookOrder;
 import com.bookerapp.core.infrastructure.repository.BookOrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +21,7 @@ public class BookOrderService {
 
     private final BookOrderRepository bookOrderRepository;
 
-    public BookOrderResponseDto createBookOrder(BookOrderRequestDto requestDto, String requesterId, String requesterName) {
+    public BookOrderDto.Response createBookOrder(BookOrderDto.Request requestDto, String requesterId, String requesterName) {
         BookOrder bookOrder = new BookOrder(
             requestDto.getTitle(),
             requestDto.getAuthor(),
@@ -43,35 +41,35 @@ public class BookOrderService {
 
         notifyAdminOfNewOrder(savedOrder);
 
-        return new BookOrderResponseDto(savedOrder);
+        return new BookOrderDto.Response(savedOrder);
     }
 
     @Transactional(readOnly = true)
-    public List<BookOrderResponseDto> getBookOrdersByUser(String userId) {
+    public List<BookOrderDto.Response> getBookOrdersByUser(String userId) {
         List<BookOrder> orders = bookOrderRepository.findByRequesterIdAndIsDeletedFalse(userId);
         return orders.stream()
-                    .map(BookOrderResponseDto::new)
+                    .map(BookOrderDto.Response::new)
                     .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<BookOrderResponseDto> getAllBookOrders() {
+    public List<BookOrderDto.Response> getAllBookOrders() {
         List<BookOrder> orders = bookOrderRepository.findAllByIsDeletedFalse();
         return orders.stream()
-                    .map(BookOrderResponseDto::new)
+                    .map(BookOrderDto.Response::new)
                     .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<BookOrderResponseDto> getBookOrdersByStatus(BookOrder.BookOrderStatus status) {
+    public List<BookOrderDto.Response> getBookOrdersByStatus(BookOrder.BookOrderStatus status) {
         List<BookOrder> orders = bookOrderRepository.findByStatusOrderByCreatedAtDesc(status);
         return orders.stream()
-                    .map(BookOrderResponseDto::new)
+                    .map(BookOrderDto.Response::new)
                     .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public BookOrderResponseDto getBookOrder(Long id) {
+    public BookOrderDto.Response getBookOrder(Long id) {
         BookOrder order = bookOrderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("도서 주문 요청을 찾을 수 없습니다. ID: " + id));
 
@@ -79,10 +77,10 @@ public class BookOrderService {
             throw new IllegalArgumentException("삭제된 도서 주문 요청입니다. ID: " + id);
         }
 
-        return new BookOrderResponseDto(order);
+        return new BookOrderDto.Response(order);
     }
 
-    public BookOrderResponseDto approveBookOrder(Long id, BookOrderActionDto actionDto, String adminId) {
+    public BookOrderDto.Response approveBookOrder(Long id, BookOrderDto.Action actionDto, String adminId) {
         BookOrder order = bookOrderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("도서 주문 요청을 찾을 수 없습니다. ID: " + id));
 
@@ -103,10 +101,10 @@ public class BookOrderService {
 
         notifyUserOfApproval(savedOrder);
 
-        return new BookOrderResponseDto(savedOrder);
+        return new BookOrderDto.Response(savedOrder);
     }
 
-    public BookOrderResponseDto rejectBookOrder(Long id, BookOrderActionDto actionDto, String adminId) {
+    public BookOrderDto.Response rejectBookOrder(Long id, BookOrderDto.Action actionDto, String adminId) {
         BookOrder order = bookOrderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("도서 주문 요청을 찾을 수 없습니다. ID: " + id));
 
@@ -127,10 +125,10 @@ public class BookOrderService {
 
         notifyUserOfRejection(savedOrder);
 
-        return new BookOrderResponseDto(savedOrder);
+        return new BookOrderDto.Response(savedOrder);
     }
 
-    public BookOrderResponseDto markAsReceived(Long id, String adminId) {
+    public BookOrderDto.Response markAsReceived(Long id, String adminId) {
         BookOrder order = bookOrderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("도서 주문 요청을 찾을 수 없습니다. ID: " + id));
 
@@ -151,7 +149,7 @@ public class BookOrderService {
 
         notifyUserOfReceival(savedOrder);
 
-        return new BookOrderResponseDto(savedOrder);
+        return new BookOrderDto.Response(savedOrder);
     }
 
     // TODO: 알림 기능 추가
