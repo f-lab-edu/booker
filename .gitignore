@@ -60,5 +60,11 @@ out/
 # Spring Boot
 spring-boot-devtools.properties
 
+# Environment variables
 .env
 .env.*
+
+# Local development scripts
+clean-rebuild.sh
+*-local.sh
+
