@@ -33,7 +33,7 @@ public class SwaggerConfig {
                     "Click 'Authorize' to login via Keycloak (supports Google OAuth)."))
             .addSecurityItem(new SecurityRequirement().addList("Keycloak"))
             .components(new io.swagger.v3.oas.models.Components()
-                .addSecuritySchemes("Keycloak",
+                .addSecuritySchemes("Keycloak", 
                     new SecurityScheme()
                         .type(SecurityScheme.Type.OAUTH2)
                         .description("Keycloak OAuth2")
@@ -47,4 +47,4 @@ public class SwaggerConfig {
                 )
             );
     }
-}
+} 
