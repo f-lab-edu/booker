@@ -12,37 +12,21 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookLoanRepository extends JpaRepository<BookLoan, Long> {
-    
-    @Query("SELECT bl FROM BookLoan bl WHERE bl.memberId = :memberId AND bl.status IN :statuses")
-    Page<BookLoan> findByMemberIdAndStatusIn(
-            @Param("memberId") String memberId,
-            @Param("statuses") List<LoanStatus> statuses,
-            Pageable pageable
-    );
-    
-    @Query("SELECT bl FROM BookLoan bl WHERE bl.book.id = :bookId AND bl.status = :status")
-    Optional<BookLoan> findByBookIdAndStatus(
-            @Param("bookId") Long bookId,
-            @Param("status") LoanStatus status
-    );
-    
-    @Query("SELECT COUNT(bl) > 0 FROM BookLoan bl WHERE bl.book.id = :bookId AND bl.status IN :statuses")
-    boolean existsByBookIdAndStatusIn(
-            @Param("bookId") Long bookId,
-            @Param("statuses") List<LoanStatus> statuses
-    );
-    
+
+    Page<BookLoan> findByMemberIdAndStatusIn(String memberId, List<LoanStatus> statuses, Pageable pageable);
+
+    Optional<BookLoan> findByBookIdAndStatus(Long bookId, LoanStatus status);
+
+    boolean existsByBookIdAndStatusIn(Long bookId, List<LoanStatus> statuses);
+
     List<BookLoan> findByStatus(LoanStatus status);
 
+    // TODO: QueryDSL로 이전 예정 - OrderBy 처리를 위해 현재는 @Query 사용
     @Query("SELECT bl FROM BookLoan bl WHERE bl.book.id = :bookId AND bl.status = :status ORDER BY bl.createdAt")
     List<BookLoan> findWaitingListByBookId(
             @Param("bookId") Long bookId,
             @Param("status") LoanStatus status
     );
 
-    @Query("SELECT COUNT(bl) FROM BookLoan bl WHERE bl.book.id = :bookId AND bl.status = :status")
-    long countWaitingListByBookId(
-            @Param("bookId") Long bookId,
-            @Param("status") LoanStatus status
-    );
-} 
+    long countByBookIdAndStatus(Long bookId, LoanStatus status);
+}
