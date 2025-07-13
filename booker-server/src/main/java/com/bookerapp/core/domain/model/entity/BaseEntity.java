@@ -18,17 +18,17 @@ public abstract class BaseEntity {
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "created_by", length = 100)
+    @Column(length = 50)
     private String createdBy;
 
-    @Column(name = "updated_by", length = 100)
+    @Column(length = 50)
     private String updatedBy;
 
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = false;
+    @Column(nullable = false)
+    private boolean isDeleted;
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
@@ -45,4 +45,8 @@ public abstract class BaseEntity {
     public void unmarkAsDeleted() {
         this.isDeleted = false;
     }
+<<<<<<<< HEAD:booker-server/src/main/java/com/bookerapp/core/domain/model/BaseEntity.java
+}
+========
 } 
+>>>>>>>> b0cca449fc1eedbe7245826d588fe47133680064:booker-server/src/main/java/com/bookerapp/core/domain/model/entity/BaseEntity.java
