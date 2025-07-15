@@ -41,7 +41,8 @@ public class AuthorizationAspect {
                 .anyMatch(requiredRoles::contains);
 
         if (!hasRequiredRole) {
-            throw new IllegalStateException("User does not have required roles: " + requiredRoles);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                "User does not have required roles: " + requiredRoles);
         }
 
         logger.debug("Access granted - User: {}, Roles: {}, Method: {}",
