@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +18,6 @@ import java.util.UUID;
 import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 
 @DataJpaTest
 @Import(BookLoanService.class)
@@ -39,7 +38,7 @@ class BookLoanServiceIsolationTest {
         Book book = bookRepository.save(Book.builder()
                 .title("동시성 테스트")
                 .author("테스터")
-                .isbn("1234567890")
+                .isbn(UUID.randomUUID().toString())
                 .build());
 
         int threadCount = 10;
