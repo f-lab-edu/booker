@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BookLoan extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private Book book;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false)
     private String memberId;
@@ -29,6 +29,10 @@ public class BookLoan extends BaseEntity {
     @Column
     private LocalDateTime returnDate;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
+    private Book book;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LoanStatus status = LoanStatus.PENDING;
@@ -41,6 +45,10 @@ public class BookLoan extends BaseEntity {
         this.book = book;
         this.memberId = memberId;
         this.status = LoanStatus.PENDING;
+    }
+
+    public void setStatus(LoanStatus status) {
+        this.status = status;
     }
 
     public void processLoan() {

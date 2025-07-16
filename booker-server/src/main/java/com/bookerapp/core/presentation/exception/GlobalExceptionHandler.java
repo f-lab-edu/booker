@@ -54,6 +54,13 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI()));
     }
 
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<ErrorResponse> handleSecurityException(SecurityException ex, HttpServletRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponse.of(HttpStatus.FORBIDDEN, ex.getMessage(), request.getRequestURI()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(
             Exception e, HttpServletRequest request) {
