@@ -16,6 +16,10 @@ public class BookLoanDto {
     @NoArgsConstructor
     public static class Request {
         private Long bookId;
+
+        public Request(Long bookId) {
+            this.bookId = bookId;
+        }
     }
 
     @Getter
@@ -53,4 +57,4 @@ public class BookLoanDto {
         private int page = 0;
         private int size = 10;
     }
-} 
+}

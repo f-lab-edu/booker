@@ -77,11 +77,11 @@ public class RBACTestController {
 
     @GetMapping("/test/user/info")
     @Operation(summary = "Get current user information")
-    public UserResponse getUserInfo(
+    public UserResponse.Response getUserInfo(
             @Parameter(hidden = true) UserContext userContext
     ) {
         logger.info("getUserInfo called by user: {} with roles: {}", userContext.getUserId(), userContext.getRoles());
-        return new UserResponse(
+        return new UserResponse.Response(
             userContext.getUserId(),
             userContext.getUsername(),
             userContext.getEmail(),

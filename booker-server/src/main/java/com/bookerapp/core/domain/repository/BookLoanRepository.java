@@ -29,4 +29,8 @@ public interface BookLoanRepository extends JpaRepository<BookLoan, Long> {
     );
 
     long countByBookIdAndStatus(Long bookId, LoanStatus status);
+
+    default long countWaitingListByBookId(Long bookId, LoanStatus status) {
+        return countByBookIdAndStatus(bookId, status);
+    }
 }
