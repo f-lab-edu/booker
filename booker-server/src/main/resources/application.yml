@@ -39,3 +39,9 @@ logging:
     com.bookerapp.core: DEBUG
     com.bookerapp.core.infrastructure.config.JwtConfig: DEBUG
     com.bookerapp.core.presentation.interceptor.JwtAuthInterceptor: DEBUG 
+
+google:
+  calendar:
+    credentials-file-path: ${GOOGLE_CALENDAR_CREDENTIALS_PATH}
+    application-name: Booker
+    calendar-id: ${GOOGLE_CALENDAR_ID} 
