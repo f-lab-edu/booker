@@ -5,10 +5,10 @@ import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.LoanStatus;
 import com.bookerapp.core.domain.repository.BookLoanRepository;
 import com.bookerapp.core.domain.repository.BookRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,11 @@ import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+
 @DataJpaTest
+@Import(BookLoanService.class)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class BookLoanServiceIsolationTest {
     @Autowired
     private BookLoanRepository bookLoanRepository;
@@ -35,7 +39,7 @@ class BookLoanServiceIsolationTest {
         Book book = bookRepository.save(Book.builder()
                 .title("동시성 테스트")
                 .author("테스터")
-                .isbn(UUID.randomUUID().toString())
+                .isbn("1234567890")
                 .build());
 
         int threadCount = 10;
