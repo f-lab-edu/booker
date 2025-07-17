@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -23,26 +24,22 @@ public class BookLoanService {
     private final BookLoanRepository bookLoanRepository;
     private final BookRepository bookRepository;
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public BookLoanDto.Response createLoan(String memberId, BookLoanDto.Request request) {
         Book book = bookRepository.findById(request.getBookId())
-                .orElseThrow(() -> new EntityNotFoundException("도서를 찾을 수 없습니다: " + request.getBookId()));
-
-        if (bookLoanRepository.existsByBookIdAndStatusIn(
-                book.getId(),
-                Arrays.asList(LoanStatus.ACTIVE, LoanStatus.PENDING))) {
-            BookLoan waitingLoan = BookLoan.createWaitingLoan(book, memberId);
-            return BookLoanDto.Response.from(bookLoanRepository.save(waitingLoan));
-        }
-
+            .orElseThrow(() -> new EntityNotFoundException("도서를 찾을 수 없습니다: " + request.getBookId()));
+        
+        boolean isBookAvailable = !bookLoanRepository.existsByBookIdAndStatusIn(
+            book.getId(), Arrays.asList(LoanStatus.ACTIVE, LoanStatus.PENDING));
+        
         BookLoan loan = new BookLoan(book, memberId);
-
-        if (book.isAvailableForLoan()) {
+        
+        if (isBookAvailable) {
             loan.processLoan();
         } else {
             loan.setStatus(LoanStatus.WAITING);
         }
-
+        
         BookLoan savedLoan = bookLoanRepository.save(loan);
         return BookLoanDto.Response.from(savedLoan);
     }

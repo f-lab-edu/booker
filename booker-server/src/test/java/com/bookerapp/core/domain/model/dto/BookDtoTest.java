@@ -88,6 +88,6 @@ class BookDtoTest {
         assertThat(response.getCoverImageUrl()).isEqualTo("http://example.com/cover.jpg");
         assertThat(response.getStatus()).isEqualTo(BookStatus.AVAILABLE);
         assertThat(response.getLocation().getFloor()).isEqualTo(Floor.FOURTH);
-        assertThat(response.getLocationDisplay()).isEqualTo("4층 A구역 1번 서가");
+        assertThat(response.getLocationDisplay()).isEqualTo("4");
     }
 }

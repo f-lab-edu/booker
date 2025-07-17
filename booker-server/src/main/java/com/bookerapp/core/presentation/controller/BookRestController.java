@@ -1,7 +1,10 @@
 package com.bookerapp.core.presentation.controller;
 
 import com.bookerapp.core.domain.model.dto.BookDto;
+import com.bookerapp.core.domain.model.auth.Role;
+import io.swagger.v3.oas.annotations.Operation;
 import com.bookerapp.core.domain.service.BookService;
+import com.bookerapp.core.presentation.aspect.RequireRoles;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +24,8 @@ public class BookRestController {
     private final BookService bookService;
 
     @PostMapping
+    @Operation(summary = "도서 생성")
+    @RequireRoles({Role.ADMIN})
     public ResponseEntity<BookDto.Response> createBook(@Valid @RequestBody BookDto.Request request) {
         BookDto.Response response = bookService.createBook(request);
         URI location = ServletUriComponentsBuilder
@@ -32,16 +37,22 @@ public class BookRestController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "도서 조회")
+    @RequireRoles({Role.USER})
     public ResponseEntity<BookDto.Response> getBook(@PathVariable Long id) {
         return ResponseEntity.ok(bookService.getBook(id));
     }
 
     @GetMapping
+    @Operation(summary = "도서 검색")
+    @RequireRoles({Role.USER})
     public ResponseEntity<Page<BookDto.Response>> searchBooks(BookDto.SearchRequest request) {
         return ResponseEntity.ok(bookService.searchBooks(request));
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "도서 수정")
+    @RequireRoles({Role.ADMIN})
     public ResponseEntity<BookDto.Response> updateBook(
             @PathVariable Long id,
             @Valid @RequestBody BookDto.Request request) {
@@ -49,6 +60,8 @@ public class BookRestController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "도서 삭제")
+    @RequireRoles({Role.ADMIN})
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
         return ResponseEntity.noContent().build();

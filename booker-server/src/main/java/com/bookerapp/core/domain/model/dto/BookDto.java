@@ -65,7 +65,9 @@ public class BookDto {
             response.coverImageUrl = book.getCoverImageUrl();
             response.status = book.getStatus();
             response.location = book.getLocation();
-            response.locationDisplay = book.getLocation().toString();
+            if (book.getLocation() != null && book.getLocation().getFloor() != null) {
+                response.locationDisplay = String.valueOf(book.getLocation().getFloor().getValue());
+            }
             return response;
         }
     }
