@@ -1,8 +1,6 @@
 package com.bookerapp.core.presentation.controller;
 
-import com.bookerapp.core.application.dto.BookOrderActionDto;
-import com.bookerapp.core.application.dto.BookOrderRequestDto;
-import com.bookerapp.core.application.dto.BookOrderResponseDto;
+import com.bookerapp.core.application.dto.BookOrderDto;
 import com.bookerapp.core.application.service.BookOrderService;
 import com.bookerapp.core.domain.model.auth.Role;
 import com.bookerapp.core.domain.model.auth.UserContext;
@@ -34,13 +32,13 @@ public class BookOrderController {
     @PostMapping
     @Operation(summary = "도서 주문 요청 생성")
     @RequireRoles({Role.USER, Role.ADMIN})
-    public ResponseEntity<BookOrderResponseDto> createBookOrder(
-            @Valid @RequestBody BookOrderRequestDto requestDto,
+    public ResponseEntity<BookOrderDto.Response> createBookOrder(
+            @Valid @RequestBody BookOrderDto.Request requestDto,
             @Parameter(hidden = true) UserContext userContext
     ) {
         logger.info("도서 주문 요청 생성: 사용자 {}, 제목: {}", userContext.getUsername(), requestDto.getTitle());
 
-        BookOrderResponseDto response = bookOrderService.createBookOrder(
+        BookOrderDto.Response response = bookOrderService.createBookOrder(
                 requestDto,
                 userContext.getUserId(),
                 userContext.getUsername()
@@ -52,25 +50,25 @@ public class BookOrderController {
     @GetMapping("/my")
     @Operation(summary = "내 도서 주문 요청 목록 조회")
     @RequireRoles({Role.USER, Role.ADMIN})
-    public ResponseEntity<List<BookOrderResponseDto>> getMyBookOrders(
+    public ResponseEntity<List<BookOrderDto.Response>> getMyBookOrders(
             @Parameter(hidden = true) UserContext userContext
     ) {
         logger.info("내 도서 주문 요청 목록 조회: 사용자 {}", userContext.getUsername());
 
-        List<BookOrderResponseDto> orders = bookOrderService.getBookOrdersByUser(userContext.getUserId());
+        List<BookOrderDto.Response> orders = bookOrderService.getBookOrdersByUser(userContext.getUserId());
         return ResponseEntity.ok(orders);
     }
 
     @GetMapping
     @Operation(summary = "모든 도서 주문 요청 목록 조회 (관리자용)")
     @RequireRoles({Role.ADMIN})
-    public ResponseEntity<List<BookOrderResponseDto>> getAllBookOrders(
+    public ResponseEntity<List<BookOrderDto.Response>> getAllBookOrders(
             @RequestParam(required = false) BookOrder.BookOrderStatus status,
             @Parameter(hidden = true) UserContext userContext
     ) {
         logger.info("모든 도서 주문 요청 목록 조회: 관리자 {}, 상태: {}", userContext.getUsername(), status);
 
-        List<BookOrderResponseDto> orders;
+        List<BookOrderDto.Response> orders;
         if (status != null) {
             orders = bookOrderService.getBookOrdersByStatus(status);
         } else {
@@ -83,13 +81,13 @@ public class BookOrderController {
     @GetMapping("/{id}")
     @Operation(summary = "도서 주문 요청 상세 조회")
     @RequireRoles({Role.USER, Role.ADMIN})
-    public ResponseEntity<BookOrderResponseDto> getBookOrder(
+    public ResponseEntity<BookOrderDto.Response> getBookOrder(
             @PathVariable Long id,
             @Parameter(hidden = true) UserContext userContext
     ) {
         logger.info("도서 주문 요청 상세 조회: ID {}, 사용자 {}", id, userContext.getUsername());
 
-        BookOrderResponseDto order = bookOrderService.getBookOrder(id);
+        BookOrderDto.Response order = bookOrderService.getBookOrder(id);
 
         if (!userContext.getRoles().contains(Role.ADMIN.name()) &&
             !order.getRequesterId().equals(userContext.getUserId())) {
@@ -103,14 +101,14 @@ public class BookOrderController {
     @PostMapping("/{id}/approve")
     @Operation(summary = "도서 주문 요청 승인")
     @RequireRoles({Role.ADMIN})
-    public ResponseEntity<BookOrderResponseDto> approveBookOrder(
+    public ResponseEntity<BookOrderDto.Response> approveBookOrder(
             @PathVariable Long id,
-            @Valid @RequestBody BookOrderActionDto actionDto,
+            @Valid @RequestBody BookOrderDto.Action actionDto,
             @Parameter(hidden = true) UserContext userContext
     ) {
         logger.info("도서 주문 요청 승인: ID {}, 관리자 {}", id, userContext.getUsername());
 
-        BookOrderResponseDto response = bookOrderService.approveBookOrder(
+        BookOrderDto.Response response = bookOrderService.approveBookOrder(
                 id,
                 actionDto,
                 userContext.getUserId()
@@ -122,14 +120,14 @@ public class BookOrderController {
     @PostMapping("/{id}/reject")
     @Operation(summary = "도서 주문 요청 거부")
     @RequireRoles({Role.ADMIN})
-    public ResponseEntity<BookOrderResponseDto> rejectBookOrder(
+    public ResponseEntity<BookOrderDto.Response> rejectBookOrder(
             @PathVariable Long id,
-            @Valid @RequestBody BookOrderActionDto actionDto,
+            @Valid @RequestBody BookOrderDto.Action actionDto,
             @Parameter(hidden = true) UserContext userContext
     ) {
         logger.info("도서 주문 요청 거부: ID {}, 관리자 {}", id, userContext.getUsername());
 
-        BookOrderResponseDto response = bookOrderService.rejectBookOrder(
+        BookOrderDto.Response response = bookOrderService.rejectBookOrder(
                 id,
                 actionDto,
                 userContext.getUserId()
@@ -141,13 +139,13 @@ public class BookOrderController {
     @PostMapping("/{id}/receive")
     @Operation(summary = "도서 입고 처리")
     @RequireRoles({Role.ADMIN})
-    public ResponseEntity<BookOrderResponseDto> markAsReceived(
+    public ResponseEntity<BookOrderDto.Response> markAsReceived(
             @PathVariable Long id,
             @Parameter(hidden = true) UserContext userContext
     ) {
         logger.info("도서 입고 처리: ID {}, 관리자 {}", id, userContext.getUsername());
 
-        BookOrderResponseDto response = bookOrderService.markAsReceived(
+        BookOrderDto.Response response = bookOrderService.markAsReceived(
                 id,
                 userContext.getUserId()
         );
