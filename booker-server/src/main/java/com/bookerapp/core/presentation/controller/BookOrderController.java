@@ -13,6 +13,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,30 +53,30 @@ public class BookOrderController {
     @GetMapping("/my")
     @Operation(summary = "내 도서 주문 요청 목록 조회")
     @RequireRoles({Role.USER, Role.ADMIN})
-    public ResponseEntity<List<BookOrderDto.Response>> getMyBookOrders(
-            @Parameter(hidden = true) UserContext userContext
+    public ResponseEntity<Page<BookOrderDto.Response>> getMyBookOrders(
+            @Parameter(hidden = true) UserContext userContext,
+            @PageableDefault(size = 20, sort = "createdAt,desc") Pageable pageable
     ) {
-        logger.info("내 도서 주문 요청 목록 조회: 사용자 {}", userContext.getUsername());
+        logger.info("내 도서 주문 요청 목록 조회: 사용자 {}, 페이지: {}", userContext.getUsername(), pageable);
 
-        List<BookOrderDto.Response> orders = bookOrderService.getBookOrdersByUser(userContext.getUserId());
+        Page<BookOrderDto.Response> orders = bookOrderService.getBookOrdersByUser(userContext.getUserId(), pageable);
         return ResponseEntity.ok(orders);
     }
 
     @GetMapping
     @Operation(summary = "모든 도서 주문 요청 목록 조회 (관리자용)")
     @RequireRoles({Role.ADMIN})
-    public ResponseEntity<List<BookOrderDto.Response>> getAllBookOrders(
+    public ResponseEntity<Page<BookOrderDto.Response>> getAllBookOrders(
             @RequestParam(required = false) BookOrder.BookOrderStatus status,
-            @Parameter(hidden = true) UserContext userContext
+            @Parameter(hidden = true) UserContext userContext,
+            @PageableDefault(size = 20, sort = "createdAt,desc") Pageable pageable
     ) {
-        logger.info("모든 도서 주문 요청 목록 조회: 관리자 {}, 상태: {}", userContext.getUsername(), status);
+        logger.info("모든 도서 주문 요청 목록 조회: 관리자 {}, 상태: {}, 페이지: {}",
+                   userContext.getUsername(), status, pageable);
 
-        List<BookOrderDto.Response> orders;
-        if (status != null) {
-            orders = bookOrderService.getBookOrdersByStatus(status);
-        } else {
-            orders = bookOrderService.getAllBookOrders();
-        }
+        Page<BookOrderDto.Response> orders = status != null ?
+            bookOrderService.getBookOrdersByStatus(status, pageable) :
+            bookOrderService.getAllBookOrders(pageable);
 
         return ResponseEntity.ok(orders);
     }

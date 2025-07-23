@@ -6,11 +6,11 @@ import com.bookerapp.core.infrastructure.repository.BookOrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import com.bookerapp.core.presentation.exception.NotPendingStatusException;
 import com.bookerapp.core.presentation.exception.NotApprovedStatusException;
 
@@ -47,27 +47,21 @@ public class BookOrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<BookOrderDto.Response> getBookOrdersByUser(String userId) {
-        List<BookOrder> orders = bookOrderRepository.findByRequesterIdAndIsDeletedFalse(userId);
-        return orders.stream()
-                    .map(BookOrderDto.Response::new)
-                    .collect(Collectors.toList());
+    public Page<BookOrderDto.Response> getBookOrdersByUser(String userId, Pageable pageable) {
+        return bookOrderRepository.findByRequesterId(userId, pageable)
+                                .map(BookOrderDto.Response::new);
     }
 
     @Transactional(readOnly = true)
-    public List<BookOrderDto.Response> getAllBookOrders() {
-        List<BookOrder> orders = bookOrderRepository.findAllByIsDeletedFalse();
-        return orders.stream()
-                    .map(BookOrderDto.Response::new)
-                    .collect(Collectors.toList());
+    public Page<BookOrderDto.Response> getAllBookOrders(Pageable pageable) {
+        return bookOrderRepository.findAllWithPagination(pageable)
+                                .map(BookOrderDto.Response::new);
     }
 
     @Transactional(readOnly = true)
-    public List<BookOrderDto.Response> getBookOrdersByStatus(BookOrder.BookOrderStatus status) {
-        List<BookOrder> orders = bookOrderRepository.findByStatusOrderByCreatedAtDesc(status);
-        return orders.stream()
-                    .map(BookOrderDto.Response::new)
-                    .collect(Collectors.toList());
+    public Page<BookOrderDto.Response> getBookOrdersByStatus(BookOrder.BookOrderStatus status, Pageable pageable) {
+        return bookOrderRepository.findByStatusOrderByCreatedAtDesc(status, pageable)
+                                .map(BookOrderDto.Response::new);
     }
 
     @Transactional(readOnly = true)
