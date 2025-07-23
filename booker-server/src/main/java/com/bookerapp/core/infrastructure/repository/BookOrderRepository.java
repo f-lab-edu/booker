@@ -11,13 +11,13 @@ import java.util.List;
 @Repository
 public interface BookOrderRepository extends JpaRepository<BookOrder, Long> {
 
-    List<BookOrder> findByRequesterIdAndIsDeletedFalse(String requesterId);
+    List<BookOrder> findByRequesterId(String requesterId);
 
-    List<BookOrder> findByStatusAndIsDeletedFalse(BookOrder.BookOrderStatus status);
+    List<BookOrder> findByStatus(BookOrder.BookOrderStatus status);
 
-    @Query("SELECT bo FROM BookOrder bo WHERE bo.isDeleted = false ORDER BY bo.createdAt DESC")
-    List<BookOrder> findAllByIsDeletedFalse();
+    @Query("SELECT bo FROM BookOrder bo ORDER BY bo.createdAt DESC")
+    List<BookOrder> findAll();
 
-    @Query("SELECT bo FROM BookOrder bo WHERE bo.isDeleted = false AND bo.status = :status ORDER BY bo.createdAt DESC")
+    @Query("SELECT bo FROM BookOrder bo WHERE bo.status = :status ORDER BY bo.createdAt DESC")
     List<BookOrder> findByStatusOrderByCreatedAtDesc(@Param("status") BookOrder.BookOrderStatus status);
 }
