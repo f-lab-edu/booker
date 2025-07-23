@@ -39,4 +39,8 @@ public class UserContext {
                 .map(Role::valueOf)
                 .collect(Collectors.toList());
     }
+
+    public boolean hasRole(Role role) {
+        return this.roles.contains(role.name());
+    }
 }
