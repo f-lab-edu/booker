@@ -92,7 +92,7 @@ public class BookOrderController {
 
         BookOrderDto.Response order = bookOrderService.getBookOrder(id);
 
-        if (!userContext.getRoles().contains(Role.ADMIN.name()) &&
+        if ((!userContext.hasRole(Role.ADMIN)) &&
             !order.getRequesterId().equals(userContext.getUserId())) {
             logger.warn("권한 없는 도서 주문 요청 조회 시도: ID {}, 사용자 {}", id, userContext.getUsername());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
