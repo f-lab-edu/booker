@@ -1,6 +1,8 @@
 package com.bookerapp.core.presentation.exception;
 
 import com.bookerapp.core.domain.exception.BookException;
+import com.bookerapp.core.domain.exception.BookOrderNotFoundException;
+import com.bookerapp.core.domain.exception.DeletedBookOrderException;
 import com.bookerapp.core.domain.exception.DuplicateIsbnException;
 import com.bookerapp.core.domain.exception.InvalidBookException;
 import com.bookerapp.core.domain.exception.InvalidFloorException;
@@ -92,14 +94,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
-        logger.warn("잘못된 요청: {}", e.getMessage());
+        logger.error("시스템 오류 (IllegalArgumentException): {}", e.getMessage(), e);
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "잘못된 요청",
-                e.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "시스템 오류가 발생했습니다",
+                "관리자에게 문의해주세요",
                 LocalDateTime.now()
         );
-        return ResponseEntity.badRequest().body(errorResponse);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 
     @ExceptionHandler(IllegalStateException.class)
@@ -143,6 +145,30 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now()
         );
         return ResponseEntity.status(e.getStatusCode()).body(errorResponse);
+    }
+
+    @ExceptionHandler(BookOrderNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleBookOrderNotFoundException(BookOrderNotFoundException e) {
+        logger.warn("도서 주문을 찾을 수 없음: {}", e.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "도서 주문을 찾을 수 없음",
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(DeletedBookOrderException.class)
+    public ResponseEntity<ErrorResponse> handleDeletedBookOrderException(DeletedBookOrderException e) {
+        logger.warn("삭제된 도서 주문에 접근: {}", e.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.GONE.value(),
+                "삭제된 도서 주문",
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.GONE).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)

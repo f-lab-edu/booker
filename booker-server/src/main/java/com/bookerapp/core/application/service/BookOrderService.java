@@ -1,6 +1,8 @@
 package com.bookerapp.core.application.service;
 
 import com.bookerapp.core.application.dto.BookOrderDto;
+import com.bookerapp.core.domain.exception.BookOrderNotFoundException;
+import com.bookerapp.core.domain.exception.DeletedBookOrderException;
 import com.bookerapp.core.domain.model.entity.BookOrder;
 import com.bookerapp.core.infrastructure.repository.BookOrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -67,10 +69,10 @@ public class BookOrderService {
     @Transactional(readOnly = true)
     public BookOrderDto.Response getBookOrder(Long id) {
         BookOrder order = bookOrderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("도서 주문 요청을 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new BookOrderNotFoundException(id));
 
         if (order.isDeleted()) {
-            throw new IllegalArgumentException("삭제된 도서 주문 요청입니다. ID: " + id);
+            throw new DeletedBookOrderException(id);
         }
 
         return new BookOrderDto.Response(order);
@@ -78,10 +80,10 @@ public class BookOrderService {
 
     public BookOrderDto.Response approveBookOrder(Long id, BookOrderDto.Action actionDto, String adminId) {
         BookOrder order = bookOrderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("도서 주문 요청을 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new BookOrderNotFoundException(id));
 
         if (order.isDeleted()) {
-            throw new IllegalArgumentException("삭제된 도서 주문 요청입니다. ID: " + id);
+            throw new DeletedBookOrderException(id);
         }
 
         if (order.getStatus() != BookOrder.BookOrderStatus.PENDING) {
@@ -102,10 +104,10 @@ public class BookOrderService {
 
     public BookOrderDto.Response rejectBookOrder(Long id, BookOrderDto.Action actionDto, String adminId) {
         BookOrder order = bookOrderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("도서 주문 요청을 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new BookOrderNotFoundException(id));
 
         if (order.isDeleted()) {
-            throw new IllegalArgumentException("삭제된 도서 주문 요청입니다. ID: " + id);
+            throw new DeletedBookOrderException(id);
         }
 
         if (order.getStatus() != BookOrder.BookOrderStatus.PENDING) {
@@ -126,10 +128,10 @@ public class BookOrderService {
 
     public BookOrderDto.Response markAsReceived(Long id, String adminId) {
         BookOrder order = bookOrderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("도서 주문 요청을 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new BookOrderNotFoundException(id));
 
         if (order.isDeleted()) {
-            throw new IllegalArgumentException("삭제된 도서 주문 요청입니다. ID: " + id);
+            throw new DeletedBookOrderException(id);
         }
 
         if (order.getStatus() != BookOrder.BookOrderStatus.APPROVED) {
