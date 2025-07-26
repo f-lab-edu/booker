@@ -24,15 +24,7 @@ public class EventController {
     public ResponseEntity<EventDto.Response> createEvent(
             @RequestBody EventDto.CreateRequest request,
             UserContext userContext) {
-        Event event = eventService.createEvent(
-                request.getTitle(),
-                request.getDescription(),
-                request.getType(),
-                request.getStartTime(),
-                request.getEndTime(),
-                request.getMaxParticipants(),
-                userContext.getMember()
-        );
+        Event event = eventService.createEvent(request, userContext.getMember());
         return ResponseEntity.ok(EventDto.Response.from(event));
     }
 
@@ -41,13 +33,7 @@ public class EventController {
     public ResponseEntity<EventDto.Response> updateEvent(
             @PathVariable Long eventId,
             @RequestBody EventDto.UpdateRequest request) {
-        eventService.updateEvent(
-                eventId,
-                request.getTitle(),
-                request.getDescription(),
-                request.getStartTime(),
-                request.getEndTime()
-        );
+        eventService.updateEvent(eventId, request);
         Event event = eventService.findEventById(eventId);
         return ResponseEntity.ok(EventDto.Response.from(event));
     }
