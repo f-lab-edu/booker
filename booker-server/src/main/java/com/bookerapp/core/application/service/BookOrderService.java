@@ -47,13 +47,13 @@ public class BookOrderService {
 
     @Transactional(readOnly = true)
     public Page<BookOrderDto.Response> getBookOrdersByUser(String userId, Pageable pageable) {
-        return bookOrderRepository.findByRequesterId(userId, pageable)
+        return bookOrderRepository.findByRequesterIdOrderByCreatedAtDesc(userId, pageable)
                                 .map(BookOrderDto.Response::new);
     }
 
     @Transactional(readOnly = true)
     public Page<BookOrderDto.Response> getAllBookOrders(Pageable pageable) {
-        return bookOrderRepository.findAllWithPagination(pageable)
+        return bookOrderRepository.findAll(pageable)
                                 .map(BookOrderDto.Response::new);
     }
 
