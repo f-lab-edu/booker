@@ -28,6 +28,7 @@ public class Event extends BaseEntity {
     private String description;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private EventType type;
 
     @Column(nullable = false)
