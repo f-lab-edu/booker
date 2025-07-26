@@ -37,6 +37,7 @@ public class Event extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime endTime;
 
+    @Column(nullable = false)
     private int maxParticipants;
 
     @ManyToOne(fetch = FetchType.LAZY)
