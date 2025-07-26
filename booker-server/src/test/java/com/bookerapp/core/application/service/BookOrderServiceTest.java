@@ -1,8 +1,11 @@
 package com.bookerapp.core.application.service;
 
 import com.bookerapp.core.application.dto.BookOrderDto;
+import com.bookerapp.core.domain.exception.BookOrderNotFoundException;
 import com.bookerapp.core.domain.model.entity.BookOrder;
 import com.bookerapp.core.infrastructure.repository.BookOrderRepository;
+import com.bookerapp.core.presentation.exception.NotApprovedStatusException;
+import com.bookerapp.core.presentation.exception.NotPendingStatusException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -10,6 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +42,12 @@ class BookOrderServiceTest {
     private static final String TEST_USERNAME = "test-user";
     private static final String TEST_ADMIN_ID = "admin-id";
     private static final Long TEST_ORDER_ID = 1L;
+    private Pageable pageable;
+
+    @BeforeEach
+    void setUp() {
+        pageable = PageRequest.of(0, 10);
+    }
 
     private BookOrder createTestBookOrder() {
         BookOrder order = new BookOrder(
@@ -111,44 +124,50 @@ class BookOrderServiceTest {
         void 사용자별_도서주문요청_목록_조회_성공() {
             // given
             List<BookOrder> orders = List.of(createTestBookOrder());
-            given(bookOrderRepository.findByRequesterIdAndIsDeletedFalse(anyString())).willReturn(orders);
+            Page<BookOrder> orderPage = new PageImpl<>(orders, pageable, orders.size());
+            given(bookOrderRepository.findByRequesterIdOrderByCreatedAtDesc(anyString(), any(Pageable.class))).willReturn(orderPage);
 
             // when
-            List<BookOrderDto.Response> result = bookOrderService.getBookOrdersByUser(TEST_USER_ID);
+            Page<BookOrderDto.Response> result = bookOrderService.getBookOrdersByUser(TEST_USER_ID, pageable);
 
             // then
-            assertThat(result).hasSize(1);
-            assertThat(result.get(0).getRequesterId()).isEqualTo(TEST_USER_ID);
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getContent().get(0).getRequesterId()).isEqualTo(TEST_USER_ID);
 
-            verify(bookOrderRepository).findByRequesterIdAndIsDeletedFalse(TEST_USER_ID);
+            verify(bookOrderRepository).findByRequesterIdOrderByCreatedAtDesc(TEST_USER_ID, pageable);
         }
 
         @Test
         void 모든_도서주문요청_목록_조회_성공() {
             // given
             List<BookOrder> orders = List.of(createTestBookOrder());
-            given(bookOrderRepository.findAllByIsDeletedFalse()).willReturn(orders);
+            Page<BookOrder> orderPage = new PageImpl<>(orders, pageable, orders.size());
+            given(bookOrderRepository.findAll(any(Pageable.class))).willReturn(orderPage);
 
             // when
-            List<BookOrderDto.Response> result = bookOrderService.getAllBookOrders();
+            Page<BookOrderDto.Response> result = bookOrderService.getAllBookOrders(pageable);
 
             // then
-            assertThat(result).hasSize(1);
-            verify(bookOrderRepository).findAllByIsDeletedFalse();
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(1);
+            verify(bookOrderRepository).findAll(pageable);
         }
 
         @Test
         void 상태별_도서주문요청_목록_조회_성공() {
             // given
             List<BookOrder> orders = List.of(createTestBookOrder());
-            given(bookOrderRepository.findByStatusOrderByCreatedAtDesc(any())).willReturn(orders);
+            Page<BookOrder> orderPage = new PageImpl<>(orders, pageable, orders.size());
+            given(bookOrderRepository.findByStatusOrderByCreatedAtDesc(any(), any(Pageable.class))).willReturn(orderPage);
 
             // when
-            List<BookOrderDto.Response> result = bookOrderService.getBookOrdersByStatus(BookOrder.BookOrderStatus.PENDING);
+            Page<BookOrderDto.Response> result = bookOrderService.getBookOrdersByStatus(BookOrder.BookOrderStatus.PENDING, pageable);
 
             // then
-            assertThat(result).hasSize(1);
-            verify(bookOrderRepository).findByStatusOrderByCreatedAtDesc(BookOrder.BookOrderStatus.PENDING);
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(1);
+            verify(bookOrderRepository).findByStatusOrderByCreatedAtDesc(BookOrder.BookOrderStatus.PENDING, pageable);
         }
 
         @Test
@@ -173,23 +192,10 @@ class BookOrderServiceTest {
 
             // when & then
             assertThatThrownBy(() -> bookOrderService.getBookOrder(TEST_ORDER_ID))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(BookOrderNotFoundException.class)
                     .hasMessageContaining("도서 주문 요청을 찾을 수 없습니다");
 
             verify(bookOrderRepository).findById(TEST_ORDER_ID);
-        }
-
-        @Test
-        void 삭제된_도서주문요청_조회시_예외발생() {
-            // given
-            BookOrder deletedOrder = createTestBookOrder();
-            deletedOrder.markAsDeleted();
-            given(bookOrderRepository.findById(anyLong())).willReturn(Optional.of(deletedOrder));
-
-            // when & then
-            assertThatThrownBy(() -> bookOrderService.getBookOrder(TEST_ORDER_ID))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("삭제된 도서 주문 요청입니다");
         }
     }
 
@@ -230,8 +236,8 @@ class BookOrderServiceTest {
 
             // when & then
             assertThatThrownBy(() -> bookOrderService.approveBookOrder(TEST_ORDER_ID, actionDto, TEST_ADMIN_ID))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("승인 대기 중인 요청만 승인할 수 있습니다");
+                    .isInstanceOf(NotPendingStatusException.class)
+                    .hasMessageContaining("승인 대기 중인 요청만 처리할 수 있습니다");
         }
 
         @Test
@@ -242,7 +248,7 @@ class BookOrderServiceTest {
 
             // when & then
             assertThatThrownBy(() -> bookOrderService.approveBookOrder(TEST_ORDER_ID, actionDto, TEST_ADMIN_ID))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(BookOrderNotFoundException.class)
                     .hasMessageContaining("도서 주문 요청을 찾을 수 없습니다");
         }
     }
@@ -284,8 +290,8 @@ class BookOrderServiceTest {
 
             // when & then
             assertThatThrownBy(() -> bookOrderService.rejectBookOrder(TEST_ORDER_ID, actionDto, TEST_ADMIN_ID))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("승인 대기 중인 요청만 거부할 수 있습니다");
+                    .isInstanceOf(NotPendingStatusException.class)
+                    .hasMessageContaining("승인 대기 중인 요청만 처리할 수 있습니다");
         }
     }
 
@@ -322,7 +328,7 @@ class BookOrderServiceTest {
 
             // when & then
             assertThatThrownBy(() -> bookOrderService.markAsReceived(TEST_ORDER_ID, TEST_ADMIN_ID))
-                    .isInstanceOf(IllegalStateException.class)
+                    .isInstanceOf(NotApprovedStatusException.class)
                     .hasMessageContaining("승인된 요청만 입고 처리할 수 있습니다");
         }
 
@@ -335,7 +341,7 @@ class BookOrderServiceTest {
 
             // when & then
             assertThatThrownBy(() -> bookOrderService.markAsReceived(TEST_ORDER_ID, TEST_ADMIN_ID))
-                    .isInstanceOf(IllegalStateException.class)
+                    .isInstanceOf(NotApprovedStatusException.class)
                     .hasMessageContaining("승인된 요청만 입고 처리할 수 있습니다");
         }
 
@@ -346,21 +352,8 @@ class BookOrderServiceTest {
 
             // when & then
             assertThatThrownBy(() -> bookOrderService.markAsReceived(TEST_ORDER_ID, TEST_ADMIN_ID))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(BookOrderNotFoundException.class)
                     .hasMessageContaining("도서 주문 요청을 찾을 수 없습니다");
-        }
-
-        @Test
-        void 삭제된_도서주문요청_입고처리시_예외발생() {
-            // given
-            BookOrder deletedOrder = createTestBookOrder();
-            deletedOrder.markAsDeleted();
-            given(bookOrderRepository.findById(anyLong())).willReturn(Optional.of(deletedOrder));
-
-            // when & then
-            assertThatThrownBy(() -> bookOrderService.markAsReceived(TEST_ORDER_ID, TEST_ADMIN_ID))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("삭제된 도서 주문 요청입니다");
         }
     }
 }
