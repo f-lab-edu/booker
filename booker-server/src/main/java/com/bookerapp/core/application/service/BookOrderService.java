@@ -80,7 +80,6 @@ public class BookOrderService {
         }
 
         order.approve(adminId, actionDto.getComments());
-        order.setUpdatedBy(adminId);
 
         BookOrder savedOrder = bookOrderRepository.save(order);
 
@@ -100,7 +99,6 @@ public class BookOrderService {
         }
 
         order.reject(adminId, actionDto.getComments());
-        order.setUpdatedBy(adminId);
 
         BookOrder savedOrder = bookOrderRepository.save(order);
 
@@ -120,7 +118,6 @@ public class BookOrderService {
         }
 
         order.markAsReceived(adminId);
-        order.setUpdatedBy(adminId);
 
         BookOrder savedOrder = bookOrderRepository.save(order);
 
