@@ -35,6 +35,10 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.nio.charset.StandardCharsets;
+import static org.mockito.BDDMockito.lenient;
+
+
 @ExtendWith(MockitoExtension.class)
 class BookOrderControllerTest {
 
@@ -96,7 +100,7 @@ class BookOrderControllerTest {
                 )
                 .build();
 
-        given(userContextArgumentResolver.supportsParameter(any())).willAnswer(invocation -> {
+        lenient().when(userContextArgumentResolver.supportsParameter(any())).thenAnswer(invocation -> {
             MethodParameter parameter = invocation.getArgument(0);
             return parameter.getParameterType().equals(UserContext.class);
         });
@@ -141,11 +145,16 @@ class BookOrderControllerTest {
                     "9788966262472"
             );
 
+            System.out.println(objectMapper.writeValueAsString(request));
+
             // when & then
-            mockMvc.perform(post(BASE_URL)
+            String result = mockMvc.perform(post(BASE_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isInternalServerError());
+                    .andExpect(status().isBadRequest())
+                    .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+
+            System.out.println("제목없이 생성 실패 응답: " + result);
         }
 
         @Test
@@ -160,10 +169,13 @@ class BookOrderControllerTest {
             );
 
             // when & then
-            mockMvc.perform(post(BASE_URL)
+            String result = mockMvc.perform(post(BASE_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isInternalServerError());
+                    .andExpect(status().isBadRequest())
+                    .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+
+            System.out.println("제목길이초과 생성 실패 응답: " + result);
         }
     }
 
