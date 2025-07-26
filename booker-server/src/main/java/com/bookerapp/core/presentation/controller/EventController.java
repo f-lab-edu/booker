@@ -4,9 +4,7 @@ import com.bookerapp.core.domain.model.auth.UserContext;
 import com.bookerapp.core.domain.model.event.Event;
 import com.bookerapp.core.domain.model.event.EventType;
 import com.bookerapp.core.domain.service.EventService;
-import com.bookerapp.core.presentation.dto.event.CreateEventRequest;
-import com.bookerapp.core.presentation.dto.event.EventResponse;
-import com.bookerapp.core.presentation.dto.event.UpdateEventRequest;
+import com.bookerapp.core.presentation.dto.event.EventDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +21,8 @@ public class EventController {
 
     @PostMapping
     @RequireRoles({Role.ADMIN, Role.USER})
-    public ResponseEntity<EventResponse> createEvent(
-            @RequestBody CreateEventRequest request,
+    public ResponseEntity<EventDto.Response> createEvent(
+            @RequestBody EventDto.CreateRequest request,
             UserContext userContext) {
         Event event = eventService.createEvent(
                 request.getTitle(),
@@ -35,14 +33,14 @@ public class EventController {
                 request.getMaxParticipants(),
                 userContext.getMember()
         );
-        return ResponseEntity.ok(EventResponse.from(event));
+        return ResponseEntity.ok(EventDto.Response.from(event));
     }
 
     @PutMapping("/{eventId}")
     @RequireRoles({Role.ADMIN})
-    public ResponseEntity<EventResponse> updateEvent(
+    public ResponseEntity<EventDto.Response> updateEvent(
             @PathVariable Long eventId,
-            @RequestBody UpdateEventRequest request) {
+            @RequestBody EventDto.UpdateRequest request) {
         eventService.updateEvent(
                 eventId,
                 request.getTitle(),
@@ -51,7 +49,7 @@ public class EventController {
                 request.getEndTime()
         );
         Event event = eventService.findEventById(eventId);
-        return ResponseEntity.ok(EventResponse.from(event));
+        return ResponseEntity.ok(EventDto.Response.from(event));
     }
 
     @DeleteMapping("/{eventId}")
@@ -81,20 +79,20 @@ public class EventController {
 
     @GetMapping
     @RequireRoles({Role.ADMIN, Role.USER})
-    public ResponseEntity<List<EventResponse>> getAllEvents(
+    public ResponseEntity<List<EventDto.Response>> getAllEvents(
             @RequestParam(required = false) EventType type) {
         List<Event> events = type != null ?
                 eventService.findEventsByType(type) :
                 eventService.findAllEvents();
         return ResponseEntity.ok(events.stream()
-                .map(EventResponse::from)
+                .map(EventDto.Response::from)
                 .toList());
     }
 
-    @GetMapping("/{eventId}")''
+    @GetMapping("/{eventId}")
     @RequireRoles({Role.ADMIN, Role.USER})
-    public ResponseEntity<EventResponse> getEvent(@PathVariable Long eventId) {
+    public ResponseEntity<EventDto.Response> getEvent(@PathVariable Long eventId) {
         Event event = eventService.findEventById(eventId);
-        return ResponseEntity.ok(EventResponse.from(event));
+        return ResponseEntity.ok(EventDto.Response.from(event));
     }
 } 
