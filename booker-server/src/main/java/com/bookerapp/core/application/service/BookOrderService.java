@@ -2,7 +2,7 @@ package com.bookerapp.core.application.service;
 
 import com.bookerapp.core.application.dto.BookOrderDto;
 import com.bookerapp.core.domain.exception.BookOrderNotFoundException;
-import com.bookerapp.core.domain.exception.DeletedBookOrderException;
+
 import com.bookerapp.core.domain.model.entity.BookOrder;
 import com.bookerapp.core.infrastructure.repository.BookOrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -68,20 +68,12 @@ public class BookOrderService {
         BookOrder order = bookOrderRepository.findById(id)
                 .orElseThrow(() -> new BookOrderNotFoundException(id));
 
-        if (order.isDeleted()) {
-            throw new DeletedBookOrderException(id);
-        }
-
         return new BookOrderDto.Response(order);
     }
 
     public BookOrderDto.Response approveBookOrder(Long id, BookOrderDto.Action actionDto, String adminId) {
         BookOrder order = bookOrderRepository.findById(id)
                 .orElseThrow(() -> new BookOrderNotFoundException(id));
-
-        if (order.isDeleted()) {
-            throw new DeletedBookOrderException(id);
-        }
 
         if (order.getStatus() != BookOrder.BookOrderStatus.PENDING) {
             throw new NotPendingStatusException();
@@ -103,10 +95,6 @@ public class BookOrderService {
         BookOrder order = bookOrderRepository.findById(id)
                 .orElseThrow(() -> new BookOrderNotFoundException(id));
 
-        if (order.isDeleted()) {
-            throw new DeletedBookOrderException(id);
-        }
-
         if (order.getStatus() != BookOrder.BookOrderStatus.PENDING) {
             throw new NotPendingStatusException();
         }
@@ -126,10 +114,6 @@ public class BookOrderService {
     public BookOrderDto.Response markAsReceived(Long id, String adminId) {
         BookOrder order = bookOrderRepository.findById(id)
                 .orElseThrow(() -> new BookOrderNotFoundException(id));
-
-        if (order.isDeleted()) {
-            throw new DeletedBookOrderException(id);
-        }
 
         if (order.getStatus() != BookOrder.BookOrderStatus.APPROVED) {
             throw new NotApprovedStatusException();
