@@ -35,9 +35,6 @@ public class BookOrderService {
             requesterName
         );
 
-        bookOrder.setCreatedBy(requesterId);
-        bookOrder.setUpdatedBy(requesterId);
-
         BookOrder savedOrder = bookOrderRepository.save(bookOrder);
 
         logger.info("도서 주문 요청이 생성되었습니다. ID: {}, 요청자: {}, 제목: {}",
