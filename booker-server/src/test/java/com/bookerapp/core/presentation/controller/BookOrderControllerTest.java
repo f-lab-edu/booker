@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -89,7 +90,10 @@ class BookOrderControllerTest {
         objectMapper.findAndRegisterModules();
         mockMvc = MockMvcBuilders.standaloneSetup(new BookOrderController(bookOrderService))
                 .setControllerAdvice(new GlobalExceptionHandler())
-                .setCustomArgumentResolvers(userContextArgumentResolver)
+                .setCustomArgumentResolvers(
+                        userContextArgumentResolver,
+                        new PageableHandlerMethodArgumentResolver()
+                )
                 .build();
 
         given(userContextArgumentResolver.supportsParameter(any())).willAnswer(invocation -> {
@@ -179,7 +183,10 @@ class BookOrderControllerTest {
                     .willReturn(page);
 
             // when & then
-            mockMvc.perform(get(BASE_URL + "/my"))
+            mockMvc.perform(get(BASE_URL + "/my")
+                            .param("page", "0")
+                            .param("size", "20")
+                            .param("sort", "createdAt,desc"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.content[0].id").value(TEST_ORDER_ID))
@@ -206,11 +213,17 @@ class BookOrderControllerTest {
                     .willReturn(page);
 
             // when & then
-            mockMvc.perform(get(BASE_URL))
+            String result = mockMvc.perform(get(BASE_URL)
+                            .param("page", "0")
+                            .param("size", "20")
+                            .param("sort", "createdAt,desc"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.content[0].id").value(TEST_ORDER_ID))
-                    .andExpect(jsonPath("$.totalElements").value(1));
+                    .andExpect(jsonPath("$.totalElements").value(1))
+                    .andReturn().getResponse().getContentAsString();
+
+            System.out.println("API 응답 결과: " + result);
 
             verify(bookOrderService).getAllBookOrders(any(Pageable.class));
         }
@@ -229,7 +242,10 @@ class BookOrderControllerTest {
 
             // when & then
             mockMvc.perform(get(BASE_URL)
-                            .param("status", "PENDING"))
+                            .param("status", "PENDING")
+                            .param("page", "0")
+                            .param("size", "20")
+                            .param("sort", "createdAt,desc"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.totalElements").value(1));
