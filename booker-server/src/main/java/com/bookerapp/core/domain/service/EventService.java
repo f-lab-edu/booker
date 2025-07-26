@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import com.bookerapp.core.domain.dto.EventDto;
 
 @Service
 @RequiredArgsConstructor
@@ -19,18 +20,24 @@ public class EventService {
     private final GoogleCalendarClient googleCalendarClient;
 
     @Transactional
-    public Event createEvent(String title, String description, EventType type,
-                           LocalDateTime startTime, LocalDateTime endTime,
-                           int maxParticipants, Member presenter) {
-        Event event = new Event(title, description, type, startTime, endTime, maxParticipants, presenter);
+    public Event createEvent(EventDto.CreateRequest request, Member presenter) {
+        Event event = new Event(
+            request.getTitle(),
+            request.getDescription(),
+            request.getType(),
+            request.getStartTime(),
+            request.getEndTime(),
+            request.getMaxParticipants(),
+            presenter
+        );
         event = eventRepository.save(event);
 
-        if (type == EventType.TECH_TALK) {
+        if (request.getType() == EventType.TECH_TALK) {
             String calendarEventId = googleCalendarClient.createEvent(
-                    title,
-                    description,
-                    startTime,
-                    endTime
+                    request.getTitle(),
+                    request.getDescription(),
+                    request.getStartTime(),
+                    request.getEndTime()
             );
             event.setCalendarEventId(calendarEventId);
             event = eventRepository.save(event);
@@ -40,22 +47,21 @@ public class EventService {
     }
 
     @Transactional
-    public void updateEvent(Long eventId, String title, String description,
-                          LocalDateTime startTime, LocalDateTime endTime) {
+    public void updateEvent(Long eventId, EventDto.UpdateRequest request) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-        event.updateSchedule(startTime, endTime);
-        event.setTitle(title);
-        event.setDescription(description);
+        event.updateSchedule(request.getStartTime(), request.getEndTime());
+        event.setTitle(request.getTitle());
+        event.setDescription(request.getDescription());
 
         if (event.getType() == EventType.TECH_TALK && event.getCalendarEventId() != null) {
             googleCalendarClient.updateEvent(
                     event.getCalendarEventId(),
-                    title,
-                    description,
-                    startTime,
-                    endTime
+                    request.getTitle(),
+                    request.getDescription(),
+                    request.getStartTime(),
+                    request.getEndTime()
             );
         }
     }
