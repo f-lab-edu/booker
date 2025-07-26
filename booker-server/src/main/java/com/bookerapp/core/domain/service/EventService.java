@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import com.bookerapp.core.domain.dto.EventDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -94,13 +96,13 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
-    public List<Event> findAllEvents() {
-        return eventRepository.findAll();
+    public Page<Event> findAllEvents(Pageable pageable) {
+        return eventRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<Event> findEventsByType(EventType type) {
-        return eventRepository.findByType(type);
+    public Page<Event> findEventsByType(EventType type, Pageable pageable) {
+        return eventRepository.findByType(type, pageable);
     }
 
     @Transactional(readOnly = true)

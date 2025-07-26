@@ -8,6 +8,7 @@ import com.bookerapp.core.domain.model.event.ParticipationStatus;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -85,6 +86,38 @@ public class EventDto {
                     .registrationDate(participation.getRegistrationDate())
                     .waitingNumber(participation.getWaitingNumber())
                     .build();
+        }
+    }
+
+    @Getter
+    public static class PageResponse {
+        private final List<Response> content;
+        private final int pageNumber;
+        private final int pageSize;
+        private final long totalElements;
+        private final int totalPages;
+        private final boolean last;
+
+        public static PageResponse from(Page<Event> page) {
+            return new PageResponse(
+                page.getContent().stream().map(Response::from).toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isLast()
+            );
+        }
+
+        @Builder
+        private PageResponse(List<Response> content, int pageNumber, int pageSize, 
+                           long totalElements, int totalPages, boolean last) {
+            this.content = content;
+            this.pageNumber = pageNumber;
+            this.pageSize = pageSize;
+            this.totalElements = totalElements;
+            this.totalPages = totalPages;
+            this.last = last;
         }
     }
 } 
