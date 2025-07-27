@@ -1,25 +1,19 @@
 package com.bookerapp.core.domain.service;
 
 import com.bookerapp.core.domain.model.event.Event;
-import com.bookerapp.core.domain.model.event.EventType;
 import com.bookerapp.core.domain.model.event.Member;
-import com.bookerapp.core.infrastructure.client.GoogleCalendarClient;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
 import com.bookerapp.core.domain.dto.EventDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@RequiredArgsConstructor
-public class EventService {
+public abstract class AbstractEventService {
 
-    private final EventRepository eventRepository;
-    private final GoogleCalendarClient googleCalendarClient;
+    protected final EventRepository eventRepository;
+
+    protected AbstractEventService(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
+    }
 
     @Transactional
     public Event createEvent(EventDto.CreateRequest request, Member presenter) {
@@ -33,18 +27,9 @@ public class EventService {
             presenter
         );
         event = eventRepository.save(event);
-
-        if (request.getType() == EventType.TECH_TALK) {
-            String calendarEventId = googleCalendarClient.createEvent(
-                    request.getTitle(),
-                    request.getDescription(),
-                    request.getStartTime(),
-                    request.getEndTime()
-            );
-            event.setCalendarEventId(calendarEventId);
-            event = eventRepository.save(event);
-        }
-
+        
+        handleEventCreation(event, request);
+        
         return event;
     }
 
@@ -57,15 +42,7 @@ public class EventService {
         event.setTitle(request.getTitle());
         event.setDescription(request.getDescription());
 
-        if (event.getType() == EventType.TECH_TALK && event.getCalendarEventId() != null) {
-            googleCalendarClient.updateEvent(
-                    event.getCalendarEventId(),
-                    request.getTitle(),
-                    request.getDescription(),
-                    request.getStartTime(),
-                    request.getEndTime()
-            );
-        }
+        handleEventUpdate(event, request);
     }
 
     @Transactional
@@ -73,10 +50,8 @@ public class EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-        if (event.getType() == EventType.TECH_TALK && event.getCalendarEventId() != null) {
-            googleCalendarClient.deleteEvent(event.getCalendarEventId());
-        }
-
+        handleEventDeletion(event);
+        
         event.cancelEvent();
         eventRepository.delete(event);
     }
@@ -86,6 +61,7 @@ public class EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
         event.addParticipant(member);
+        handleParticipantAddition(event, member);
     }
 
     @Transactional
@@ -93,6 +69,7 @@ public class EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
         event.removeParticipant(member);
+        handleParticipantRemoval(event, member);
     }
 
     @Transactional(readOnly = true)
@@ -110,4 +87,14 @@ public class EventService {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
     }
+
+    protected abstract void handleEventCreation(Event event, EventDto.CreateRequest request);
+    
+    protected abstract void handleEventUpdate(Event event, EventDto.UpdateRequest request);
+    
+    protected abstract void handleEventDeletion(Event event);
+    
+    protected abstract void handleParticipantAddition(Event event, Member member);
+    
+    protected abstract void handleParticipantRemoval(Event event, Member member);
 } 
