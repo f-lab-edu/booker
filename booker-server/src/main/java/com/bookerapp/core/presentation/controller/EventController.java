@@ -3,7 +3,7 @@ package com.bookerapp.core.presentation.controller;
 import com.bookerapp.core.domain.model.auth.UserContext;
 import com.bookerapp.core.domain.model.event.Event;
 import com.bookerapp.core.domain.model.event.EventType;
-import com.bookerapp.core.domain.service.EventService;
+import com.bookerapp.core.domain.service.EventServiceFactory;
 import com.bookerapp.core.presentation.dto.event.EventDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,13 +20,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EventController {
 
-    private final EventService eventService;
+    private final EventServiceFactory eventServiceFactory;
 
     @PostMapping
     @RequireRoles({Role.ADMIN, Role.USER})
     public ResponseEntity<EventDto.Response> createEvent(
             @RequestBody EventDto.CreateRequest request,
             UserContext userContext) {
+        var eventService = eventServiceFactory.getEventService(request.getType());
         Event event = eventService.createEvent(request, userContext.getMember());
         return ResponseEntity.ok(EventDto.Response.from(event));
     }
@@ -36,6 +37,7 @@ public class EventController {
     public ResponseEntity<EventDto.Response> updateEvent(
             @PathVariable Long eventId,
             @RequestBody EventDto.UpdateRequest request) {
+        var eventService = eventServiceFactory.getEventService(request.getType());
         eventService.updateEvent(eventId, request);
         Event event = eventService.findEventById(eventId);
         return ResponseEntity.ok(EventDto.Response.from(event));
@@ -43,7 +45,10 @@ public class EventController {
 
     @DeleteMapping("/{eventId}")
     @RequireRoles({Role.ADMIN})
-    public ResponseEntity<Void> deleteEvent(@PathVariable Long eventId) {
+    public ResponseEntity<Void> deleteEvent(
+            @PathVariable Long eventId,
+            @RequestParam EventType type) {
+        var eventService = eventServiceFactory.getEventService(type);
         eventService.deleteEvent(eventId);
         return ResponseEntity.ok().build();
     }
@@ -52,7 +57,9 @@ public class EventController {
     @RequireRoles({Role.ADMIN})
     public ResponseEntity<Void> addParticipant(
             @PathVariable Long eventId,
+            @RequestParam EventType type,
             UserContext userContext) {
+        var eventService = eventServiceFactory.getEventService(type);
         eventService.addParticipant(eventId, userContext.getMember());
         return ResponseEntity.ok().build();
     }
@@ -61,7 +68,9 @@ public class EventController {
     @RequireRoles({Role.ADMIN})
     public ResponseEntity<Void> removeParticipant(
             @PathVariable Long eventId,
+            @RequestParam EventType type,
             UserContext userContext) {
+        var eventService = eventServiceFactory.getEventService(type);
         eventService.removeParticipant(eventId, userContext.getMember());
         return ResponseEntity.ok().build();
     }
@@ -71,14 +80,17 @@ public class EventController {
     public ResponseEntity<EventDto.PageResponse> getEvents(
             @RequestParam(required = true) EventType type,
             @PageableDefault(size = 20) Pageable pageable) {
-        
+        var eventService = eventServiceFactory.getEventService(type);
         Page<Event> events = eventService.findEventsByType(type, pageable);
         return ResponseEntity.ok(EventDto.PageResponse.from(events));
     }
 
     @GetMapping("/{eventId}")
     @RequireRoles({Role.ADMIN, Role.USER})
-    public ResponseEntity<EventDto.Response> getEvent(@PathVariable Long eventId) {
+    public ResponseEntity<EventDto.Response> getEvent(
+            @PathVariable Long eventId,
+            @RequestParam EventType type) {
+        var eventService = eventServiceFactory.getEventService(type);
         Event event = eventService.findEventById(eventId);
         return ResponseEntity.ok(EventDto.Response.from(event));
     }
