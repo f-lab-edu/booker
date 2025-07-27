@@ -31,10 +31,15 @@ public class EventParticipation extends BaseEntity {
     private Integer waitingNumber;
 
     public EventParticipation(Event event, Member participant, ParticipationStatus status) {
+        this(event, participant, status, null);
+    }
+
+    public EventParticipation(Event event, Member participant, ParticipationStatus status, Integer waitingNumber) {
         this.event = event;
         this.participant = participant;
         this.status = status;
         this.registrationDate = LocalDateTime.now();
+        this.waitingNumber = waitingNumber;
     }
 
     public void changeStatus(ParticipationStatus newStatus) {
@@ -44,6 +49,7 @@ public class EventParticipation extends BaseEntity {
 
     public void cancelParticipation() {
         this.status = ParticipationStatus.CANCELLED;
+        this.waitingNumber = null;
         notifyStatusChange();
     }
 
@@ -51,6 +57,12 @@ public class EventParticipation extends BaseEntity {
         this.status = ParticipationStatus.CONFIRMED;
         this.waitingNumber = null;
         notifyStatusChange();
+    }
+
+    public void updateWaitingNumber(int newWaitingNumber) {
+        if (this.status == ParticipationStatus.WAITING) {
+            this.waitingNumber = newWaitingNumber;
+        }
     }
 
     public void notifyStatusChange() {

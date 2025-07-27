@@ -8,9 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Queue;
 
 @Entity
 @Getter
@@ -46,9 +45,6 @@ public class Event extends BaseEntity {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventParticipation> participants = new ArrayList<>();
 
-    @Transient
-    private Queue<EventParticipation> waitingList = new LinkedList<>();
-
     public Event(String title, String description, EventType type, LocalDateTime startTime,
                 LocalDateTime endTime, int maxParticipants, Member presenter) {
         this.title = title;
@@ -62,8 +58,9 @@ public class Event extends BaseEntity {
 
     public void addParticipant(Member member) {
         if (isFullyBooked()) {
-            EventParticipation participation = new EventParticipation(this, member, ParticipationStatus.WAITING);
-            waitingList.offer(participation);
+            int nextWaitingNumber = getNextWaitingNumber();
+            EventParticipation participation = new EventParticipation(this, member, ParticipationStatus.WAITING, nextWaitingNumber);
+            participants.add(participation);
             return;
         }
 
@@ -84,22 +81,50 @@ public class Event extends BaseEntity {
     public void cancelEvent() {
         participants.forEach(EventParticipation::cancelParticipation);
         participants.clear();
-        waitingList.clear();
     }
 
     public boolean isFullyBooked() {
-        return participants.size() >= maxParticipants;
+        return getConfirmedParticipants().size() >= maxParticipants;
     }
 
     public void promoteFromWaitingList() {
-        if (isFullyBooked() || waitingList.isEmpty()) {
+        if (isFullyBooked()) {
             return;
         }
 
-        EventParticipation nextParticipation = waitingList.poll();
-        if (nextParticipation != null) {
+        List<EventParticipation> waitingParticipants = getWaitingParticipants();
+        if (!waitingParticipants.isEmpty()) {
+            EventParticipation nextParticipation = waitingParticipants.get(0);
             nextParticipation.promoteToParticipant();
-            participants.add(nextParticipation);
+            reorderWaitingList();
+        }
+    }
+
+    private List<EventParticipation> getConfirmedParticipants() {
+        return participants.stream()
+                .filter(p -> p.getStatus() == ParticipationStatus.CONFIRMED)
+                .toList();
+    }
+
+    private List<EventParticipation> getWaitingParticipants() {
+        return participants.stream()
+                .filter(p -> p.getStatus() == ParticipationStatus.WAITING)
+                .sorted(Comparator.comparing(EventParticipation::getWaitingNumber))
+                .toList();
+    }
+
+    private int getNextWaitingNumber() {
+        return participants.stream()
+                .filter(p -> p.getStatus() == ParticipationStatus.WAITING)
+                .map(EventParticipation::getWaitingNumber)
+                .max(Integer::compareTo)
+                .orElse(0) + 1;
+    }
+
+    private void reorderWaitingList() {
+        List<EventParticipation> waitingParticipants = getWaitingParticipants();
+        for (int i = 0; i < waitingParticipants.size(); i++) {
+            waitingParticipants.get(i).updateWaitingNumber(i + 1);
         }
     }
 } 
