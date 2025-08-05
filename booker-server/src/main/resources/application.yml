@@ -7,7 +7,7 @@ spring:
     username: booker
     password: booker123
     driver-class-name: com.mysql.cj.jdbc.Driver
-  
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,7 +17,7 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
     defer-datasource-initialization: true
-  
+
 keycloak:
   auth-server-url: http://keycloak:8083
   realm: myrealm
@@ -33,9 +33,27 @@ springdoc:
 
 logging:
   level:
-    root: INFO    
+    root: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     com.bookerapp.core: DEBUG
     com.bookerapp.core.infrastructure.config.JwtConfig: DEBUG
-    com.bookerapp.core.presentation.interceptor.JwtAuthInterceptor: DEBUG 
+    com.bookerapp.core.presentation.interceptor.JwtAuthInterceptor: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.http: DEBUG
+    org.springframework.web.servlet: DEBUG
+    org.springframework.web.servlet.mvc: DEBUG
+    org.springframework.web.servlet.handler: DEBUG
+    org.springframework.web.bind: DEBUG
+    org.springframework.validation: DEBUG
+    com.fasterxml.jackson: DEBUG
+    org.springframework.transaction: DEBUG
+    org.springframework.orm.jpa: DEBUG
+    org.springframework.dao: DEBUG
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
