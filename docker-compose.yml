@@ -156,8 +156,8 @@ services:
     ports:
       - "6565:6565"
     volumes:
-      - ./script.js:/script.js
-    command: run /script.js
+      - ./k6-script:/scripts
+    command: run /scripts/book-loan-load-test.js
     network_mode: host
 volumes:
   postgres_data:

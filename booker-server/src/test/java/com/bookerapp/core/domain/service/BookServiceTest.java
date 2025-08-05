@@ -1,6 +1,7 @@
 package com.bookerapp.core.domain.service;
 
 import com.bookerapp.core.domain.exception.DuplicateIsbnException;
+import com.bookerapp.core.domain.model.auth.UserContext;
 import com.bookerapp.core.domain.model.dto.BookDto;
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLocation;
@@ -37,6 +38,7 @@ class BookServiceTest {
     private BookService bookService;
 
     private BookDto.Request createBookRequest;
+    private UserContext userContext;
 
     @BeforeEach
     void setUp() {
@@ -51,6 +53,8 @@ class BookServiceTest {
         locationRequest.setSection("A");
         locationRequest.setShelf("1");
         createBookRequest.setLocation(locationRequest);
+
+        userContext = new UserContext("test-user-id", "test-user", "test@example.com", List.of("ADMIN"));
     }
 
     @Test
@@ -68,7 +72,7 @@ class BookServiceTest {
         given(bookRepository.save(any(Book.class))).willReturn(mockBook);
 
         // when
-        BookDto.Response response = bookService.createBook(createBookRequest);
+        BookDto.Response response = bookService.createBook(createBookRequest, userContext);
 
         // then
         assertThat(response)
@@ -90,7 +94,7 @@ class BookServiceTest {
         given(bookRepository.findByIsbn(createBookRequest.getIsbn())).willReturn(Optional.of(mockBook));
 
         // when & then
-        assertThatThrownBy(() -> bookService.createBook(createBookRequest))
+        assertThatThrownBy(() -> bookService.createBook(createBookRequest, userContext))
                 .isInstanceOf(DuplicateIsbnException.class)
                 .hasMessageContaining("이미 등록된 ISBN입니다");
     }
