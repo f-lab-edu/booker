@@ -45,8 +45,4 @@ public abstract class BaseEntity {
     public void unmarkAsDeleted() {
         this.isDeleted = false;
     }
-<<<<<<<< HEAD:booker-server/src/main/java/com/bookerapp/core/domain/model/BaseEntity.java
 }
-========
-} 
->>>>>>>> b0cca449fc1eedbe7245826d588fe47133680064:booker-server/src/main/java/com/bookerapp/core/domain/model/entity/BaseEntity.java

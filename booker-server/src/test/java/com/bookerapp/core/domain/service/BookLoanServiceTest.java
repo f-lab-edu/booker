@@ -59,17 +59,10 @@ class BookLoanServiceTest {
         // given
         Book book = mock(Book.class);
         when(book.getId()).thenReturn(BOOK_ID);
-        when(book.isAvailableForLoan()).thenReturn(true);
-
-        BookLoan bookLoan = mock(BookLoan.class);
-        when(bookLoan.getId()).thenReturn(LOAN_ID);
-        when(bookLoan.getBook()).thenReturn(book);
-        when(bookLoan.getMemberId()).thenReturn(MEMBER_ID);
-        when(bookLoan.getStatus()).thenReturn(LoanStatus.ACTIVE);
 
         given(bookRepository.findById(BOOK_ID)).willReturn(Optional.of(book));
         given(bookLoanRepository.existsByBookIdAndStatusIn(any(), any())).willReturn(false);
-        given(bookLoanRepository.save(any(BookLoan.class))).willReturn(bookLoan);
+        given(bookLoanRepository.save(any(BookLoan.class))).will(invocation -> invocation.getArgument(0));
 
         // when
         BookLoanDto.Response response = bookLoanService.createLoan(MEMBER_ID, createLoanRequest);
@@ -101,20 +94,13 @@ class BookLoanServiceTest {
         // given
         Book book = mock(Book.class);
         when(book.getId()).thenReturn(BOOK_ID);
-        when(book.isAvailableForLoan()).thenReturn(false);
-
-        BookLoan waitingLoan = mock(BookLoan.class);
-        when(waitingLoan.getId()).thenReturn(LOAN_ID);
-        when(waitingLoan.getBook()).thenReturn(book);
-        when(waitingLoan.getMemberId()).thenReturn(MEMBER_ID);
-        when(waitingLoan.getStatus()).thenReturn(LoanStatus.WAITING);
 
         given(bookRepository.findById(BOOK_ID)).willReturn(Optional.of(book));
         given(bookLoanRepository.existsByBookIdAndStatusIn(
                 eq(BOOK_ID),
                 eq(Arrays.asList(LoanStatus.ACTIVE, LoanStatus.PENDING))
         )).willReturn(true);
-        given(bookLoanRepository.save(any(BookLoan.class))).willReturn(waitingLoan);
+        given(bookLoanRepository.save(any(BookLoan.class))).will(invocation -> invocation.getArgument(0));
 
         // when
         BookLoanDto.Response response = bookLoanService.createLoan(MEMBER_ID, createLoanRequest);
@@ -135,20 +121,13 @@ class BookLoanServiceTest {
         // given
         Book book = mock(Book.class);
         when(book.getId()).thenReturn(BOOK_ID);
-        when(book.isAvailableForLoan()).thenReturn(false);
-
-        BookLoan waitingLoan = mock(BookLoan.class);
-        when(waitingLoan.getId()).thenReturn(LOAN_ID);
-        when(waitingLoan.getBook()).thenReturn(book);
-        when(waitingLoan.getMemberId()).thenReturn(MEMBER_ID);
-        when(waitingLoan.getStatus()).thenReturn(LoanStatus.WAITING);
 
         given(bookRepository.findById(BOOK_ID)).willReturn(Optional.of(book));
         given(bookLoanRepository.existsByBookIdAndStatusIn(
                 eq(BOOK_ID),
                 eq(Arrays.asList(LoanStatus.ACTIVE, LoanStatus.PENDING))
         )).willReturn(true);
-        given(bookLoanRepository.save(any(BookLoan.class))).willReturn(waitingLoan);
+        given(bookLoanRepository.save(any(BookLoan.class))).will(invocation -> invocation.getArgument(0));
 
         // when
         BookLoanDto.Response response = bookLoanService.createLoan("other-user", createLoanRequest);

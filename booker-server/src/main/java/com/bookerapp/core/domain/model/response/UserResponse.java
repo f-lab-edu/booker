@@ -28,4 +28,4 @@ public class UserResponse {
         private final List<Role> roles;
         private final boolean authenticated;
     }
-} 
+}

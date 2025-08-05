@@ -1,6 +1,7 @@
 package com.bookerapp.core.domain.service;
 
 import com.bookerapp.core.domain.exception.DuplicateIsbnException;
+import com.bookerapp.core.domain.model.auth.UserContext;
 import com.bookerapp.core.domain.model.dto.BookDto;
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLocation;
@@ -37,6 +38,7 @@ class BookServiceTest {
     private BookService bookService;
 
     private BookDto.Request createBookRequest;
+    private UserContext userContext;
 
     @BeforeEach
     void setUp() {
@@ -46,7 +48,13 @@ class BookServiceTest {
         createBookRequest.setPublisher("테스트 출판사");
         createBookRequest.setIsbn("9788956746425");
         createBookRequest.setCoverImageUrl("http://example.com/cover.jpg");
-        createBookRequest.setLocation(BookLocation.of(Floor.FOURTH));
+        BookDto.LocationRequest locationRequest = new BookDto.LocationRequest();
+        locationRequest.setFloor("FOURTH");
+        locationRequest.setSection("A");
+        locationRequest.setShelf("1");
+        createBookRequest.setLocation(locationRequest);
+
+        userContext = new UserContext("test-user-id", "test-user", "test@example.com", List.of("ADMIN"));
     }
 
     @Test
@@ -58,13 +66,13 @@ class BookServiceTest {
         when(mockBook.getIsbn()).thenReturn(createBookRequest.getIsbn());
         when(mockBook.getCoverImageUrl()).thenReturn(createBookRequest.getCoverImageUrl());
         when(mockBook.getStatus()).thenReturn(BookStatus.AVAILABLE);
-        when(mockBook.getLocation()).thenReturn(createBookRequest.getLocation());
+        when(mockBook.getLocation()).thenReturn(BookLocation.of(Floor.FOURTH));
 
         given(bookRepository.findByIsbn(createBookRequest.getIsbn())).willReturn(Optional.empty());
         given(bookRepository.save(any(Book.class))).willReturn(mockBook);
 
         // when
-        BookDto.Response response = bookService.createBook(createBookRequest);
+        BookDto.Response response = bookService.createBook(createBookRequest, userContext);
 
         // then
         assertThat(response)
@@ -86,7 +94,7 @@ class BookServiceTest {
         given(bookRepository.findByIsbn(createBookRequest.getIsbn())).willReturn(Optional.of(mockBook));
 
         // when & then
-        assertThatThrownBy(() -> bookService.createBook(createBookRequest))
+        assertThatThrownBy(() -> bookService.createBook(createBookRequest, userContext))
                 .isInstanceOf(DuplicateIsbnException.class)
                 .hasMessageContaining("이미 등록된 ISBN입니다");
     }
@@ -181,19 +189,23 @@ class BookServiceTest {
         updateRequest.setAuthor("수정된 저자");
         updateRequest.setPublisher("수정된 출판사");
         updateRequest.setIsbn("9788956746425");
-        updateRequest.setLocation(BookLocation.of(Floor.TWELFTH));
+        BookDto.LocationRequest updateLocationRequest = new BookDto.LocationRequest();
+        updateLocationRequest.setFloor("TWELFTH");
+        updateLocationRequest.setSection("A");
+        updateLocationRequest.setShelf("1");
+        updateRequest.setLocation(updateLocationRequest);
 
         // when
         BookDto.Response response = bookService.updateBook(1L, updateRequest);
 
         // then
         verify(mockBook).updateInformation(
-                updateRequest.getTitle(),
-                updateRequest.getAuthor(),
-                updateRequest.getIsbn(),
-                updateRequest.getPublisher(),
-                updateRequest.getCoverImageUrl(),
-                updateRequest.getLocation()
+                eq(updateRequest.getTitle()),
+                eq(updateRequest.getAuthor()),
+                eq(updateRequest.getIsbn()),
+                eq(updateRequest.getPublisher()),
+                eq(updateRequest.getCoverImageUrl()),
+                any(BookLocation.class)
         );
 
         assertThat(response)
