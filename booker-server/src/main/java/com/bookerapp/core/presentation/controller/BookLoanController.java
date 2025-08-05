@@ -63,7 +63,7 @@ public class BookLoanController {
     @RequireRoles({Role.USER})
     public ResponseEntity<Page<BookLoanDto.Response>> getMyLoans(
             @Valid BookLoanDto.SearchRequest request,
-            UserContext userContext) {
+            @Parameter(hidden = true) UserContext userContext) {
         return ResponseEntity.ok(bookLoanService.getMyLoans(userContext.getUserId(), request));
     }
 
