@@ -8,13 +8,18 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 public class BookLoanDto {
 
     @Getter
     @Setter
     @NoArgsConstructor
+    @Schema(name = "BookLoanRequest") // OpenAPI 스키마 네이밍 충돌 방지
     public static class Request {
+        @NotNull(message = "도서 ID는 필수입니다")
+        @Schema(description = "대출할 도서의 ID", example = "1", required = true)
         private Long bookId;
 
         public Request(Long bookId) {
@@ -25,6 +30,7 @@ public class BookLoanDto {
     @Getter
     @Setter
     @NoArgsConstructor
+    @Schema(name = "BookLoanResponse")
     public static class Response {
         private Long id;
         private Long bookId;
@@ -52,6 +58,7 @@ public class BookLoanDto {
     @Getter
     @Setter
     @NoArgsConstructor
+    @Schema(name = "BookLoanSearchRequest")
     public static class SearchRequest {
         private List<LoanStatus> statuses;
         private int page = 0;
