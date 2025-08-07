@@ -1,4 +1,4 @@
-package com.bookerapp.core.domain.model.entity;
+package com.bookerapp.core.domain.model.enums;
 
 public enum LoanStatus {
     PENDING,     // 대출 신청됨
@@ -7,4 +7,4 @@ public enum LoanStatus {
     OVERDUE,     // 연체
     RETURNED,    // 반납 완료
     CANCELLED    // 취소됨
-} 
+}
