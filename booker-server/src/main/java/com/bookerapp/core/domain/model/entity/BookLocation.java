@@ -1,6 +1,7 @@
 package com.bookerapp.core.domain.model.entity;
 
-import com.bookerapp.core.domain.model.Floor;
+import com.bookerapp.core.domain.model.enums.Floor;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

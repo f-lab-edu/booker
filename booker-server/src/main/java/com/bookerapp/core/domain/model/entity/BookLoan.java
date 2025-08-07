@@ -8,6 +8,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+import com.bookerapp.core.domain.model.enums.BookStatus;
+import com.bookerapp.core.domain.model.enums.LoanStatus;
+
 @Entity
 @Table(name = "book_loans")
 @Getter

@@ -1,4 +1,4 @@
-package com.bookerapp.core.domain.model.entity;
+package com.bookerapp.core.domain.model.enums;
 
 public enum BookStatus {
     AVAILABLE,    // 대출 가능
