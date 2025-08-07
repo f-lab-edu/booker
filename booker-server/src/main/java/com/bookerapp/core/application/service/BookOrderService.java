@@ -2,7 +2,7 @@ package com.bookerapp.core.application.service;
 
 import com.bookerapp.core.application.dto.BookOrderDto;
 import com.bookerapp.core.domain.exception.BookOrderNotFoundException;
-import com.bookerapp.core.domain.exception.DeletedBookOrderException;
+
 import com.bookerapp.core.domain.model.entity.BookOrder;
 import com.bookerapp.core.infrastructure.repository.BookOrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +35,6 @@ public class BookOrderService {
             requesterName
         );
 
-        bookOrder.setCreatedBy(requesterId);
-        bookOrder.setUpdatedBy(requesterId);
-
         BookOrder savedOrder = bookOrderRepository.save(bookOrder);
 
         logger.info("도서 주문 요청이 생성되었습니다. ID: {}, 요청자: {}, 제목: {}",
@@ -50,13 +47,13 @@ public class BookOrderService {
 
     @Transactional(readOnly = true)
     public Page<BookOrderDto.Response> getBookOrdersByUser(String userId, Pageable pageable) {
-        return bookOrderRepository.findByRequesterId(userId, pageable)
+        return bookOrderRepository.findByRequesterIdOrderByCreatedAtDesc(userId, pageable)
                                 .map(BookOrderDto.Response::new);
     }
 
     @Transactional(readOnly = true)
     public Page<BookOrderDto.Response> getAllBookOrders(Pageable pageable) {
-        return bookOrderRepository.findAllWithPagination(pageable)
+        return bookOrderRepository.findAll(pageable)
                                 .map(BookOrderDto.Response::new);
     }
 
@@ -71,10 +68,6 @@ public class BookOrderService {
         BookOrder order = bookOrderRepository.findById(id)
                 .orElseThrow(() -> new BookOrderNotFoundException(id));
 
-        if (order.isDeleted()) {
-            throw new DeletedBookOrderException(id);
-        }
-
         return new BookOrderDto.Response(order);
     }
 
@@ -82,16 +75,11 @@ public class BookOrderService {
         BookOrder order = bookOrderRepository.findById(id)
                 .orElseThrow(() -> new BookOrderNotFoundException(id));
 
-        if (order.isDeleted()) {
-            throw new DeletedBookOrderException(id);
-        }
-
         if (order.getStatus() != BookOrder.BookOrderStatus.PENDING) {
             throw new NotPendingStatusException();
         }
 
         order.approve(adminId, actionDto.getComments());
-        order.setUpdatedBy(adminId);
 
         BookOrder savedOrder = bookOrderRepository.save(order);
 
@@ -106,16 +94,11 @@ public class BookOrderService {
         BookOrder order = bookOrderRepository.findById(id)
                 .orElseThrow(() -> new BookOrderNotFoundException(id));
 
-        if (order.isDeleted()) {
-            throw new DeletedBookOrderException(id);
-        }
-
         if (order.getStatus() != BookOrder.BookOrderStatus.PENDING) {
             throw new NotPendingStatusException();
         }
 
         order.reject(adminId, actionDto.getComments());
-        order.setUpdatedBy(adminId);
 
         BookOrder savedOrder = bookOrderRepository.save(order);
 
@@ -130,16 +113,11 @@ public class BookOrderService {
         BookOrder order = bookOrderRepository.findById(id)
                 .orElseThrow(() -> new BookOrderNotFoundException(id));
 
-        if (order.isDeleted()) {
-            throw new DeletedBookOrderException(id);
-        }
-
         if (order.getStatus() != BookOrder.BookOrderStatus.APPROVED) {
             throw new NotApprovedStatusException();
         }
 
         order.markAsReceived(adminId);
-        order.setUpdatedBy(adminId);
 
         BookOrder savedOrder = bookOrderRepository.save(order);
 
