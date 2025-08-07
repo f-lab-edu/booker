@@ -2,8 +2,8 @@ package com.bookerapp.core.domain.model.dto;
 
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLocation;
-import com.bookerapp.core.domain.model.entity.BookStatus;
-import com.bookerapp.core.domain.model.Floor;
+import com.bookerapp.core.domain.model.enums.BookStatus;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
