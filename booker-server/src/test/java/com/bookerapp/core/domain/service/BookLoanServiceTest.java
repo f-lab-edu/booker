@@ -221,7 +221,7 @@ class BookLoanServiceTest {
         when(bookLoan.getMemberId()).thenReturn(MEMBER_ID);
 
         given(bookLoanRepository.findById(LOAN_ID)).willReturn(Optional.of(bookLoan));
-        given(bookLoanRepository.countWaitingListByBookId(BOOK_ID, LoanStatus.WAITING)).willReturn(0L);
+        given(bookLoanRepository.countByBookIdAndStatus(BOOK_ID, LoanStatus.WAITING)).willReturn(0L);
         given(bookLoanRepository.save(any(BookLoan.class))).willReturn(bookLoan);
 
         // when
@@ -243,7 +243,7 @@ class BookLoanServiceTest {
         when(bookLoan.getBook()).thenReturn(book);
 
         given(bookLoanRepository.findById(LOAN_ID)).willReturn(Optional.of(bookLoan));
-        given(bookLoanRepository.countWaitingListByBookId(BOOK_ID, LoanStatus.WAITING)).willReturn(1L);
+        given(bookLoanRepository.countByBookIdAndStatus(BOOK_ID, LoanStatus.WAITING)).willReturn(1L);
 
         // when & then
         assertThatThrownBy(() -> bookLoanService.extendLoan(MEMBER_ID, LOAN_ID))
@@ -326,4 +326,4 @@ class BookLoanServiceTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("본인의 대출 기록만 조회할 수 있습니다");
     }
-} 
+}
