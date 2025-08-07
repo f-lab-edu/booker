@@ -3,7 +3,7 @@ package com.bookerapp.core.domain.service;
 import com.bookerapp.core.domain.model.dto.BookLoanDto;
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLoan;
-import com.bookerapp.core.domain.model.entity.LoanStatus;
+import com.bookerapp.core.domain.model.enums.LoanStatus;
 import com.bookerapp.core.domain.repository.BookLoanRepository;
 import com.bookerapp.core.domain.repository.BookRepository;
 import jakarta.persistence.EntityNotFoundException;

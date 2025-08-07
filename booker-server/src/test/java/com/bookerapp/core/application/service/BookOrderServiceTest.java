@@ -59,8 +59,6 @@ class BookOrderServiceTest {
                 TEST_USERNAME
         );
         order.setId(TEST_ORDER_ID);
-        order.setCreatedBy(TEST_USER_ID);
-        order.setUpdatedBy(TEST_USER_ID);
         return order;
     }
 

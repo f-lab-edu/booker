@@ -1,6 +1,8 @@
 package com.bookerapp.core.domain.model;
 
 import com.bookerapp.core.domain.model.entity.BookLocation;
+import com.bookerapp.core.domain.model.enums.Floor;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

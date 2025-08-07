@@ -75,8 +75,6 @@ public class BookOrder extends BaseEntity {
         this.requesterId = requesterId;
         this.requesterName = requesterName;
         this.status = BookOrderStatus.PENDING;
-        setCreatedBy(requesterId);
-        setUpdatedBy(requesterId);
     }
 
     public void approve(String adminId, String comments) {
