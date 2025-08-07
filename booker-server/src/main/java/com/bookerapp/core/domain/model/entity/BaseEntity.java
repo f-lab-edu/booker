@@ -20,7 +20,7 @@ public abstract class BaseEntity {
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @CreatedBy
@@ -41,4 +41,4 @@ public abstract class BaseEntity {
     public void unmarkAsDeleted() {
         this.isDeleted = false;
     }
-} 
+}

@@ -1,7 +1,13 @@
 package com.bookerapp.core.presentation.exception;
 
+import com.bookerapp.core.domain.exception.BookException;
 import com.bookerapp.core.domain.exception.BookOrderNotFoundException;
 import com.bookerapp.core.domain.exception.DeletedBookOrderException;
+import com.bookerapp.core.domain.exception.DuplicateIsbnException;
+import com.bookerapp.core.domain.exception.InvalidBookException;
+import com.bookerapp.core.domain.exception.InvalidFloorException;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -20,6 +26,71 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(InvalidBookException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidBookException(
+            InvalidBookException e, HttpServletRequest request) {
+        logger.warn("InvalidBookException: {}", e.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "잘못된 도서 정보",
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(DuplicateIsbnException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateIsbnException(
+            DuplicateIsbnException e, HttpServletRequest request) {
+        logger.warn("DuplicateIsbnException: {}", e.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "중복된 ISBN",
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidFloorException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidFloorException(
+            InvalidFloorException e, HttpServletRequest request) {
+        logger.warn("InvalidFloorException: {}", e.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "잘못된 층 정보",
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(
+            EntityNotFoundException e, HttpServletRequest request) {
+        logger.warn("EntityNotFoundException: {}", e.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "리소스를 찾을 수 없음",
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(BookException.class)
+    public ResponseEntity<ErrorResponse> handleBookException(
+            BookException e, HttpServletRequest request) {
+        logger.warn("BookException: {}", e.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "도서 관련 오류",
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
