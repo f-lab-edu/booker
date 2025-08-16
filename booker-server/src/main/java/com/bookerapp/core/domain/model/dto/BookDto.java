@@ -3,7 +3,7 @@ package com.bookerapp.core.domain.model.dto;
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLocation;
 import com.bookerapp.core.domain.model.enums.BookStatus;
-
+import com.bookerapp.core.domain.model.enums.Floor;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -97,8 +97,8 @@ public class BookDto {
         private Long id;
         private String title;
         private String author;
-        private String publisher;
         private String isbn;
+        private String publisher;
         private String coverImageUrl;
         private BookStatus status;
         private BookLocation location;
@@ -109,8 +109,8 @@ public class BookDto {
             response.id = book.getId();
             response.title = book.getTitle();
             response.author = book.getAuthor();
-            response.publisher = book.getPublisher();
             response.isbn = book.getIsbn();
+            response.publisher = book.getPublisher();
             response.coverImageUrl = book.getCoverImageUrl();
             response.status = book.getStatus();
             response.location = book.getLocation();
@@ -129,6 +129,6 @@ public class BookDto {
         private String author;
         private BookStatus status;
         private int page = 0;
-        private int size = 10;
+        private int size = 20;
     }
 }

@@ -15,11 +15,11 @@ public class ErrorResponse {
     private final String message;
     private final String path;
 
-    public static ErrorResponse of(HttpStatus status, String message, String path) {
+    public static ErrorResponse of(HttpStatus status, String message, String error, String path) {
         return ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(status.value())
-                .error(status.getReasonPhrase())
+                .error(error)
                 .message(message)
                 .path(path)
                 .build();

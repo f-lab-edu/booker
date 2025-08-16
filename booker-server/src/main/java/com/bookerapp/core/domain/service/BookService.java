@@ -4,7 +4,7 @@ import com.bookerapp.core.domain.exception.DuplicateIsbnException;
 import com.bookerapp.core.domain.model.dto.BookDto;
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLocation;
-import com.bookerapp.core.domain.model.Floor;
+import com.bookerapp.core.domain.model.enums.Floor;
 import com.bookerapp.core.domain.model.auth.UserContext;
 import com.bookerapp.core.domain.repository.BookRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -47,12 +47,8 @@ public class BookService {
     @Transactional(readOnly = true)
     public Page<BookDto.Response> searchBooks(BookDto.SearchRequest request) {
         PageRequest pageRequest = PageRequest.of(request.getPage(), request.getSize());
-        return bookRepository.searchBooks(
-                request.getTitle(),
-                request.getAuthor(),
-                request.getStatus(),
-                pageRequest
-        ).map(BookDto.Response::from);
+        return bookRepository.searchBooks(request.getTitle(), request.getAuthor(), request.getStatus(), pageRequest)
+                .map(BookDto.Response::from);
     }
 
     @Transactional
@@ -60,10 +56,8 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("도서를 찾을 수 없습니다: " + id));
 
-        if (request.getIsbn() != null &&
-                bookRepository.findByIsbn(request.getIsbn())
-                        .filter(existingBook -> !existingBook.getId().equals(id))
-                        .isPresent()) {
+        if (!book.getIsbn().equals(request.getIsbn()) &&
+                bookRepository.findByIsbn(request.getIsbn()).isPresent()) {
             throw new DuplicateIsbnException(request.getIsbn());
         }
 
@@ -91,7 +85,6 @@ public class BookService {
     public void deleteBook(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("도서를 찾을 수 없습니다: " + id));
-        book.markAsDeleted();
-        bookRepository.save(book);
+        bookRepository.delete(book);
     }
 }
