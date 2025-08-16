@@ -3,8 +3,8 @@ package com.bookerapp.core.domain.service;
 import com.bookerapp.core.domain.model.dto.BookLoanDto;
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLoan;
-import com.bookerapp.core.domain.model.entity.BookStatus;
-import com.bookerapp.core.domain.model.entity.LoanStatus;
+import com.bookerapp.core.domain.model.enums.BookStatus;
+import com.bookerapp.core.domain.model.enums.LoanStatus;
 import com.bookerapp.core.domain.repository.BookLoanRepository;
 import com.bookerapp.core.domain.repository.BookRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -200,7 +200,7 @@ class BookLoanServiceTest {
         when(bookLoan.getMemberId()).thenReturn(MEMBER_ID);
 
         given(bookLoanRepository.findById(LOAN_ID)).willReturn(Optional.of(bookLoan));
-        given(bookLoanRepository.countWaitingListByBookId(BOOK_ID, LoanStatus.WAITING)).willReturn(0L);
+        given(bookLoanRepository.countByBookIdAndStatus(BOOK_ID, LoanStatus.WAITING)).willReturn(0L);
         given(bookLoanRepository.save(any(BookLoan.class))).willReturn(bookLoan);
 
         // when
@@ -222,7 +222,7 @@ class BookLoanServiceTest {
         when(bookLoan.getBook()).thenReturn(book);
 
         given(bookLoanRepository.findById(LOAN_ID)).willReturn(Optional.of(bookLoan));
-        given(bookLoanRepository.countWaitingListByBookId(BOOK_ID, LoanStatus.WAITING)).willReturn(1L);
+        given(bookLoanRepository.countByBookIdAndStatus(BOOK_ID, LoanStatus.WAITING)).willReturn(1L);
 
         // when & then
         assertThatThrownBy(() -> bookLoanService.extendLoan(MEMBER_ID, LOAN_ID))
@@ -305,4 +305,4 @@ class BookLoanServiceTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("본인의 대출 기록만 조회할 수 있습니다");
     }
-} 
+}

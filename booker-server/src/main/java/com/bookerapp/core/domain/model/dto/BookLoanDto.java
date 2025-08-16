@@ -1,7 +1,8 @@
 package com.bookerapp.core.domain.model.dto;
 
 import com.bookerapp.core.domain.model.entity.BookLoan;
-import com.bookerapp.core.domain.model.entity.LoanStatus;
+import com.bookerapp.core.domain.model.enums.LoanStatus;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

@@ -4,12 +4,18 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AccessLevel;
+import lombok.Setter;
+
 
 import java.time.LocalDateTime;
+
+import com.bookerapp.core.domain.model.enums.BookStatus;
+import com.bookerapp.core.domain.model.enums.LoanStatus;
 
 @Entity
 @Table(name = "book_loans")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BookLoan extends BaseEntity {
 
@@ -49,6 +55,13 @@ public class BookLoan extends BaseEntity {
 
     public void setStatus(LoanStatus status) {
         this.status = status;
+    }
+
+    public static BookLoan createWaitingLoan(Book book, String memberId) {
+        BookLoan loan = new BookLoan(book, memberId);
+        loan.setStatus(LoanStatus.WAITING);
+        return loan;
+    }
     }
 
     public void processLoan() {

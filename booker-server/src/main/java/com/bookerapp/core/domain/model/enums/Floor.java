@@ -1,4 +1,4 @@
-package com.bookerapp.core.domain.model;
+package com.bookerapp.core.domain.model.enums;
 
 import com.bookerapp.core.domain.exception.InvalidFloorException;
 

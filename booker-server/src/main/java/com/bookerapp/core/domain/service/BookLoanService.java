@@ -3,7 +3,7 @@ package com.bookerapp.core.domain.service;
 import com.bookerapp.core.domain.model.dto.BookLoanDto;
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLoan;
-import com.bookerapp.core.domain.model.entity.LoanStatus;
+import com.bookerapp.core.domain.model.enums.LoanStatus;
 import com.bookerapp.core.domain.repository.BookLoanRepository;
 import com.bookerapp.core.domain.repository.BookRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -75,7 +75,7 @@ public class BookLoanService {
             throw new IllegalStateException("본인의 대출 기록만 연장할 수 있습니다.");
         }
 
-        long waitingCount = bookLoanRepository.countWaitingListByBookId(loan.getBook().getId(), LoanStatus.WAITING);
+        long waitingCount = bookLoanRepository.countByBookIdAndStatus(loan.getBook().getId(), LoanStatus.WAITING);
         if (waitingCount > 0) {
             throw new IllegalStateException("대기자가 있는 도서는 연장할 수 없습니다.");
         }
@@ -112,7 +112,7 @@ public class BookLoanService {
 
     @Transactional(readOnly = true)
     public long getWaitingCount(Long bookId) {
-        return bookLoanRepository.countWaitingListByBookId(bookId, LoanStatus.WAITING);
+        return bookLoanRepository.countByBookIdAndStatus(bookId, LoanStatus.WAITING);
     }
 
     @Transactional
