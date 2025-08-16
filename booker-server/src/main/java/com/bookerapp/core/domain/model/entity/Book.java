@@ -1,6 +1,8 @@
 package com.bookerapp.core.domain.model.entity;
 
 import com.bookerapp.core.domain.exception.InvalidBookException;
+import com.bookerapp.core.domain.model.enums.BookStatus;
+
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

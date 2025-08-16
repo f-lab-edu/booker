@@ -1,7 +1,8 @@
 package com.bookerapp.core.domain.repository;
 
 import com.bookerapp.core.domain.model.entity.Book;
-import com.bookerapp.core.domain.model.entity.BookStatus;
+import com.bookerapp.core.domain.model.enums.BookStatus;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
