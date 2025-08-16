@@ -127,4 +127,4 @@ public class Event extends BaseEntity {
             waitingParticipants.get(i).updateWaitingNumber(i + 1);
         }
     }
-} 
+}

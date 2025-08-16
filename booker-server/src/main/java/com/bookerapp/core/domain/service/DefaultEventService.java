@@ -1,8 +1,9 @@
 package com.bookerapp.core.domain.service;
 
+import com.bookerapp.core.domain.model.dto.EventDto;
 import com.bookerapp.core.domain.model.event.Event;
 import com.bookerapp.core.domain.model.event.Member;
-import com.bookerapp.core.domain.dto.EventDto;
+import com.bookerapp.core.domain.repository.EventRepository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,4 +37,4 @@ public class DefaultEventService extends AbstractEventService {
     protected void handleParticipantRemoval(Event event, Member member) {
         // Basic participant removal logic is handled in the abstract class
     }
-} 
+}

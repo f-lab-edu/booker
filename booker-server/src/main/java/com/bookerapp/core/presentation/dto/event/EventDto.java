@@ -110,7 +110,7 @@ public class EventDto {
         }
 
         @Builder
-        private PageResponse(List<Response> content, int pageNumber, int pageSize, 
+        private PageResponse(List<Response> content, int pageNumber, int pageSize,
                            long totalElements, int totalPages, boolean last) {
             this.content = content;
             this.pageNumber = pageNumber;
@@ -120,4 +120,4 @@ public class EventDto {
             this.last = last;
         }
     }
-} 
+}
