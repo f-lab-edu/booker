@@ -10,7 +10,7 @@ public class EventParticipationDto {
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @AllArgsConstructor
-    public static class Req {
+    public static class Request {
         private Long eventId;
         private String memberId;
         private String memberName;
@@ -20,7 +20,7 @@ public class EventParticipationDto {
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @AllArgsConstructor
-    public static class Res {
+    public static class Response {
         private Long participationId;
         private String status;
         private Integer waitingNumber;

@@ -68,13 +68,13 @@ class EventParticipationServiceUnitTest {
             final int userId = i;
             executor.submit(() -> {
                 try {
-                    EventParticipationDto.Req request = new EventParticipationDto.Req(
+                    EventParticipationDto.Request request = new EventParticipationDto.Request(
                             testEvent.getId(),
                             "user" + userId,
                             "User " + userId,
                             "user" + userId + "@test.com"
                     );
-                    EventParticipationDto.Res response = synchronizedService.participateInEvent(request);
+                    EventParticipationDto.Response response = synchronizedService.participateInEvent(request);
 
                     if ("CONFIRMED".equals(response.getStatus())) {
                         confirmedCount.incrementAndGet();
@@ -109,13 +109,13 @@ class EventParticipationServiceUnitTest {
             final int userId = i;
             executor.submit(() -> {
                 try {
-                    EventParticipationDto.Req request = new EventParticipationDto.Req(
+                    EventParticipationDto.Request request = new EventParticipationDto.Request(
                             testEvent.getId(),
                             "user" + userId,
                             "User " + userId,
                             "user" + userId + "@test.com"
                     );
-                    EventParticipationDto.Res response = casService.participateInEvent(request);
+                    EventParticipationDto.Response response = casService.participateInEvent(request);
 
                     if ("CONFIRMED".equals(response.getStatus())) {
                         confirmedCount.incrementAndGet();
@@ -153,13 +153,13 @@ class EventParticipationServiceUnitTest {
             final int userId = i;
             executor.submit(() -> {
                 try {
-                    EventParticipationDto.Req request = new EventParticipationDto.Req(
+                    EventParticipationDto.Request request = new EventParticipationDto.Request(
                             testEvent.getId(),
                             "user" + userId,
                             "User " + userId,
                             "user" + userId + "@test.com"
                     );
-                    EventParticipationDto.Res response = synchronizedService.participateInEvent(request);
+                    EventParticipationDto.Response response = synchronizedService.participateInEvent(request);
 
                     if ("WAITING".equals(response.getStatus()) && response.getWaitingNumber() != null) {
                         waitingNumbers[userId].set(response.getWaitingNumber());
@@ -201,7 +201,7 @@ class EventParticipationServiceUnitTest {
 
         assertThat(casService.getRetryCount()).isEqualTo(0);
 
-        EventParticipationDto.Req request = new EventParticipationDto.Req(
+        EventParticipationDto.Request request = new EventParticipationDto.Request(
                 testEvent.getId(),
                 "testUser",
                 "Test User",
@@ -254,7 +254,7 @@ class EventParticipationServiceUnitTest {
             final int userId = i;
             executor.submit(() -> {
                 try {
-                    EventParticipationDto.Req request = new EventParticipationDto.Req(
+                    EventParticipationDto.Request request = new EventParticipationDto.Request(
                             testEvent.getId(),
                             "user" + userId,
                             "User " + userId,
@@ -279,7 +279,7 @@ class EventParticipationServiceUnitTest {
             final int userId = i;
             executor.submit(() -> {
                 try {
-                    EventParticipationDto.Req request = new EventParticipationDto.Req(
+                    EventParticipationDto.Request request = new EventParticipationDto.Request(
                             testEvent.getId(),
                             "user" + userId,
                             "User " + userId,

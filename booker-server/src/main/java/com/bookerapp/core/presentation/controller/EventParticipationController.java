@@ -27,24 +27,24 @@ public class EventParticipationController {
     @PostMapping("/synchronized")
     @Operation(summary = "이벤트 참여 신청 (Synchronized)")
     @RequireRoles({Role.ADMIN, Role.USER})
-    public ResponseEntity<EventParticipationDto.Res> participateWithSynchronized(
-            @RequestBody EventParticipationDto.Req request,
+    public ResponseEntity<EventParticipationDto.Response> participateWithSynchronized(
+            @RequestBody EventParticipationDto.Request request,
             @Parameter(hidden = true) UserContext userContext) {
 
         log.info("Synchronized participation request from user: {}", userContext.getUserId());
-        EventParticipationDto.Res response = synchronizedEventParticipationService.participateInEvent(request);
+        EventParticipationDto.Response response = synchronizedEventParticipationService.participateInEvent(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/cas")
     @Operation(summary = "이벤트 참여 신청 (CAS)")
     @RequireRoles({Role.ADMIN, Role.USER})
-    public ResponseEntity<EventParticipationDto.Res> participateWithCas(
-            @RequestBody EventParticipationDto.Req request,
+    public ResponseEntity<EventParticipationDto.Response> participateWithCas(
+            @RequestBody EventParticipationDto.Request request,
             @Parameter(hidden = true) UserContext userContext) {
 
         log.info("CAS participation request from user: {}", userContext.getUserId());
-        EventParticipationDto.Res response = casEventParticipationService.participateInEvent(request);
+        EventParticipationDto.Response response = casEventParticipationService.participateInEvent(request);
         return ResponseEntity.ok(response);
     }
 

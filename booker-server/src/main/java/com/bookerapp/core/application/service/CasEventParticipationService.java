@@ -23,7 +23,7 @@ public class CasEventParticipationService {
     private final AtomicInteger retryCounter = new AtomicInteger(0);
 
     @Transactional
-    public EventParticipationDto.Res participateInEvent(EventParticipationDto.Req request) {
+    public EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
         log.info("CAS participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
 
         int maxRetries = 10;
@@ -54,14 +54,14 @@ public class CasEventParticipationService {
         throw new RuntimeException("참여 신청 처리 중 오류가 발생했습니다.");
     }
 
-    private EventParticipationDto.Res attemptParticipation(EventParticipationDto.Req request) {
+    private EventParticipationDto.Response attemptParticipation(EventParticipationDto.Request request) {
         Event event = eventRepository.findById(request.getEventId())
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
         Member member = new Member(request.getMemberId(), request.getMemberName(), request.getMemberEmail());
 
         if (isAlreadyParticipating(event, member)) {
-            return new EventParticipationDto.Res(null, "ALREADY_PARTICIPATING", null, "이미 참여 신청된 이벤트입니다.");
+            return new EventParticipationDto.Response(null, "ALREADY_PARTICIPATING", null, "이미 참여 신청된 이벤트입니다.");
         }
 
         if (event.isFullyBooked()) {
@@ -72,7 +72,7 @@ public class CasEventParticipationService {
             log.info("Added to waiting list (CAS) - Event: {}, Member: {}, Waiting Number: {}",
                     request.getEventId(), request.getMemberId(), nextWaitingNumber);
 
-            return new EventParticipationDto.Res(participation.getId(), "WAITING", nextWaitingNumber,
+            return new EventParticipationDto.Response(participation.getId(), "WAITING", nextWaitingNumber,
                     "대기자 명단에 등록되었습니다. 대기 순번: " + nextWaitingNumber);
         } else {
             EventParticipation participation = new EventParticipation(event, member, ParticipationStatus.CONFIRMED);
@@ -80,7 +80,7 @@ public class CasEventParticipationService {
 
             log.info("Confirmed participation (CAS) - Event: {}, Member: {}", request.getEventId(), request.getMemberId());
 
-            return new EventParticipationDto.Res(participation.getId(), "CONFIRMED", null, "참여가 확정되었습니다.");
+            return new EventParticipationDto.Response(participation.getId(), "CONFIRMED", null, "참여가 확정되었습니다.");
         }
     }
 
