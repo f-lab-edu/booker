@@ -19,7 +19,7 @@ public class SynchronizedEventParticipationService {
     private final EventRepository eventRepository;
 
     @Transactional
-    public synchronized EventParticipationDto.Res participateInEvent(EventParticipationDto.Req request) {
+    public synchronized EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
         log.info("Synchronized participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
 
         Event event = eventRepository.findById(request.getEventId())
@@ -28,7 +28,7 @@ public class SynchronizedEventParticipationService {
         Member member = new Member(request.getMemberId(), request.getMemberName(), request.getMemberEmail());
 
         if (isAlreadyParticipating(event, member)) {
-            return new EventParticipationDto.Res(null, "ALREADY_PARTICIPATING", null, "이미 참여 신청된 이벤트입니다.");
+            return new EventParticipationDto.Response(null, "ALREADY_PARTICIPATING", null, "이미 참여 신청된 이벤트입니다.");
         }
 
         if (event.isFullyBooked()) {
@@ -39,7 +39,7 @@ public class SynchronizedEventParticipationService {
             log.info("Added to waiting list - Event: {}, Member: {}, Waiting Number: {}",
                     request.getEventId(), request.getMemberId(), nextWaitingNumber);
 
-            return new EventParticipationDto.Res(participation.getId(), "WAITING", nextWaitingNumber,
+            return new EventParticipationDto.Response(participation.getId(), "WAITING", nextWaitingNumber,
                     "대기자 명단에 등록되었습니다. 대기 순번: " + nextWaitingNumber);
         } else {
             EventParticipation participation = new EventParticipation(event, member, ParticipationStatus.CONFIRMED);
@@ -47,7 +47,7 @@ public class SynchronizedEventParticipationService {
 
             log.info("Confirmed participation - Event: {}, Member: {}", request.getEventId(), request.getMemberId());
 
-            return new EventParticipationDto.Res(participation.getId(), "CONFIRMED", null, "참여가 확정되었습니다.");
+            return new EventParticipationDto.Response(participation.getId(), "CONFIRMED", null, "참여가 확정되었습니다.");
         }
     }
 

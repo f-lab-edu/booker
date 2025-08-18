@@ -59,7 +59,7 @@ class EventParticipationConcurrencyTest {
     void synchronizedConcurrencyOrderTest() throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(concurrentUsers);
         CountDownLatch latch = new CountDownLatch(concurrentUsers);
-        List<Future<EventParticipationDto.Res>> futures = new ArrayList<>();
+        List<Future<EventParticipationDto.Response>> futures = new ArrayList<>();
         AtomicInteger confirmedCount = new AtomicInteger(0);
         AtomicInteger waitingCount = new AtomicInteger(0);
 
@@ -67,9 +67,9 @@ class EventParticipationConcurrencyTest {
 
         for (int i = 0; i < concurrentUsers; i++) {
             final int userId = i;
-            Future<EventParticipationDto.Res> future = executor.submit(() -> {
+            Future<EventParticipationDto.Response> future = executor.submit(() -> {
                 try {
-                    EventParticipationDto.Req request = new EventParticipationDto.Req(
+                    EventParticipationDto.Request request = new EventParticipationDto.Request(
                             testEvent.getId(),
                             "user" + userId,
                             "User " + userId,
@@ -86,9 +86,9 @@ class EventParticipationConcurrencyTest {
         latch.await(10, TimeUnit.SECONDS);
         long endTime = System.currentTimeMillis();
 
-        for (Future<EventParticipationDto.Res> future : futures) {
+        for (Future<EventParticipationDto.Response> future : futures) {
             try {
-                EventParticipationDto.Res response = future.get();
+                EventParticipationDto.Response response = future.get();
                 if ("CONFIRMED".equals(response.getStatus())) {
                     confirmedCount.incrementAndGet();
                 } else if ("WAITING".equals(response.getStatus())) {
@@ -115,7 +115,7 @@ class EventParticipationConcurrencyTest {
     void casConcurrencyOrderTest() throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(concurrentUsers);
         CountDownLatch latch = new CountDownLatch(concurrentUsers);
-        List<Future<EventParticipationDto.Res>> futures = new ArrayList<>();
+        List<Future<EventParticipationDto.Response>> futures = new ArrayList<>();
         AtomicInteger confirmedCount = new AtomicInteger(0);
         AtomicInteger waitingCount = new AtomicInteger(0);
 
@@ -123,9 +123,9 @@ class EventParticipationConcurrencyTest {
 
         for (int i = 0; i < concurrentUsers; i++) {
             final int userId = i;
-            Future<EventParticipationDto.Res> future = executor.submit(() -> {
+            Future<EventParticipationDto.Response> future = executor.submit(() -> {
                 try {
-                    EventParticipationDto.Req request = new EventParticipationDto.Req(
+                    EventParticipationDto.Request request = new EventParticipationDto.Request(
                             testEvent.getId(),
                             "user" + userId,
                             "User " + userId,
@@ -142,9 +142,9 @@ class EventParticipationConcurrencyTest {
         latch.await(10, TimeUnit.SECONDS);
         long endTime = System.currentTimeMillis();
 
-        for (Future<EventParticipationDto.Res> future : futures) {
+        for (Future<EventParticipationDto.Response> future : futures) {
             try {
-                EventParticipationDto.Res response = future.get();
+                EventParticipationDto.Response response = future.get();
                 if ("CONFIRMED".equals(response.getStatus())) {
                     confirmedCount.incrementAndGet();
                 } else if ("WAITING".equals(response.getStatus())) {
@@ -199,13 +199,13 @@ class EventParticipationConcurrencyTest {
     void waitingOrderAccuracyTest() throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(concurrentUsers);
         CountDownLatch latch = new CountDownLatch(concurrentUsers);
-        List<Future<EventParticipationDto.Res>> futures = new ArrayList<>();
+        List<Future<EventParticipationDto.Response>> futures = new ArrayList<>();
 
         for (int i = 0; i < concurrentUsers; i++) {
             final int userId = i;
-            Future<EventParticipationDto.Res> future = executor.submit(() -> {
+            Future<EventParticipationDto.Response> future = executor.submit(() -> {
                 try {
-                    EventParticipationDto.Req request = new EventParticipationDto.Req(
+                    EventParticipationDto.Request request = new EventParticipationDto.Request(
                             testEvent.getId(),
                             "user" + userId,
                             "User " + userId,
@@ -222,9 +222,9 @@ class EventParticipationConcurrencyTest {
         latch.await(10, TimeUnit.SECONDS);
 
         List<Integer> waitingNumbers = new ArrayList<>();
-        for (Future<EventParticipationDto.Res> future : futures) {
+        for (Future<EventParticipationDto.Response> future : futures) {
             try {
-                EventParticipationDto.Res response = future.get();
+                EventParticipationDto.Response response = future.get();
                 if ("WAITING".equals(response.getStatus()) && response.getWaitingNumber() != null) {
                     waitingNumbers.add(response.getWaitingNumber());
                 }
@@ -247,13 +247,13 @@ class EventParticipationConcurrencyTest {
     private void runConcurrentTest(SynchronizedEventParticipationService service) throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(concurrentUsers);
         CountDownLatch latch = new CountDownLatch(concurrentUsers);
-        List<Future<EventParticipationDto.Res>> futures = new ArrayList<>();
+        List<Future<EventParticipationDto.Response>> futures = new ArrayList<>();
 
         for (int i = 0; i < concurrentUsers; i++) {
             final int userId = i;
-            Future<EventParticipationDto.Res> future = executor.submit(() -> {
+            Future<EventParticipationDto.Response> future = executor.submit(() -> {
                 try {
-                    EventParticipationDto.Req request = new EventParticipationDto.Req(
+                    EventParticipationDto.Request request = new EventParticipationDto.Request(
                             testEvent.getId(),
                             "user" + userId,
                             "User " + userId,
@@ -269,7 +269,7 @@ class EventParticipationConcurrencyTest {
 
         latch.await(10, TimeUnit.SECONDS);
 
-        for (Future<EventParticipationDto.Res> future : futures) {
+        for (Future<EventParticipationDto.Response> future : futures) {
             try {
                 future.get();
             } catch (Exception e) {
@@ -283,13 +283,13 @@ class EventParticipationConcurrencyTest {
     private void runConcurrentTest(CasEventParticipationService service) throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(concurrentUsers);
         CountDownLatch latch = new CountDownLatch(concurrentUsers);
-        List<Future<EventParticipationDto.Res>> futures = new ArrayList<>();
+        List<Future<EventParticipationDto.Response>> futures = new ArrayList<>();
 
         for (int i = 0; i < concurrentUsers; i++) {
             final int userId = i;
-            Future<EventParticipationDto.Res> future = executor.submit(() -> {
+            Future<EventParticipationDto.Response> future = executor.submit(() -> {
                 try {
-                    EventParticipationDto.Req request = new EventParticipationDto.Req(
+                    EventParticipationDto.Request request = new EventParticipationDto.Request(
                             testEvent.getId(),
                             "user" + userId,
                             "User " + userId,
@@ -305,7 +305,7 @@ class EventParticipationConcurrencyTest {
 
         latch.await(10, TimeUnit.SECONDS);
 
-        for (Future<EventParticipationDto.Res> future : futures) {
+        for (Future<EventParticipationDto.Response> future : futures) {
             try {
                 future.get();
             } catch (Exception e) {

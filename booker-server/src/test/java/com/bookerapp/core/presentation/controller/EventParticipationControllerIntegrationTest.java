@@ -65,7 +65,7 @@ class EventParticipationControllerIntegrationTest {
     @Test
     @DisplayName("Synchronized 방식 이벤트 참여 신청 API 테스트")
     void synchronizedParticipationApiTest() throws Exception {
-        EventParticipationDto.Req request = new EventParticipationDto.Req(
+        EventParticipationDto.Request request = new EventParticipationDto.Request(
                 testEvent.getId(),
                 "user1",
                 "User One",
@@ -84,7 +84,7 @@ class EventParticipationControllerIntegrationTest {
     @Test
     @DisplayName("CAS 방식 이벤트 참여 신청 API 테스트")
     void casParticipationApiTest() throws Exception {
-        EventParticipationDto.Req request = new EventParticipationDto.Req(
+        EventParticipationDto.Request request = new EventParticipationDto.Request(
                 testEvent.getId(),
                 "user2",
                 "User Two",
@@ -120,7 +120,7 @@ class EventParticipationControllerIntegrationTest {
     @Test
     @DisplayName("존재하지 않는 이벤트 참여 신청 시 에러 처리 테스트")
     void nonExistentEventParticipationTest() throws Exception {
-        EventParticipationDto.Req request = new EventParticipationDto.Req(
+        EventParticipationDto.Request request = new EventParticipationDto.Request(
                 999L,
                 "user3",
                 "User Three",
@@ -139,7 +139,7 @@ class EventParticipationControllerIntegrationTest {
     void waitingListRegistrationTest() throws Exception {
         // 최대 참가자 수만큼 먼저 등록
         for (int i = 0; i < 5; i++) {
-            EventParticipationDto.Req request = new EventParticipationDto.Req(
+            EventParticipationDto.Request request = new EventParticipationDto.Request(
                     testEvent.getId(),
                     "user" + i,
                     "User " + i,
@@ -155,7 +155,7 @@ class EventParticipationControllerIntegrationTest {
         }
 
         // 추가 참가자는 대기자 명단에 등록
-        EventParticipationDto.Req waitingRequest = new EventParticipationDto.Req(
+        EventParticipationDto.Request waitingRequest = new EventParticipationDto.Request(
                 testEvent.getId(),
                 "waitingUser",
                 "Waiting User",
@@ -175,7 +175,7 @@ class EventParticipationControllerIntegrationTest {
     @Test
     @DisplayName("중복 참여 신청 방지 테스트")
     void duplicateParticipationPreventionTest() throws Exception {
-        EventParticipationDto.Req request = new EventParticipationDto.Req(
+        EventParticipationDto.Request request = new EventParticipationDto.Request(
                 testEvent.getId(),
                 "duplicateUser",
                 "Duplicate User",
