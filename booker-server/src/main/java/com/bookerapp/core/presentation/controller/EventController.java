@@ -62,7 +62,7 @@ public class EventController {
 
     @PostMapping("/{id}/participants")
     @Operation(summary = "이벤트 참가자 추가")
-    @RequireRoles({Role.ADMIN})
+    @RequireRoles({Role.ADMIN, Role.USER})
     public ResponseEntity<Void> addParticipant(
             @PathVariable Long id,
             @RequestParam String memberId,

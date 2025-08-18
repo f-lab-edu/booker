@@ -32,4 +32,4 @@ public class JpaAuditingConfig {
                     .or(() -> Optional.of("system"));
         };
     }
-} 
+}
