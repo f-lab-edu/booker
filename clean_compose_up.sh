@@ -16,5 +16,3 @@ sleep 10
 
 # 크롬 브라우저로 Spring Boot 애플리케이션 접속
 open -a "Google Chrome" http://localhost:8084/swagger-ui/index.html#/
-
-# docker logs -f springboot
