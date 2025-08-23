@@ -16,15 +16,12 @@ public class JwtParser {
     public Claims parseToken(String token, PublicKey publicKey) {
         try {
             logger.debug("Parsing JWT token...");
-            
-            Claims claims = Jwts.parserBuilder()
+
+            return Jwts.parserBuilder()
                     .setSigningKey(publicKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-                    
-            logger.debug("JWT token parsed successfully for user: {}", claims.getSubject());
-            return claims;
         } catch (Exception e) {
             logger.error("Failed to parse JWT token: {}", e.getMessage(), e);
             throw new RuntimeException("Invalid JWT token: " + e.getMessage(), e);

@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 @Entity
 @Table(name = "books")
@@ -38,7 +37,7 @@ public class Book extends BaseEntity {
     @Column(nullable = false)
     private BookStatus status = BookStatus.AVAILABLE;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private BookLocation location;
 
     @Builder(builderClassName = "BookBuilder")
