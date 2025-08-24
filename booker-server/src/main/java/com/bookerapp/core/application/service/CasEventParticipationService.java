@@ -8,6 +8,9 @@ import com.bookerapp.core.domain.model.event.ParticipationStatus;
 import com.bookerapp.core.domain.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,35 +26,21 @@ public class CasEventParticipationService {
     private final AtomicInteger retryCounter = new AtomicInteger(0);
 
     @Transactional
+    @Retryable(
+        value = {OptimisticLockException.class},
+        maxAttempts = 10,
+        backoff = @Backoff(delay = 10)
+    )
     public EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
         log.info("CAS participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
+        retryCounter.incrementAndGet();
+        return attemptParticipation(request);
+    }
 
-        int maxRetries = 10;
-        int retryCount = 0;
-
-        while (retryCount < maxRetries) {
-            try {
-                return attemptParticipation(request);
-            } catch (OptimisticLockException e) {
-                retryCount++;
-                retryCounter.incrementAndGet();
-                log.warn("CAS retry attempt {} for event: {}, member: {}", retryCount, request.getEventId(), request.getMemberId());
-
-                if (retryCount >= maxRetries) {
-                    log.error("Max retries exceeded for event: {}, member: {}", request.getEventId(), request.getMemberId());
-                    throw new RuntimeException("참여 신청 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
-                }
-
-                try {
-                    Thread.sleep(10); // 짧은 대기 후 재시도
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException("참여 신청이 중단되었습니다.");
-                }
-            }
-        }
-
-        throw new RuntimeException("참여 신청 처리 중 오류가 발생했습니다.");
+    @Recover
+    public EventParticipationDto.Response recoverParticipation(OptimisticLockException e, EventParticipationDto.Request request) {
+        log.error("Max retries exceeded for event: {}, member: {}", request.getEventId(), request.getMemberId());
+        throw new RuntimeException("참여 신청 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
 
     private EventParticipationDto.Response attemptParticipation(EventParticipationDto.Request request) {
