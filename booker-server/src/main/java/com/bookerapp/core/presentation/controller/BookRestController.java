@@ -16,8 +16,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
-// 깃 충돌 방지를 위해, 테스트용으로 임시 컨트롤러 추가
-
 @RestController
 @RequestMapping("/api/v1/books")
 @RequiredArgsConstructor

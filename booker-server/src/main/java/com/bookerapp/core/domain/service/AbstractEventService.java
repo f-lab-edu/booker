@@ -1,8 +1,10 @@
 package com.bookerapp.core.domain.service;
 
+import com.bookerapp.core.domain.model.dto.EventDto;
 import com.bookerapp.core.domain.model.event.Event;
+import com.bookerapp.core.domain.model.event.EventType;
 import com.bookerapp.core.domain.model.event.Member;
-import com.bookerapp.core.domain.dto.EventDto;
+import com.bookerapp.core.domain.repository.EventRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,9 +29,9 @@ public abstract class AbstractEventService {
             presenter
         );
         event = eventRepository.save(event);
-        
+
         handleEventCreation(event, request);
-        
+
         return event;
     }
 
@@ -39,8 +41,6 @@ public abstract class AbstractEventService {
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
         event.updateSchedule(request.getStartTime(), request.getEndTime());
-        event.setTitle(request.getTitle());
-        event.setDescription(request.getDescription());
 
         handleEventUpdate(event, request);
     }
@@ -51,7 +51,7 @@ public abstract class AbstractEventService {
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
         handleEventDeletion(event);
-        
+
         event.cancelEvent();
         eventRepository.delete(event);
     }
@@ -89,12 +89,12 @@ public abstract class AbstractEventService {
     }
 
     protected abstract void handleEventCreation(Event event, EventDto.CreateRequest request);
-    
+
     protected abstract void handleEventUpdate(Event event, EventDto.UpdateRequest request);
-    
+
     protected abstract void handleEventDeletion(Event event);
-    
+
     protected abstract void handleParticipantAddition(Event event, Member member);
-    
+
     protected abstract void handleParticipantRemoval(Event event, Member member);
-} 
+}

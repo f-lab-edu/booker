@@ -62,7 +62,6 @@ public class BookLoan extends BaseEntity {
         loan.setStatus(LoanStatus.WAITING);
         return loan;
     }
-    }
 
     public void processLoan() {
         if (status != LoanStatus.PENDING) {
