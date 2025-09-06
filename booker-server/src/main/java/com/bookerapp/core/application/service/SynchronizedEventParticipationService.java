@@ -6,6 +6,7 @@ import com.bookerapp.core.domain.model.event.EventParticipation;
 import com.bookerapp.core.domain.model.event.Member;
 import com.bookerapp.core.domain.model.event.ParticipationStatus;
 import com.bookerapp.core.domain.repository.EventRepository;
+import com.bookerapp.core.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SynchronizedEventParticipationService {
 
     private final EventRepository eventRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
     public synchronized EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
@@ -25,7 +27,11 @@ public class SynchronizedEventParticipationService {
         Event event = eventRepository.findById(request.getEventId())
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-        Member member = new Member(request.getMemberId(), request.getMemberName(), request.getMemberEmail());
+        Member member = memberRepository.findByMemberId(request.getMemberId())
+                .orElseGet(() -> {
+                    Member newMember = new Member(request.getMemberId(), request.getMemberName(), request.getMemberEmail());
+                    return memberRepository.save(newMember);
+                });
 
         if (isAlreadyParticipating(event, member)) {
             return new EventParticipationDto.Response(null, "ALREADY_PARTICIPATING", null, "이미 참여 신청된 이벤트입니다.");

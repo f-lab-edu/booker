@@ -5,6 +5,7 @@ import com.bookerapp.core.domain.model.event.Event;
 import com.bookerapp.core.domain.model.event.EventType;
 import com.bookerapp.core.domain.model.event.Member;
 import com.bookerapp.core.domain.repository.EventRepository;
+import com.bookerapp.core.domain.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,14 +32,17 @@ class EventParticipationServiceUnitTest {
     @Mock
     private EventRepository eventRepository;
 
+    @Mock
+    private MemberRepository memberRepository;
+
     private SynchronizedEventParticipationService synchronizedService;
     private CasEventParticipationService casService;
     private Event testEvent;
 
     @BeforeEach
     void setUp() {
-        synchronizedService = new SynchronizedEventParticipationService(eventRepository);
-        casService = new CasEventParticipationService(eventRepository);
+        synchronizedService = new SynchronizedEventParticipationService(eventRepository, memberRepository);
+        casService = new CasEventParticipationService(eventRepository, memberRepository);
 
         Member presenter = new Member("presenter1", "Presenter", "presenter@test.com");
         testEvent = new Event(
@@ -57,6 +63,8 @@ class EventParticipationServiceUnitTest {
     @DisplayName("Synchronized 방식 - 동시 요청 처리 테스트")
     void synchronizedConcurrencyTest() throws InterruptedException {
         when(eventRepository.findById(testEvent.getId())).thenReturn(java.util.Optional.of(testEvent));
+        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.empty());
+        when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         int concurrentUsers = 20;
         ExecutorService executor = Executors.newFixedThreadPool(concurrentUsers);
@@ -98,6 +106,8 @@ class EventParticipationServiceUnitTest {
     @DisplayName("CAS 방식 - 동시 요청 처리 테스트")
     void casConcurrencyTest() throws InterruptedException {
         when(eventRepository.findById(testEvent.getId())).thenReturn(java.util.Optional.of(testEvent));
+        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.empty());
+        when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         int concurrentUsers = 20;
         ExecutorService executor = Executors.newFixedThreadPool(concurrentUsers);
@@ -139,6 +149,8 @@ class EventParticipationServiceUnitTest {
     @DisplayName("대기 순번 정확성 테스트")
     void waitingOrderAccuracyTest() throws InterruptedException {
         when(eventRepository.findById(testEvent.getId())).thenReturn(java.util.Optional.of(testEvent));
+        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.empty());
+        when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         int concurrentUsers = 20;
         ExecutorService executor = Executors.newFixedThreadPool(concurrentUsers);
@@ -198,6 +210,8 @@ class EventParticipationServiceUnitTest {
     @DisplayName("CAS 재시도 횟수 테스트")
     void casRetryCountTest() {
         when(eventRepository.findById(testEvent.getId())).thenReturn(java.util.Optional.of(testEvent));
+        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.empty());
+        when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         assertThat(casService.getRetryCount()).isEqualTo(0);
 
@@ -221,6 +235,8 @@ class EventParticipationServiceUnitTest {
     @DisplayName("성능 비교 테스트")
     void performanceComparisonTest() throws InterruptedException {
         when(eventRepository.findById(testEvent.getId())).thenReturn(java.util.Optional.of(testEvent));
+        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.empty());
+        when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         int concurrentUsers = 50;
 

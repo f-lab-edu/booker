@@ -6,6 +6,7 @@ import com.bookerapp.core.domain.model.event.EventParticipation;
 import com.bookerapp.core.domain.model.event.Member;
 import com.bookerapp.core.domain.model.event.ParticipationStatus;
 import com.bookerapp.core.domain.repository.EventRepository;
+import com.bookerapp.core.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,10 +22,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CasEventParticipationService {
 
     private final EventRepository eventRepository;
+    private final MemberRepository memberRepository;
     private final AtomicInteger retryCounter = new AtomicInteger(0);
     private static final int MAX_RETRY_ATTEMPTS = 5;  // 재시도 횟수 감소
     private static final long BASE_RETRY_DELAY_MS = 1;  // 지연 시간 단축
 
+<<<<<<< HEAD
+=======
+    @Transactional
+>>>>>>> 462f9bd (refactor: EventParticipationDto 내부클래스 이름 수정)
     public EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
         log.info("CAS participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
 
@@ -56,16 +62,28 @@ public class CasEventParticipationService {
         throw new RuntimeException("예상치 못한 오류가 발생했습니다.");
     }
 
+<<<<<<< HEAD
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     private EventParticipationDto.Response attemptParticipationWithOptimizedCas(EventParticipationDto.Request request) {
+=======
+    private EventParticipationDto.Response attemptParticipation(EventParticipationDto.Request request) {
+>>>>>>> 462f9bd (refactor: EventParticipationDto 내부클래스 이름 수정)
         Event event = eventRepository.findById(request.getEventId())
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-        Member member = new Member(request.getMemberId(), request.getMemberName(), request.getMemberEmail());
+        Member member = memberRepository.findByMemberId(request.getMemberId())
+                .orElseGet(() -> {
+                    Member newMember = new Member(request.getMemberId(), request.getMemberName(), request.getMemberEmail());
+                    return memberRepository.save(newMember);
+                });
 
+<<<<<<< HEAD
         ParticipationInfo info = analyzeParticipation(event, member);
 
         if (info.isAlreadyParticipating) {
+=======
+        if (isAlreadyParticipating(event, member)) {
+>>>>>>> 462f9bd (refactor: EventParticipationDto 내부클래스 이름 수정)
             return new EventParticipationDto.Response(null, "ALREADY_PARTICIPATING", null, "이미 참여 신청된 이벤트입니다.");
         }
 
@@ -94,8 +112,21 @@ public class CasEventParticipationService {
 
             log.info("Added to waiting list (CAS) - Event: {}, Member: {}, Waiting Number: {}",
                     request.getEventId(), request.getMemberId(), nextWaitingNumber);
+<<<<<<< HEAD
             return new EventParticipationDto.Response(participation.getId(), "WAITING", nextWaitingNumber,
                     "대기자 명단에 등록되었습니다. 대기 순번: " + nextWaitingNumber);
+=======
+
+            return new EventParticipationDto.Response(participation.getId(), "WAITING", nextWaitingNumber,
+                    "대기자 명단에 등록되었습니다. 대기 순번: " + nextWaitingNumber);
+        } else {
+            EventParticipation participation = new EventParticipation(event, member, ParticipationStatus.CONFIRMED);
+            event.getParticipants().add(participation);
+
+            log.info("Confirmed participation (CAS) - Event: {}, Member: {}", request.getEventId(), request.getMemberId());
+
+            return new EventParticipationDto.Response(participation.getId(), "CONFIRMED", null, "참여가 확정되었습니다.");
+>>>>>>> 462f9bd (refactor: EventParticipationDto 내부클래스 이름 수정)
         }
     }
 

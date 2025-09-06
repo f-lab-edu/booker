@@ -63,6 +63,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:mysql'
+    testImplementation 'com.h2database:h2'
 
     // Google Calendar
     implementation 'com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0'
