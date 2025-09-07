@@ -12,55 +12,33 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ConcurrentModificationException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CasEventParticipationService {
+public class PessimisticLockEventParticipationService {
 
     private final EventRepository eventRepository;
     private final MemberRepository memberRepository;
-    private final AtomicInteger retryCounter = new AtomicInteger(0);
-    private static final int MAX_RETRY_ATTEMPTS = 5;  // 재시도 횟수 감소
-    private static final long BASE_RETRY_DELAY_MS = 1;  // 지연 시간 단축
+    private final AtomicInteger lockWaitCounter = new AtomicInteger(0);
 
     @Transactional
     public EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
-        log.info("CAS participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
+        log.info("Pessimistic lock participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
 
-        for (int attempts = 0; attempts < MAX_RETRY_ATTEMPTS; attempts++) {
-            try {
-                return attemptParticipationWithOptimizedCas(request);
-            } catch (ConcurrentModificationException e) {
-                retryCounter.incrementAndGet();
-
-                if (attempts == MAX_RETRY_ATTEMPTS - 1) {
-                    log.error("Max CAS retries exceeded for event: {}, member: {}", request.getEventId(), request.getMemberId());
-                    throw new RuntimeException("참여 신청 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
-                }
-
-                log.debug("CAS retry attempt {}/{} for event: {}", attempts + 1, MAX_RETRY_ATTEMPTS, request.getEventId());
-
-                // 짧은 지연만 적용
-                if (attempts > 0) {
-                    try {
-                        Thread.sleep(BASE_RETRY_DELAY_MS << attempts);  // 지수 백오프: 1, 2, 4ms
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        throw new RuntimeException("처리가 중단되었습니다.");
-                    }
-                }
-            }
+        try {
+            return attemptParticipationWithPessimisticLock(request);
+        } catch (Exception e) {
+            log.error("Pessimistic lock participation failed for event: {}, member: {}", request.getEventId(), request.getMemberId(), e);
+            throw new RuntimeException("참여 신청 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
         }
-
-        throw new RuntimeException("예상치 못한 오류가 발생했습니다.");
     }
 
     @Transactional
-    private EventParticipationDto.Response attemptParticipationWithOptimizedCas(EventParticipationDto.Request request) {
-        Event event = eventRepository.findById(request.getEventId())
+    private EventParticipationDto.Response attemptParticipationWithPessimisticLock(EventParticipationDto.Request request) {
+        // 비관적 락으로 Event 조회 (데이터베이스 레벨에서 배타적 락)
+        Event event = eventRepository.findByIdWithPessimisticWriteLock(request.getEventId())
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
         // LazyInitializationException 방지를 위해 participants 컬렉션 명시적 초기화
@@ -78,23 +56,15 @@ public class CasEventParticipationService {
             return new EventParticipationDto.Response(null, "ALREADY_PARTICIPATING", null, "이미 참여 신청된 이벤트입니다.");
         }
 
-        // CAS 연산: 확정 참여자 수 기준으로 원자적 판단
+        // 비관적 락으로 보호된 상태에서 참여 처리
         EventParticipation participation;
         if (info.confirmedCount < event.getMaxParticipants()) {
             participation = new EventParticipation(event, member, ParticipationStatus.CONFIRMED);
             event.getParticipants().add(participation);
 
-            // 저장 후 실제 확정자 수 검증 (CAS 검증)
-            Event savedEvent = eventRepository.save(event);
-            // LazyInitializationException 방지를 위해 participants 컬렉션 명시적 초기화
-            savedEvent.getParticipants().size();
-            int actualConfirmedCount = countConfirmedParticipants(savedEvent);
+            eventRepository.save(event);
 
-            if (actualConfirmedCount > event.getMaxParticipants()) {
-                throw new ConcurrentModificationException("Concurrent participation detected");
-            }
-
-            log.info("Confirmed participation (CAS) - Event: {}, Member: {}", request.getEventId(), request.getMemberId());
+            log.info("Confirmed participation (Pessimistic Lock) - Event: {}, Member: {}", request.getEventId(), request.getMemberId());
             return new EventParticipationDto.Response(participation.getId(), "CONFIRMED", null, "참여가 확정되었습니다.");
         } else {
             int nextWaitingNumber = info.maxWaitingNumber + 1;
@@ -103,7 +73,7 @@ public class CasEventParticipationService {
 
             eventRepository.save(event);
 
-            log.info("Added to waiting list (CAS) - Event: {}, Member: {}, Waiting Number: {}",
+            log.info("Added to waiting list (Pessimistic Lock) - Event: {}, Member: {}, Waiting Number: {}",
                     request.getEventId(), request.getMemberId(), nextWaitingNumber);
             return new EventParticipationDto.Response(participation.getId(), "WAITING", nextWaitingNumber,
                     "대기자 명단에 등록되었습니다. 대기 순번: " + nextWaitingNumber);
@@ -133,22 +103,12 @@ public class CasEventParticipationService {
         return new ParticipationInfo(confirmedCount, maxWaitingNumber, isAlreadyParticipating);
     }
 
-    private int countConfirmedParticipants(Event event) {
-        int count = 0;
-        for (EventParticipation p : event.getParticipants()) {
-            if (p.getStatus() == ParticipationStatus.CONFIRMED) {
-                count++;
-            }
-        }
-        return count;
+    public int getLockWaitCount() {
+        return lockWaitCounter.get();
     }
 
-    public int getRetryCount() {
-        return retryCounter.get();
-    }
-
-    public void resetRetryCount() {
-        retryCounter.set(0);
+    public void resetLockWaitCount() {
+        lockWaitCounter.set(0);
     }
 
     private static class ParticipationInfo {
