@@ -196,7 +196,7 @@ class EventParticipationPerformanceComparisonTest {
     @DisplayName("동시성 제어 방식별 기본 기능 테스트")
     void basicFunctionalityTest() {
         System.out.println("\n=== 동시성 제어 방식별 기본 기능 테스트 ===");
-        
+
         // 각 방식별로 기본 기능 테스트
         testBasicFunctionality("CAS", casEventParticipationService);
         testBasicFunctionality("Optimistic Lock", optimisticLockEventParticipationService);
@@ -330,7 +330,7 @@ class EventParticipationPerformanceComparisonTest {
                 System.out.println("Warning: Failed to delete test event: " + e.getMessage());
             }
         }
-        
+
         // 새로운 이벤트 생성
         Member presenter = new Member("presenter" + System.currentTimeMillis(), "Presenter", "presenter@test.com");
         testEvent = new Event(
@@ -347,10 +347,10 @@ class EventParticipationPerformanceComparisonTest {
 
     private void testIndividualService(String methodName, Object service) throws InterruptedException {
         System.out.println("\n--- " + methodName + " 방식 개별 테스트 ---");
-        
+
         // 새로운 이벤트 생성
         setUpNewEvent();
-        
+
         // 간단한 테스트: 3명만 동시 참여
         int testUsers = 3;
         ExecutorService executor = Executors.newFixedThreadPool(testUsers);
@@ -403,7 +403,7 @@ class EventParticipationPerformanceComparisonTest {
 
         // 기본 검증: 모든 사용자가 참여했는지 확인
         assertThat(confirmedCount.get() + waitingCount.get()).isEqualTo(testUsers);
-        
+
         // 이벤트 정리
         if (testEvent != null) {
             try {
@@ -419,10 +419,10 @@ class EventParticipationPerformanceComparisonTest {
 
     private void testBasicFunctionality(String methodName, Object service) {
         System.out.println("\n--- " + methodName + " 방식 기본 기능 테스트 ---");
-        
+
         // 새로운 이벤트 생성
         setUpNewEvent();
-        
+
         try {
             // 단일 사용자 참여 테스트
             EventParticipationDto.Request request = new EventParticipationDto.Request(
@@ -452,7 +452,7 @@ class EventParticipationPerformanceComparisonTest {
             // 기본 검증: 응답이 정상인지 확인
             assertThat(response.getStatus()).isIn("CONFIRMED", "WAITING", "ALREADY_PARTICIPATING");
             assertThat(response.getMessage()).isNotNull();
-            
+
         } finally {
             // 이벤트 정리
             if (testEvent != null) {
