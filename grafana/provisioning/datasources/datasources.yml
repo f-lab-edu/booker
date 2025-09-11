@@ -1,0 +1,25 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+
+  - name: InfluxDB
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    database: myk6db
+    editable: true
+
+  - name: MySQL
+    type: mysql
+    url: mysql:3306
+    database: booker
+    user: booker
+    secureJsonData:
+      password: booker123
+    editable: true
