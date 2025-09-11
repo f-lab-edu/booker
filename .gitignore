@@ -69,3 +69,4 @@ clean-rebuild.sh
 *-local.sh
 
 db/*
+CLAUDE.md
