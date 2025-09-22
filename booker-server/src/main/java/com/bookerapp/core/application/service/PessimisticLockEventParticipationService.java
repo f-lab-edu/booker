@@ -11,30 +11,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
-import java.util.concurrent.atomic.AtomicInteger;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PessimisticLockEventParticipationService {
 
     private final EventRepository eventRepository;
-    private final EntityManager entityManager;
-    private final AtomicInteger lockCount = new AtomicInteger(0);
 
     @Transactional
     public EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
         log.info("Pessimistic lock participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
-        
-        lockCount.incrementAndGet();
-        
-        // 비관적 락을 사용하여 이벤트 조회
-        Event event = entityManager.find(Event.class, request.getEventId(), LockModeType.PESSIMISTIC_WRITE);
-        if (event == null) {
-            throw new RuntimeException("Event not found");
-        }
+
+        // Repository 레벨에서 비관적 락을 사용하여 이벤트 조회
+        Event event = eventRepository.findWithPessimisticLockById(request.getEventId())
+                .orElseThrow(() -> new RuntimeException("Event not found"));
 
         Member member = new Member(request.getMemberId(), request.getMemberName(), request.getMemberEmail());
 
@@ -74,29 +64,5 @@ public class PessimisticLockEventParticipationService {
                 .map(EventParticipation::getWaitingNumber)
                 .max(Integer::compareTo)
                 .orElse(0) + 1;
-    }
-
-    public int getLockCount() {
-        return lockCount.get();
-    }
-
-    public void resetLockCount() {
-        lockCount.set(0);
-    }
-
-    public static class ParticipationInfo {
-        private final String status;
-        private final Integer waitingNumber;
-        private final String message;
-
-        public ParticipationInfo(String status, Integer waitingNumber, String message) {
-            this.status = status;
-            this.waitingNumber = waitingNumber;
-            this.message = message;
-        }
-
-        public String getStatus() { return status; }
-        public Integer getWaitingNumber() { return waitingNumber; }
-        public String getMessage() { return message; }
     }
 }

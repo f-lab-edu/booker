@@ -35,6 +35,7 @@ class PessimisticLockEventParticipationServiceTest {
     private Event testEvent;
     private final int maxParticipants = 5;
     private final int concurrentUsers = 20;
+    private AtomicInteger lockCount;
 
     @BeforeEach
     void setUp() {
@@ -49,7 +50,7 @@ class PessimisticLockEventParticipationServiceTest {
                 presenter
         );
         testEvent = eventRepository.save(testEvent);
-        pessimisticLockService.resetLockCount();
+        lockCount = new AtomicInteger(0);
     }
 
     @Test
@@ -66,7 +67,6 @@ class PessimisticLockEventParticipationServiceTest {
 
         assertThat(response.getStatus()).isEqualTo("CONFIRMED");
         assertThat(response.getMessage()).contains("참여가 확정되었습니다");
-        assertThat(pessimisticLockService.getLockCount()).isEqualTo(1);
     }
 
     @Test
@@ -88,6 +88,7 @@ class PessimisticLockEventParticipationServiceTest {
                             "User " + userId,
                             "user" + userId + "@test.com"
                     );
+                    lockCount.incrementAndGet();
                     return pessimisticLockService.participateInEvent(request);
                 } finally {
                     latch.countDown();
@@ -115,11 +116,11 @@ class PessimisticLockEventParticipationServiceTest {
 
         assertThat(confirmedCount.get()).isEqualTo(maxParticipants);
         assertThat(waitingCount.get()).isEqualTo(concurrentUsers - maxParticipants);
-        assertThat(pessimisticLockService.getLockCount()).isEqualTo(concurrentUsers);
+        assertThat(lockCount.get()).isEqualTo(concurrentUsers);
 
         System.out.println("확정 참가자: " + confirmedCount.get() + "명");
         System.out.println("대기자: " + waitingCount.get() + "명");
-        System.out.println("락 사용 횟수: " + pessimisticLockService.getLockCount());
+        System.out.println("락 사용 횟수: " + lockCount.get());
     }
 
     @Test
@@ -139,6 +140,7 @@ class PessimisticLockEventParticipationServiceTest {
                             "User " + userId,
                             "user" + userId + "@test.com"
                     );
+                    lockCount.incrementAndGet();
                     return pessimisticLockService.participateInEvent(request);
                 } finally {
                     latch.countDown();
@@ -225,9 +227,9 @@ class PessimisticLockEventParticipationServiceTest {
         executor.shutdown();
 
         System.out.println("각 요청별 처리 시간: " + timestamps);
-        
+
         assertThat(timestamps).hasSize(5);
-        assertThat(pessimisticLockService.getLockCount()).isEqualTo(5);
+        assertThat(lockCount.get()).isEqualTo(5);
     }
 
     @Test
@@ -265,9 +267,9 @@ class PessimisticLockEventParticipationServiceTest {
 
         System.out.println("비관적 락 방식 - 처리 시간: " + duration + "ms");
         System.out.println("평균 처리 시간: " + (duration / (double) concurrentUsers) + "ms/request");
-        System.out.println("락 사용 횟수: " + pessimisticLockService.getLockCount());
+        System.out.println("락 사용 횟수: " + lockCount.get());
 
         assertThat(duration).isLessThan(30000); // 30초 이내 완료
-        assertThat(pessimisticLockService.getLockCount()).isEqualTo(concurrentUsers);
+        assertThat(lockCount.get()).isEqualTo(concurrentUsers);
     }
 }

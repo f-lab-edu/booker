@@ -15,7 +15,6 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.annotation.Recover;
 
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OptimisticLockEventParticipationService {
 
     private final EventRepository eventRepository;
-    private final AtomicInteger retryCounter = new AtomicInteger(0);
 
     @Transactional
     @Retryable(
@@ -33,7 +31,6 @@ public class OptimisticLockEventParticipationService {
     )
     public EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
         log.info("Optimistic lock participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
-        retryCounter.incrementAndGet();
         return attemptParticipation(request);
     }
 
@@ -87,13 +84,5 @@ public class OptimisticLockEventParticipationService {
                 .map(EventParticipation::getWaitingNumber)
                 .max(Integer::compareTo)
                 .orElse(0) + 1;
-    }
-
-    public int getRetryCount() {
-        return retryCounter.get();
-    }
-
-    public void resetRetryCount() {
-        retryCounter.set(0);
     }
 }
