@@ -36,7 +36,7 @@ public abstract class BaseEntity {
 
     @Version
     @Column(name = "version", nullable = false)
-    private Long version = 0L;
+    private Long version = 1L;
 
     public void markAsDeleted() {
         this.isDeleted = true;

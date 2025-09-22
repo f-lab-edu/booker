@@ -11,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import jakarta.persistence.OptimisticLockException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.annotation.Recover;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,38 +24,23 @@ public class OptimisticLockEventParticipationService {
 
     private final EventRepository eventRepository;
     private final AtomicInteger retryCounter = new AtomicInteger(0);
-    private static final int MAX_RETRY_ATTEMPTS = 10;
 
     @Transactional
+    @Retryable(
+        value = {OptimisticLockException.class},
+        maxAttempts = 10,
+        backoff = @Backoff(delay = 10, multiplier = 1.5)
+    )
     public EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
         log.info("Optimistic lock participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
-        
-        int attempt = 0;
-        while (attempt < MAX_RETRY_ATTEMPTS) {
-            try {
-                retryCounter.incrementAndGet();
-                return attemptParticipation(request);
-            } catch (OptimisticLockException e) {
-                attempt++;
-                log.warn("Optimistic lock conflict on attempt {} for event: {}, member: {}", 
-                        attempt, request.getEventId(), request.getMemberId());
-                
-                if (attempt >= MAX_RETRY_ATTEMPTS) {
-                    log.error("Max retry attempts exceeded for event: {}, member: {}", 
-                            request.getEventId(), request.getMemberId());
-                    throw new RuntimeException("참여 신청 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
-                }
-                
-                try {
-                    Thread.sleep(10 + (attempt * 5)); // 백오프 전략
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException("참여 신청이 중단되었습니다.");
-                }
-            }
-        }
-        
-        throw new RuntimeException("참여 신청 처리 중 오류가 발생했습니다.");
+        retryCounter.incrementAndGet();
+        return attemptParticipation(request);
+    }
+
+    @Recover
+    public EventParticipationDto.Response recoverFromOptimisticLockException(OptimisticLockException e, EventParticipationDto.Request request) {
+        log.error("Max retry attempts exceeded for event: {}, member: {}", request.getEventId(), request.getMemberId());
+        throw new RuntimeException("참여 신청 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
 
     private EventParticipationDto.Response attemptParticipation(EventParticipationDto.Request request) {
