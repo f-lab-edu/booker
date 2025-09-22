@@ -3,6 +3,9 @@ package com.bookerapp.core.domain.service;
 import com.bookerapp.core.domain.exception.DuplicateIsbnException;
 import com.bookerapp.core.domain.model.dto.BookDto;
 import com.bookerapp.core.domain.model.entity.Book;
+import com.bookerapp.core.domain.model.entity.BookLocation;
+import com.bookerapp.core.domain.model.enums.Floor;
+import com.bookerapp.core.domain.model.auth.UserContext;
 import com.bookerapp.core.domain.repository.BookRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +21,21 @@ public class BookService {
     private final BookRepository bookRepository;
 
     @Transactional
-    public BookDto.Response createBook(BookDto.Request request) {
-        if (bookRepository.findByIsbn(request.getIsbn()).isPresent()) {
-            throw new DuplicateIsbnException(request.getIsbn());
+    public BookDto.Response createBook(BookDto.Request request, UserContext userContext) {
+        try {
+            if (bookRepository.findByIsbn(request.getIsbn()).isPresent()) {
+                throw new DuplicateIsbnException(request.getIsbn());
+            }
+            Book book = request.toEntity();
+            Book savedBook = bookRepository.save(book);
+            return BookDto.Response.from(savedBook);
+        } catch (Exception e) {
+            System.err.println("=== BookService.createBook 에러 발생 ===");
+            System.err.println("Exception type: " + e.getClass().getName());
+            System.err.println("Exception message: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
-        Book book = request.toEntity();
-        Book savedBook = bookRepository.save(book);
-        return BookDto.Response.from(savedBook);
     }
 
     public BookDto.Response getBook(Long id) {
@@ -36,12 +47,8 @@ public class BookService {
     @Transactional(readOnly = true)
     public Page<BookDto.Response> searchBooks(BookDto.SearchRequest request) {
         PageRequest pageRequest = PageRequest.of(request.getPage(), request.getSize());
-        return bookRepository.searchBooks(
-                request.getTitle(),
-                request.getAuthor(),
-                request.getStatus(),
-                pageRequest
-        ).map(BookDto.Response::from);
+        return bookRepository.searchBooks(request.getTitle(), request.getAuthor(), request.getStatus(), pageRequest)
+                .map(BookDto.Response::from);
     }
 
     @Transactional
@@ -49,11 +56,16 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("도서를 찾을 수 없습니다: " + id));
 
-        if (request.getIsbn() != null &&
-                bookRepository.findByIsbn(request.getIsbn())
-                        .filter(existingBook -> !existingBook.getId().equals(id))
-                        .isPresent()) {
+        if (!book.getIsbn().equals(request.getIsbn()) &&
+                bookRepository.findByIsbn(request.getIsbn()).isPresent()) {
             throw new DuplicateIsbnException(request.getIsbn());
+        }
+
+        BookLocation bookLocation = null;
+        if (request.getLocation() != null) {
+            bookLocation = BookLocation.of(Floor.valueOf(request.getLocation().getFloor()));
+            bookLocation.setSection(request.getLocation().getSection());
+            bookLocation.setShelf(request.getLocation().getShelf());
         }
 
         book.updateInformation(
@@ -62,7 +74,7 @@ public class BookService {
             request.getIsbn(),
             request.getPublisher(),
             request.getCoverImageUrl(),
-            request.getLocation()
+            bookLocation
         );
 
         Book updatedBook = bookRepository.save(book);
@@ -73,7 +85,6 @@ public class BookService {
     public void deleteBook(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("도서를 찾을 수 없습니다: " + id));
-        book.markAsDeleted();
-        bookRepository.save(book);
+        bookRepository.delete(book);
     }
 }

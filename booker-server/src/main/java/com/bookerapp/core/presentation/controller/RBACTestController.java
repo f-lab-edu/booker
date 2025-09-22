@@ -11,9 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api")
 @Tag(name = "RBACTest", description = "RBACTest APIs")
@@ -77,11 +74,11 @@ public class RBACTestController {
 
     @GetMapping("/test/user/info")
     @Operation(summary = "Get current user information")
-    public UserResponse getUserInfo(
+    public UserResponse.Response getUserInfo(
             @Parameter(hidden = true) UserContext userContext
     ) {
         logger.info("getUserInfo called by user: {} with roles: {}", userContext.getUserId(), userContext.getRoles());
-        return new UserResponse(
+        return new UserResponse.Response(
             userContext.getUserId(),
             userContext.getUsername(),
             userContext.getEmail(),

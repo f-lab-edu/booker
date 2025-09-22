@@ -1,7 +1,8 @@
 package com.bookerapp.core.domain.repository;
 
 import com.bookerapp.core.domain.model.entity.BookLoan;
-import com.bookerapp.core.domain.model.entity.LoanStatus;
+import com.bookerapp.core.domain.model.enums.LoanStatus;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,4 +30,8 @@ public interface BookLoanRepository extends JpaRepository<BookLoan, Long> {
     );
 
     long countByBookIdAndStatus(Long bookId, LoanStatus status);
+
+    default long countWaitingListByBookId(Long bookId, LoanStatus status) {
+        return countByBookIdAndStatus(bookId, status);
+    }
 }

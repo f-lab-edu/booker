@@ -3,7 +3,7 @@ package com.bookerapp.core.domain.service;
 import com.bookerapp.core.domain.model.dto.BookLoanDto;
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLoan;
-import com.bookerapp.core.domain.model.entity.LoanStatus;
+import com.bookerapp.core.domain.model.enums.LoanStatus;
 import com.bookerapp.core.domain.repository.BookLoanRepository;
 import com.bookerapp.core.domain.repository.BookRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -23,26 +24,22 @@ public class BookLoanService {
     private final BookLoanRepository bookLoanRepository;
     private final BookRepository bookRepository;
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public BookLoanDto.Response createLoan(String memberId, BookLoanDto.Request request) {
         Book book = bookRepository.findById(request.getBookId())
-                .orElseThrow(() -> new EntityNotFoundException("도서를 찾을 수 없습니다: " + request.getBookId()));
-
-        if (bookLoanRepository.existsByBookIdAndStatusIn(
-                book.getId(),
-                Arrays.asList(LoanStatus.ACTIVE, LoanStatus.PENDING))) {
-            BookLoan waitingLoan = BookLoan.createWaitingLoan(book, memberId);
-            return BookLoanDto.Response.from(bookLoanRepository.save(waitingLoan));
-        }
-
+            .orElseThrow(() -> new EntityNotFoundException("도서를 찾을 수 없습니다: " + request.getBookId()));
+        
+        boolean isBookAvailable = !bookLoanRepository.existsByBookIdAndStatusIn(
+            book.getId(), Arrays.asList(LoanStatus.ACTIVE, LoanStatus.PENDING));
+        
         BookLoan loan = new BookLoan(book, memberId);
-
-        if (book.isAvailableForLoan()) {
+        
+        if (isBookAvailable) {
             loan.processLoan();
         } else {
             loan.setStatus(LoanStatus.WAITING);
         }
-
+        
         BookLoan savedLoan = bookLoanRepository.save(loan);
         return BookLoanDto.Response.from(savedLoan);
     }
@@ -78,7 +75,7 @@ public class BookLoanService {
             throw new IllegalStateException("본인의 대출 기록만 연장할 수 있습니다.");
         }
 
-        long waitingCount = bookLoanRepository.countWaitingListByBookId(loan.getBook().getId(), LoanStatus.WAITING);
+        long waitingCount = bookLoanRepository.countByBookIdAndStatus(loan.getBook().getId(), LoanStatus.WAITING);
         if (waitingCount > 0) {
             throw new IllegalStateException("대기자가 있는 도서는 연장할 수 없습니다.");
         }
@@ -115,7 +112,7 @@ public class BookLoanService {
 
     @Transactional(readOnly = true)
     public long getWaitingCount(Long bookId) {
-        return bookLoanRepository.countWaitingListByBookId(bookId, LoanStatus.WAITING);
+        return bookLoanRepository.countByBookIdAndStatus(bookId, LoanStatus.WAITING);
     }
 
     @Transactional

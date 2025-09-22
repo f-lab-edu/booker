@@ -2,8 +2,9 @@ package com.bookerapp.core.domain.model.dto;
 
 import com.bookerapp.core.domain.model.entity.Book;
 import com.bookerapp.core.domain.model.entity.BookLocation;
-import com.bookerapp.core.domain.model.entity.BookStatus;
-import com.bookerapp.core.domain.model.Floor;
+import com.bookerapp.core.domain.model.enums.BookStatus;
+import com.bookerapp.core.domain.model.enums.Floor;
+
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -34,7 +35,11 @@ class BookDtoTest {
         request.setPublisher("테스트 출판사");
         request.setIsbn("9788956746425");
         request.setCoverImageUrl("http://example.com/cover.jpg");
-        request.setLocation(BookLocation.of(Floor.FOURTH));
+        BookDto.LocationRequest locationRequest = new BookDto.LocationRequest();
+        locationRequest.setFloor("FOURTH");
+        locationRequest.setSection("A");
+        locationRequest.setShelf("1");
+        request.setLocation(locationRequest);
 
         // when
         Set<ConstraintViolation<BookDto.Request>> violations = validator.validate(request);
@@ -88,6 +93,6 @@ class BookDtoTest {
         assertThat(response.getCoverImageUrl()).isEqualTo("http://example.com/cover.jpg");
         assertThat(response.getStatus()).isEqualTo(BookStatus.AVAILABLE);
         assertThat(response.getLocation().getFloor()).isEqualTo(Floor.FOURTH);
-        assertThat(response.getLocationDisplay()).isEqualTo("4층 A구역 1번 서가");
+        assertThat(response.getLocationDisplay()).isEqualTo("4");
     }
 }
