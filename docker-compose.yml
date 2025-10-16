@@ -136,16 +136,6 @@ services:
     volumes:
       - ./keycloak-init.sh:/opt/keycloak-init.sh:ro
 
-  mysql-exporter:
-    container_name: mysql-exporter
-    image: prom/mysqld-exporter
-    command:
-      - "--mysqld.username=booker:booker123"
-      - "--mysqld.address=mysql:3306"
-    ports:
-      - "9104:9104"
-    depends_on:
-      - mysql
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
