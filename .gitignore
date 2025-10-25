@@ -69,3 +69,5 @@ clean-rebuild.sh
 *-local.sh
 
 db/*
+
+k6-script/results

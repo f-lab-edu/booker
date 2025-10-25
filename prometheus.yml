@@ -17,7 +17,7 @@ scrape_configs:
           application: 'booker'
           service: 'api'
 
-  # MySQL Exporter metrics  
+  # MySQL Exporter metrics
   - job_name: "mysql"
     static_configs:
       - targets: ["mysql-exporter:9104"]

@@ -19,23 +19,58 @@ services:
 
   mysql:
     image: mysql:8.0
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '1.0'
+          memory: 1024M
+    restart: always
     container_name: booker_mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root123
       - MYSQL_DATABASE=booker
       - MYSQL_USER=booker
       - MYSQL_PASSWORD=booker123
+      - TZ=Asia/Seoul
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
       - "3308:3308"
-    restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "booker", "-pbooker123"]
       interval: 10s
       timeout: 5s
       retries: 5
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max-connections=500
+      - --innodb-buffer-pool-size=768M
+      - --innodb-log-file-size=128M
+      - --innodb-flush-log-at-trx-commit=2
+      - --innodb-flush-method=O_DIRECT
+      - --wait-timeout=600
+      - --interactive-timeout=600
+      - --net-read-timeout=60
+      - --net-write-timeout=60
+      - --connect-timeout=30
+      - --max-allowed-packet=64M
+      - --innodb-lock-wait-timeout=120
+
+  mysql-exporter:
+    container_name: mysql-exporter
+    image: prom/mysqld-exporter
+    command:
+      - "--mysqld.username=booker:booker123"
+      - "--mysqld.address=mysql:3306"
+    ports:
+      - "9104:9104"
+    depends_on:
+      - mysql
+
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -72,6 +107,14 @@ services:
       context: booker-server
       dockerfile: Dockerfile
     container_name: springboot
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '1.0'
+          memory: 1024M
     ports:
       - "8084:8084"
       - "8085:8085"  # Actuator metrics endpoint
@@ -106,17 +149,6 @@ services:
     entrypoint: ["/bin/sh", "/opt/keycloak-init.sh"]
     volumes:
       - ./keycloak-init.sh:/opt/keycloak-init.sh:ro
-
-  mysql-exporter:
-    container_name: mysql-exporter
-    image: prom/mysqld-exporter
-    command:
-      - "--mysqld.username=booker:booker123"
-      - "--mysqld.address=mysql:3306"
-    ports:
-      - "9104:9104"
-    depends_on:
-      - mysql
 
   prometheus:
     image: prom/prometheus:latest
@@ -166,6 +198,20 @@ services:
     volumes:
       - influxdb_data:/var/lib/influxdb
     restart: always
+
+  k6:
+    image: grafana/k6:latest
+    ports:
+      - "6565:6565"
+    volumes:
+      - ./k6-script:/scripts
+    command: [
+      "run",
+      "/scripts/book-loan-load-test.js",
+      "--out",
+      "influxdb=http://influxdb:8086/myk6db"
+    ]
+    network_mode: host
 
 volumes:
   postgres_data:
