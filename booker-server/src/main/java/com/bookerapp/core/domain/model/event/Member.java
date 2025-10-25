@@ -3,6 +3,7 @@ package com.bookerapp.core.domain.model.event;
 import com.bookerapp.core.domain.model.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "members")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode(of = "memberId", callSuper = false)
 public class Member extends BaseEntity {
 
     @Id
@@ -43,18 +45,5 @@ public class Member extends BaseEntity {
         this.email = email;
         this.department = department;
         this.position = position;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Member member = (Member) o;
-        return memberId != null ? memberId.equals(member.memberId) : member.memberId == null;
-    }
-
-    @Override
-    public int hashCode() {
-        return memberId != null ? memberId.hashCode() : 0;
     }
 }
