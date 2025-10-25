@@ -47,11 +47,18 @@ services:
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
-      - --max-connections=300
+      - --max-connections=500
       - --innodb-buffer-pool-size=768M
       - --innodb-log-file-size=128M
       - --innodb-flush-log-at-trx-commit=2
       - --innodb-flush-method=O_DIRECT
+      - --wait-timeout=600
+      - --interactive-timeout=600
+      - --net-read-timeout=60
+      - --net-write-timeout=60
+      - --connect-timeout=30
+      - --max-allowed-packet=64M
+      - --innodb-lock-wait-timeout=120
 
   mysql-exporter:
     container_name: mysql-exporter
