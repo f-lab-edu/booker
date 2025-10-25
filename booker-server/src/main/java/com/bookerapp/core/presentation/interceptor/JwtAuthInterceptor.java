@@ -31,9 +31,10 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
 
         // Swagger UI 관련 경로는 통과
         String requestURI = request.getRequestURI();
-        if (requestURI.startsWith("/swagger-ui") || 
-            requestURI.startsWith("/v3/api-docs") || 
-            requestURI.equals("/swagger-ui.html")) {
+        if (requestURI.startsWith("/swagger-ui") ||
+            requestURI.startsWith("/v3/api-docs") ||
+            requestURI.equals("/swagger-ui.html") ||
+            requestURI.startsWith("/api/load-test")) {
             return true;
         }
 

@@ -6,13 +6,15 @@ import com.bookerapp.core.domain.model.event.EventParticipation;
 import com.bookerapp.core.domain.model.event.Member;
 import com.bookerapp.core.domain.model.event.ParticipationStatus;
 import com.bookerapp.core.domain.repository.EventRepository;
+import com.bookerapp.core.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.persistence.OptimisticLockException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.annotation.Recover;
 
 @Service
 @RequiredArgsConstructor
@@ -20,46 +22,30 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OptimisticLockEventParticipationService {
 
     private final EventRepository eventRepository;
-    private final AtomicInteger retryCounter = new AtomicInteger(0);
-    private static final int MAX_RETRY_ATTEMPTS = 10;
+    private final MemberRepository memberRepository;
 
     @Transactional
+    @Retryable(
+        value = {OptimisticLockException.class},
+        maxAttempts = 10,
+        backoff = @Backoff(delay = 10, multiplier = 1.5)
+    )
     public EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
         log.info("Optimistic lock participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
-        
-        int attempt = 0;
-        while (attempt < MAX_RETRY_ATTEMPTS) {
-            try {
-                retryCounter.incrementAndGet();
-                return attemptParticipation(request);
-            } catch (OptimisticLockException e) {
-                attempt++;
-                log.warn("Optimistic lock conflict on attempt {} for event: {}, member: {}", 
-                        attempt, request.getEventId(), request.getMemberId());
-                
-                if (attempt >= MAX_RETRY_ATTEMPTS) {
-                    log.error("Max retry attempts exceeded for event: {}, member: {}", 
-                            request.getEventId(), request.getMemberId());
-                    throw new RuntimeException("참여 신청 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
-                }
-                
-                try {
-                    Thread.sleep(10 + (attempt * 5)); // 백오프 전략
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException("참여 신청이 중단되었습니다.");
-                }
-            }
-        }
-        
-        throw new RuntimeException("참여 신청 처리 중 오류가 발생했습니다.");
+        return attemptParticipation(request);
+    }
+
+    @Recover
+    public EventParticipationDto.Response recoverFromOptimisticLockException(OptimisticLockException e, EventParticipationDto.Request request) {
+        log.error("Max retry attempts exceeded for event: {}, member: {}", request.getEventId(), request.getMemberId());
+        throw new RuntimeException("참여 신청 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
 
     private EventParticipationDto.Response attemptParticipation(EventParticipationDto.Request request) {
         Event event = eventRepository.findById(request.getEventId())
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-        Member member = new Member(request.getMemberId(), request.getMemberName(), request.getMemberEmail());
+        Member member = findOrCreateMember(request.getMemberId(), request.getMemberName(), request.getMemberEmail());
 
         if (isAlreadyParticipating(event, member)) {
             return new EventParticipationDto.Response(null, "ALREADY_PARTICIPATING", null, "이미 참여 신청된 이벤트입니다.");
@@ -101,11 +87,11 @@ public class OptimisticLockEventParticipationService {
                 .orElse(0) + 1;
     }
 
-    public int getRetryCount() {
-        return retryCounter.get();
-    }
-
-    public void resetRetryCount() {
-        retryCounter.set(0);
+    private Member findOrCreateMember(String memberId, String memberName, String memberEmail) {
+        return memberRepository.findByMemberId(memberId)
+                .orElseGet(() -> {
+                    Member member = new Member(memberId, memberName, memberEmail);
+                    return memberRepository.save(member);
+                });
     }
 }

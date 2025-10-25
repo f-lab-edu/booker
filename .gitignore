@@ -70,3 +70,5 @@ clean-rebuild.sh
 
 db/*
 CLAUDE.md
+
+k6-script/results

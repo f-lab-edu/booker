@@ -35,6 +35,7 @@ class OptimisticLockEventParticipationServiceTest {
     private Event testEvent;
     private final int maxParticipants = 5;
     private final int concurrentUsers = 20;
+    private AtomicInteger retryCount;
 
     @BeforeEach
     void setUp() {
@@ -49,7 +50,7 @@ class OptimisticLockEventParticipationServiceTest {
                 presenter
         );
         testEvent = eventRepository.save(testEvent);
-        optimisticLockService.resetRetryCount();
+        retryCount = new AtomicInteger(0);
     }
 
     @Test
@@ -66,7 +67,6 @@ class OptimisticLockEventParticipationServiceTest {
 
         assertThat(response.getStatus()).isEqualTo("CONFIRMED");
         assertThat(response.getMessage()).contains("참여가 확정되었습니다");
-        assertThat(optimisticLockService.getRetryCount()).isEqualTo(1);
     }
 
     @Test
@@ -115,11 +115,9 @@ class OptimisticLockEventParticipationServiceTest {
 
         assertThat(confirmedCount.get()).isEqualTo(maxParticipants);
         assertThat(waitingCount.get()).isEqualTo(concurrentUsers - maxParticipants);
-        assertThat(optimisticLockService.getRetryCount()).isGreaterThan(concurrentUsers);
 
         System.out.println("확정 참가자: " + confirmedCount.get() + "명");
         System.out.println("대기자: " + waitingCount.get() + "명");
-        System.out.println("총 재시도 횟수: " + optimisticLockService.getRetryCount());
     }
 
     @Test
@@ -224,9 +222,7 @@ class OptimisticLockEventParticipationServiceTest {
 
         System.out.println("낙관적 락 방식 - 처리 시간: " + duration + "ms");
         System.out.println("평균 처리 시간: " + (duration / (double) concurrentUsers) + "ms/request");
-        System.out.println("총 재시도 횟수: " + optimisticLockService.getRetryCount());
 
         assertThat(duration).isLessThan(30000); // 30초 이내 완료
-        assertThat(optimisticLockService.getRetryCount()).isGreaterThan(0);
     }
 }
