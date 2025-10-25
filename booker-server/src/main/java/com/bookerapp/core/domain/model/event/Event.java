@@ -39,10 +39,11 @@ public class Event extends BaseEntity {
     @Column(nullable = false)
     private int maxParticipants;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Member presenter;
 
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<EventParticipation> participants = new ArrayList<>();
 
     public Event(String title, String description, EventType type, LocalDateTime startTime,
