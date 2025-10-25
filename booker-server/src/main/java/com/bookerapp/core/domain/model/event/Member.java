@@ -44,17 +44,4 @@ public class Member extends BaseEntity {
         this.department = department;
         this.position = position;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Member member = (Member) o;
-        return memberId != null ? memberId.equals(member.memberId) : member.memberId == null;
-    }
-
-    @Override
-    public int hashCode() {
-        return memberId != null ? memberId.hashCode() : 0;
-    }
 }
