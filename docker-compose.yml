@@ -1,22 +1,4 @@
 services:
-  postgres:
-    image: postgres:15
-    container_name: keycloak_postgres
-    environment:
-      - POSTGRES_DB=keycloak
-      - POSTGRES_USER=keycloak
-      - POSTGRES_PASSWORD=keycloak
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U keycloak"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    ports:
-      - "5432:5432"
-
   mysql:
     image: mysql:8.0
     deploy:
@@ -38,7 +20,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
-      - "3308:3308"
+      - "3308:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "booker", "-pbooker123"]
       interval: 10s
@@ -56,37 +38,6 @@ services:
       - "9104:9104"
     depends_on:
       - mysql
-
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:latest
-    container_name: keycloak
-    command: start-dev
-    environment:
-      - KC_DB=postgres
-      - KC_DB_URL=jdbc:postgresql://postgres:5432/keycloak
-      - KC_DB_USERNAME=keycloak
-      - KC_DB_PASSWORD=keycloak
-      - KC_HOSTNAME_STRICT=false
-      - KC_HOSTNAME_STRICT_HTTPS=false
-      - KC_HOSTNAME_STRICT_BACKCHANNEL=false
-      - KC_HTTP_PORT=8083
-      - KC_HTTP_ENABLED=true
-      - KEYCLOAK_ADMIN=keycloak_admin
-      - KEYCLOAK_ADMIN_PASSWORD=keycloak_admin_password123!
-      - KC_HEALTH_ENABLED=true
-      - KC_PROXY=edge
-    ports:
-      - "8083:8083"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "/opt/keycloak/bin/kc.sh", "show-config"]
-      interval: 10s
-      timeout: 10s
-      retries: 12
-      start_period: 30s
 
   springboot:
     build:
@@ -107,30 +58,10 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/booker?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
       - SPRING_DATASOURCE_USERNAME=booker
       - SPRING_DATASOURCE_PASSWORD=booker123
-      - KEYCLOAK_REALM=myrealm
-      - KEYCLOAK_AUTH_SERVER_URL=http://keycloak:8083
-      - KEYCLOAK_CLIENT_ID=springboot-client
-      - KEYCLOAK_CLIENT_SECRET=springboot-secret
     depends_on:
       mysql:
         condition: service_healthy
-      keycloak-init:
-        condition: service_completed_successfully
     restart: unless-stopped
-
-  keycloak-init:
-    image: curlimages/curl:8.7.1
-    user: root
-    depends_on:
-      keycloak:
-        condition: service_healthy
-    environment:
-      # Google OAuth 설정 - 실제 사용시 환경변수로 주입
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-    entrypoint: ["/bin/sh", "/opt/keycloak-init.sh"]
-    volumes:
-      - ./keycloak-init.sh:/opt/keycloak-init.sh:ro
 
   prometheus:
     image: prom/prometheus:latest
@@ -177,5 +108,4 @@ services:
 
 
 volumes:
-  postgres_data:
   mysql_data:

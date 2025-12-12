@@ -5,7 +5,6 @@ import com.bookerapp.core.application.service.BookOrderService;
 import com.bookerapp.core.domain.model.auth.Role;
 import com.bookerapp.core.domain.model.auth.UserContext;
 import com.bookerapp.core.domain.model.entity.BookOrder;
-import com.bookerapp.core.presentation.aspect.RequireRoles;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,7 +33,6 @@ public class BookOrderController {
 
     @PostMapping
     @Operation(summary = "도서 주문 요청 생성")
-    @RequireRoles({Role.USER, Role.ADMIN})
     public ResponseEntity<BookOrderDto.Response> createBookOrder(
             @Valid @RequestBody BookOrderDto.Request requestDto,
             @Parameter(hidden = true) UserContext userContext
@@ -52,7 +50,6 @@ public class BookOrderController {
 
     @GetMapping("/my")
     @Operation(summary = "내 도서 주문 요청 목록 조회")
-    @RequireRoles({Role.USER, Role.ADMIN})
     public ResponseEntity<Page<BookOrderDto.Response>> getMyBookOrders(
             @Parameter(hidden = true) UserContext userContext,
             @PageableDefault(size = 20, sort = "createdAt,desc") Pageable pageable
@@ -65,7 +62,6 @@ public class BookOrderController {
 
     @GetMapping
     @Operation(summary = "모든 도서 주문 요청 목록 조회 (관리자용)")
-    @RequireRoles({Role.ADMIN})
     public ResponseEntity<Page<BookOrderDto.Response>> getAllBookOrders(
             @RequestParam(required = false) BookOrder.BookOrderStatus status,
             @Parameter(hidden = true) UserContext userContext,
@@ -83,7 +79,6 @@ public class BookOrderController {
 
     @GetMapping("/{id}")
     @Operation(summary = "도서 주문 요청 상세 조회")
-    @RequireRoles({Role.USER, Role.ADMIN})
     public ResponseEntity<BookOrderDto.Response> getBookOrder(
             @PathVariable Long id,
             @Parameter(hidden = true) UserContext userContext
@@ -103,7 +98,6 @@ public class BookOrderController {
 
     @PostMapping("/{id}/approve")
     @Operation(summary = "도서 주문 요청 승인")
-    @RequireRoles({Role.ADMIN})
     public ResponseEntity<BookOrderDto.Response> approveBookOrder(
             @PathVariable Long id,
             @Valid @RequestBody BookOrderDto.Action actionDto,
@@ -122,7 +116,6 @@ public class BookOrderController {
 
     @PostMapping("/{id}/reject")
     @Operation(summary = "도서 주문 요청 거부")
-    @RequireRoles({Role.ADMIN})
     public ResponseEntity<BookOrderDto.Response> rejectBookOrder(
             @PathVariable Long id,
             @Valid @RequestBody BookOrderDto.Action actionDto,
@@ -141,7 +134,6 @@ public class BookOrderController {
 
     @PostMapping("/{id}/receive")
     @Operation(summary = "도서 입고 처리")
-    @RequireRoles({Role.ADMIN})
     public ResponseEntity<BookOrderDto.Response> markAsReceived(
             @PathVariable Long id,
             @Parameter(hidden = true) UserContext userContext

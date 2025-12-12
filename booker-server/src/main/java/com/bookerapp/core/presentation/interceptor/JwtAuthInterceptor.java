@@ -1,7 +1,5 @@
 package com.bookerapp.core.presentation.interceptor;
 
-import com.bookerapp.core.infrastructure.jwt.KeycloakJwtParser;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +16,6 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthInterceptor.class);
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
-
-    private final KeycloakJwtParser keycloakJwtParser;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -45,19 +41,10 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        try {
-            Claims claims = keycloakJwtParser.parseToken(token);
-            
-            logger.debug("JWT token validated successfully for user: {}", claims.getSubject());
-            request.setAttribute("claims", claims);
-            return true;
-        } catch (Exception e) {
-            logger.warn("JWT token validation failed for request: {} - {}", requestURI, e.getMessage());
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\":\"Invalid JWT token\"}");
-            return false;
-        }
+        // TODO: JWT token validation logic needs to be implemented
+        // Previously used KeycloakJwtParser which has been removed
+        logger.debug("JWT token present for request: {}", requestURI);
+        return true;
     }
 
     private String extractToken(HttpServletRequest request) {

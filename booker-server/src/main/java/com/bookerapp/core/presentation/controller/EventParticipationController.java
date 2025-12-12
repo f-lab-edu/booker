@@ -5,7 +5,6 @@ import com.bookerapp.core.application.service.CasEventParticipationService;
 import com.bookerapp.core.application.service.SynchronizedEventParticipationService;
 import com.bookerapp.core.domain.model.auth.Role;
 import com.bookerapp.core.domain.model.auth.UserContext;
-import com.bookerapp.core.presentation.aspect.RequireRoles;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,7 +25,6 @@ public class EventParticipationController {
 
     @PostMapping("/synchronized")
     @Operation(summary = "이벤트 참여 신청 (Synchronized)")
-    @RequireRoles({Role.ADMIN, Role.USER})
     public ResponseEntity<EventParticipationDto.Response> participateWithSynchronized(
             @RequestBody EventParticipationDto.Request request,
             @Parameter(hidden = true) UserContext userContext) {
@@ -38,7 +36,6 @@ public class EventParticipationController {
 
     @PostMapping("/cas")
     @Operation(summary = "이벤트 참여 신청 (CAS)")
-    @RequireRoles({Role.ADMIN, Role.USER})
     public ResponseEntity<EventParticipationDto.Response> participateWithCas(
             @RequestBody EventParticipationDto.Request request,
             @Parameter(hidden = true) UserContext userContext) {
@@ -50,14 +47,12 @@ public class EventParticipationController {
 
     @GetMapping("/cas/retry-count")
     @Operation(summary = "CAS 재시도 횟수 조회")
-    @RequireRoles({Role.ADMIN})
     public ResponseEntity<Integer> getCasRetryCount() {
         return ResponseEntity.ok(casEventParticipationService.getRetryCount());
     }
 
     @PostMapping("/cas/reset-retry-count")
     @Operation(summary = "CAS 재시도 횟수 초기화")
-    @RequireRoles({Role.ADMIN})
     public ResponseEntity<Void> resetCasRetryCount() {
         casEventParticipationService.resetRetryCount();
         return ResponseEntity.ok().build();
