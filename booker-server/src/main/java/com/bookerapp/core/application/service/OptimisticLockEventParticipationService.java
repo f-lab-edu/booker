@@ -9,21 +9,39 @@ import com.bookerapp.core.domain.repository.EventRepository;
 import com.bookerapp.core.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.persistence.OptimisticLockException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.annotation.Recover;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class SynchronizedEventParticipationService {
+public class OptimisticLockEventParticipationService {
 
     private final EventRepository eventRepository;
     private final MemberRepository memberRepository;
 
     @Transactional
-    public synchronized EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
-        log.info("Synchronized participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
+    @Retryable(
+        value = {OptimisticLockException.class},
+        maxAttempts = 10,
+        backoff = @Backoff(delay = 10, multiplier = 1.5)
+    )
+    public EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
+        log.info("Optimistic lock participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
+        return attemptParticipation(request);
+    }
 
+    @Recover
+    public EventParticipationDto.Response recoverFromOptimisticLockException(OptimisticLockException e, EventParticipationDto.Request request) {
+        log.error("Max retry attempts exceeded for event: {}, member: {}", request.getEventId(), request.getMemberId());
+        throw new RuntimeException("참여 신청 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
+
+    private EventParticipationDto.Response attemptParticipation(EventParticipationDto.Request request) {
         Event event = eventRepository.findById(request.getEventId())
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
@@ -37,8 +55,9 @@ public class SynchronizedEventParticipationService {
             int nextWaitingNumber = getNextWaitingNumber(event);
             EventParticipation participation = new EventParticipation(event, member, ParticipationStatus.WAITING, nextWaitingNumber);
             event.getParticipants().add(participation);
+            eventRepository.save(event); // 낙관적 락을 위한 명시적 저장
 
-            log.info("Added to waiting list - Event: {}, Member: {}, Waiting Number: {}",
+            log.info("Added to waiting list (Optimistic Lock) - Event: {}, Member: {}, Waiting Number: {}",
                     request.getEventId(), request.getMemberId(), nextWaitingNumber);
 
             return new EventParticipationDto.Response(participation.getId(), "WAITING", nextWaitingNumber,
@@ -46,8 +65,9 @@ public class SynchronizedEventParticipationService {
         } else {
             EventParticipation participation = new EventParticipation(event, member, ParticipationStatus.CONFIRMED);
             event.getParticipants().add(participation);
+            eventRepository.save(event); // 낙관적 락을 위한 명시적 저장
 
-            log.info("Confirmed participation - Event: {}, Member: {}", request.getEventId(), request.getMemberId());
+            log.info("Confirmed participation (Optimistic Lock) - Event: {}, Member: {}", request.getEventId(), request.getMemberId());
 
             return new EventParticipationDto.Response(participation.getId(), "CONFIRMED", null, "참여가 확정되었습니다.");
         }

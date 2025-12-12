@@ -34,6 +34,10 @@ public abstract class BaseEntity {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version = 1L;
+
     public void markAsDeleted() {
         this.isDeleted = true;
     }

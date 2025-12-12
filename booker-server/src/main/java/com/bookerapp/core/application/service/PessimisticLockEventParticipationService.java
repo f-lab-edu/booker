@@ -15,16 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class SynchronizedEventParticipationService {
+public class PessimisticLockEventParticipationService {
 
     private final EventRepository eventRepository;
     private final MemberRepository memberRepository;
 
     @Transactional
-    public synchronized EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
-        log.info("Synchronized participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
+    public EventParticipationDto.Response participateInEvent(EventParticipationDto.Request request) {
+        log.info("Pessimistic lock participation request for event: {}, member: {}", request.getEventId(), request.getMemberId());
 
-        Event event = eventRepository.findById(request.getEventId())
+        // Repository 레벨에서 비관적 락을 사용하여 이벤트 조회
+        Event event = eventRepository.findWithPessimisticLockById(request.getEventId())
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
         Member member = findOrCreateMember(request.getMemberId(), request.getMemberName(), request.getMemberEmail());
@@ -38,7 +39,7 @@ public class SynchronizedEventParticipationService {
             EventParticipation participation = new EventParticipation(event, member, ParticipationStatus.WAITING, nextWaitingNumber);
             event.getParticipants().add(participation);
 
-            log.info("Added to waiting list - Event: {}, Member: {}, Waiting Number: {}",
+            log.info("Added to waiting list (Pessimistic Lock) - Event: {}, Member: {}, Waiting Number: {}",
                     request.getEventId(), request.getMemberId(), nextWaitingNumber);
 
             return new EventParticipationDto.Response(participation.getId(), "WAITING", nextWaitingNumber,
@@ -47,7 +48,7 @@ public class SynchronizedEventParticipationService {
             EventParticipation participation = new EventParticipation(event, member, ParticipationStatus.CONFIRMED);
             event.getParticipants().add(participation);
 
-            log.info("Confirmed participation - Event: {}, Member: {}", request.getEventId(), request.getMemberId());
+            log.info("Confirmed participation (Pessimistic Lock) - Event: {}, Member: {}", request.getEventId(), request.getMemberId());
 
             return new EventParticipationDto.Response(participation.getId(), "CONFIRMED", null, "참여가 확정되었습니다.");
         }
