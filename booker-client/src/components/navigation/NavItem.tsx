@@ -17,10 +17,10 @@ export function NavItem({ label, href, className = '' }: NavItemProps) {
     <Link
       href={href}
       className={`
-        relative px-5 py-2.5 rounded-lg text-base font-medium transition-all duration-200
+        relative px-7 py-2.5 rounded-lg text-xl font-normal transition-all duration-200
         ${isActive
-          ? 'bg-white/10 text-white'
-          : 'text-white/80 hover:text-white hover:bg-white/5'
+          ? 'text-white bg-white/10'
+          : 'text-white/70 hover:text-violet-400 hover:bg-white/5'
         }
         ${className}
       `}

@@ -10,7 +10,7 @@ interface NavigationMenuProps {
 
 export function NavigationMenu({ items, className = '' }: NavigationMenuProps) {
   return (
-    <nav className={`flex items-center gap-2 ${className}`}>
+    <nav className={`flex items-center gap-8 ${className}`}>
       {items.map((item) => (
         <NavItem
           key={item.href}

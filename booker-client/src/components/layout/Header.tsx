@@ -30,10 +30,10 @@ export function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-6 backdrop-blur-md bg-black/10">
+      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-12 py-5 backdrop-blur-md bg-black/10">
         {/* Logo */}
         <Link href="/" className="flex items-center">
-          <div className="text-2xl font-medium tracking-tight text-white">
+          <div className="text-xl font-semibold tracking-tight text-white">
             BOOKER
           </div>
         </Link>
