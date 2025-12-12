@@ -1,12 +1,6 @@
 package com.bookerapp.core.presentation.controller;
 
-import com.bookerapp.core.domain.model.auth.Role;
 import com.bookerapp.core.domain.model.auth.UserContext;
-import com.bookerapp.core.presentation.argumentresolver.UserContextArgumentResolver;
-import com.bookerapp.core.infrastructure.client.KeycloakClient;
-import com.bookerapp.core.infrastructure.jwt.KeycloakJwtParser;
-import com.bookerapp.core.infrastructure.jwt.JwtParser;
-import com.bookerapp.core.presentation.interceptor.JwtAuthInterceptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

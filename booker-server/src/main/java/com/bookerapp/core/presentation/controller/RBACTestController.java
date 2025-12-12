@@ -3,7 +3,6 @@ package com.bookerapp.core.presentation.controller;
 import com.bookerapp.core.domain.model.auth.UserContext;
 import com.bookerapp.core.domain.model.auth.Role;
 import com.bookerapp.core.domain.model.response.UserResponse;
-import com.bookerapp.core.presentation.aspect.RequireRoles;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,7 +18,6 @@ public class RBACTestController {
 
     @GetMapping("/test/books")
     @Operation(summary = "Get all books")
-    @RequireRoles({Role.USER, Role.ADMIN})
     public String getAllBooks(
             @Parameter(hidden = true) UserContext userContext
     ) {
@@ -29,7 +27,6 @@ public class RBACTestController {
 
     @GetMapping("/test/books/{id}")
     @Operation(summary = "Get book by ID")
-    @RequireRoles({Role.USER, Role.ADMIN})
     public String getBookById(
             @PathVariable String id,
             @Parameter(hidden = true) UserContext userContext
@@ -40,7 +37,6 @@ public class RBACTestController {
 
     @PostMapping("/test/books")
     @Operation(summary = "Create a new book")
-    @RequireRoles({Role.ADMIN})
     public String createBook(
             @RequestBody String bookData,
             @Parameter(hidden = true) UserContext userContext
@@ -51,7 +47,6 @@ public class RBACTestController {
 
     @PutMapping("/test/books/{id}")
     @Operation(summary = "Update a book")
-    @RequireRoles({Role.ADMIN})
     public String updateBook(
             @PathVariable String id,
             @RequestBody String bookData,
@@ -63,7 +58,6 @@ public class RBACTestController {
 
     @DeleteMapping("/test/books/{id}")
     @Operation(summary = "Delete a book")
-    @RequireRoles({Role.ADMIN})
     public String deleteBook(
             @PathVariable String id,
             @Parameter(hidden = true) UserContext userContext

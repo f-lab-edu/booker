@@ -23,7 +23,3 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     com.bookerapp.core: DEBUG
-
-keycloak:
-  auth-server-url: http://localhost:8080
-  realm: test-realm

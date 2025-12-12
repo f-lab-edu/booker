@@ -4,7 +4,6 @@ import com.bookerapp.core.domain.model.auth.UserContext;
 import com.bookerapp.core.domain.model.auth.Role;
 import com.bookerapp.core.domain.model.dto.BookLoanDto;
 import com.bookerapp.core.domain.service.BookLoanService;
-import com.bookerapp.core.presentation.aspect.RequireRoles;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,7 +26,6 @@ public class BookLoanController {
 
     @PostMapping
     @Operation(summary = "도서 대출 신청")
-    @RequireRoles({Role.USER})
     public ResponseEntity<BookLoanDto.Response> createLoan(
             @Valid @RequestBody BookLoanDto.Request request,
             @Parameter(hidden = true) UserContext userContext) {
@@ -42,7 +40,6 @@ public class BookLoanController {
 
     @PostMapping("/{loanId}/return")
     @Operation(summary = "도서 반납 신청")
-    @RequireRoles({Role.USER})
     public ResponseEntity<BookLoanDto.Response> returnBook(
             @PathVariable Long loanId,
             @Parameter(hidden = true) UserContext userContext) {
@@ -51,7 +48,6 @@ public class BookLoanController {
 
     @PostMapping("/{loanId}/extend")
     @Operation(summary = "대출 기간 연장")
-    @RequireRoles({Role.USER})
     public ResponseEntity<BookLoanDto.Response> extendLoan(
             @PathVariable Long loanId,
             @Parameter(hidden = true) UserContext userContext) {
@@ -60,7 +56,6 @@ public class BookLoanController {
 
     @GetMapping
     @Operation(summary = "내 대출 목록 조회")
-    @RequireRoles({Role.USER})
     public ResponseEntity<Page<BookLoanDto.Response>> getMyLoans(
             @Valid BookLoanDto.SearchRequest request,
             @Parameter(hidden = true) UserContext userContext) {
@@ -69,7 +64,6 @@ public class BookLoanController {
 
     @GetMapping("/{loanId}")
     @Operation(summary = "대출 상세 조회")
-    @RequireRoles({Role.USER})
     public ResponseEntity<BookLoanDto.Response> getLoan(
             @PathVariable Long loanId,
             @Parameter(hidden = true) UserContext userContext) {
