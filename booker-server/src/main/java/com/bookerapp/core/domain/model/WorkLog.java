@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,4 +21,7 @@ public class WorkLog {
     private String content; // markdown
     private String author;
     private LocalDateTime createdAt;
+    
+    @Builder.Default
+    private List<WorkLogTag> tags = new ArrayList<>();
 }

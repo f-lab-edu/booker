@@ -1,6 +1,7 @@
 package com.bookerapp.core.infrastructure.repository;
 
 import com.bookerapp.core.domain.model.WorkLog;
+import com.bookerapp.core.domain.model.WorkLogTag;
 import com.bookerapp.core.domain.repository.WorkLogRepository;
 import org.springframework.stereotype.Repository;
 
@@ -56,10 +57,12 @@ public class FileWorkLogRepository implements WorkLogRepository {
             
             // Write content
             // We'll write a simple header + content
+            String tagsString = workLog.getTags().stream().map(Enum::name).collect(Collectors.joining(","));
             String fileContent = "---" + System.lineSeparator() +
                                  "title: " + workLog.getTitle() + System.lineSeparator() +
                                  "author: " + workLog.getAuthor() + System.lineSeparator() +
                                  "date: " + workLog.getCreatedAt().toString() + System.lineSeparator() +
+                                 "tags: " + tagsString + System.lineSeparator() +
                                  "---" + System.lineSeparator() + System.lineSeparator() +
                                  workLog.getContent();
                                  
@@ -102,6 +105,7 @@ public class FileWorkLogRepository implements WorkLogRepository {
             String title = "Untitled";
             String author = "Unknown";
             LocalDateTime createdAt = LocalDateTime.now();
+            List<WorkLogTag> tags = new ArrayList<>();
             StringBuilder content = new StringBuilder();
             
             boolean inHeader = false;
@@ -128,6 +132,17 @@ public class FileWorkLogRepository implements WorkLogRepository {
                          } catch (Exception e) {
                              // ignore parse error
                          }
+                    } else if (line.startsWith("tags:")) {
+                        String tagsStr = line.substring(5).trim();
+                        if (!tagsStr.isEmpty()) {
+                            for (String tag : tagsStr.split(",")) {
+                                try {
+                                    tags.add(WorkLogTag.valueOf(tag.trim()));
+                                } catch (IllegalArgumentException e) {
+                                    // ignore invalid tags
+                                }
+                            }
+                        }
                     }
                 } else {
                     content.append(line).append(System.lineSeparator());
@@ -139,6 +154,7 @@ public class FileWorkLogRepository implements WorkLogRepository {
                     .title(title)
                     .author(author)
                     .createdAt(createdAt)
+                    .tags(tags)
                     .content(content.toString()) // This might contain extra newlines at start
                     .build();
                     
