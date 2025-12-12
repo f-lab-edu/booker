@@ -7,7 +7,6 @@ import com.bookerapp.core.domain.model.event.EventType;
 import com.bookerapp.core.domain.model.event.Member;
 import com.bookerapp.core.domain.service.DefaultEventService;
 import com.bookerapp.core.domain.service.TechTalkEventService;
-import com.bookerapp.core.presentation.aspect.RequireRoles;
 import com.bookerapp.core.domain.model.dto.EventDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,7 +29,6 @@ public class EventController {
 
     @PostMapping
     @Operation(summary = "이벤트 생성")
-    @RequireRoles({Role.ADMIN, Role.USER})
     public ResponseEntity<EventDto.Response> createEvent(
             @Valid @RequestBody EventDto.CreateRequest request,
             @Parameter(hidden = true) UserContext userContext) {
@@ -41,7 +39,6 @@ public class EventController {
 
     @PutMapping("/{id}")
     @Operation(summary = "이벤트 수정")
-    @RequireRoles({Role.ADMIN})
     public ResponseEntity<Void> updateEvent(
             @PathVariable Long id,
             @Valid @RequestBody EventDto.UpdateRequest request,
@@ -52,7 +49,6 @@ public class EventController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "이벤트 삭제")
-    @RequireRoles({Role.ADMIN})
     public ResponseEntity<Void> deleteEvent(
             @PathVariable Long id,
             @Parameter(hidden = true) UserContext userContext) {
@@ -62,7 +58,6 @@ public class EventController {
 
     @PostMapping("/{id}/participants")
     @Operation(summary = "이벤트 참가자 추가")
-    @RequireRoles({Role.ADMIN, Role.USER})
     public ResponseEntity<Void> addParticipant(
             @PathVariable Long id,
             @RequestParam String memberId,
@@ -74,7 +69,6 @@ public class EventController {
 
     @DeleteMapping("/{id}/participants/{memberId}")
     @Operation(summary = "이벤트 참가자 제거")
-    @RequireRoles({Role.ADMIN})
     public ResponseEntity<Void> removeParticipant(
             @PathVariable Long id,
             @PathVariable String memberId,
@@ -86,7 +80,6 @@ public class EventController {
 
     @GetMapping
     @Operation(summary = "이벤트 목록 조회")
-    @RequireRoles({Role.ADMIN, Role.USER})
     public ResponseEntity<Page<EventDto.Response>> getEvents(
             @RequestParam(required = false) EventType type,
             Pageable pageable,
@@ -99,7 +92,6 @@ public class EventController {
 
     @GetMapping("/{id}")
     @Operation(summary = "이벤트 상세 조회")
-    @RequireRoles({Role.ADMIN, Role.USER})
     public ResponseEntity<EventDto.Response> getEvent(
             @PathVariable Long id,
             @Parameter(hidden = true) UserContext userContext) {

@@ -31,11 +31,6 @@ spring:
         format_sql: true
     defer-datasource-initialization: true
 
-keycloak:
-  auth-server-url: http://keycloak:8083
-  realm: myrealm
-  client-id: springboot-client
-
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

@@ -1,8 +1,6 @@
 package com.bookerapp.core.presentation.argumentresolver;
 
 import com.bookerapp.core.domain.model.auth.UserContext;
-import com.bookerapp.core.infrastructure.jwt.KeycloakJwtParser;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -19,8 +17,6 @@ public class UserContextArgumentResolver implements HandlerMethodArgumentResolve
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
 
-    private final KeycloakJwtParser keycloakJwtParser;
-
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.getParameterType().equals(UserContext.class);
@@ -32,9 +28,10 @@ public class UserContextArgumentResolver implements HandlerMethodArgumentResolve
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         String token = extractToken(request);
 
+        // TODO: JWT token validation and UserContext creation needs to be implemented
+        // Previously used KeycloakJwtParser which has been removed
         if (token != null) {
-            Claims claims = keycloakJwtParser.parseToken(token);
-            return new UserContext(claims);
+            return null; // Placeholder - need to implement JWT parsing
         }
 
         return null;

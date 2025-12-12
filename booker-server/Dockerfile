@@ -7,7 +7,5 @@ RUN ./gradlew clean build -x test --no-daemon
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
-COPY wait-for-it.sh /wait-for-it.sh
-RUN chmod +x /wait-for-it.sh
 EXPOSE 8084
-ENTRYPOINT ["/wait-for-it.sh", "keycloak:8083", "--strict", "--timeout=60", "--", "java", "-jar", "/app/app.jar"] 
+ENTRYPOINT ["java", "-jar", "/app/app.jar"] 
