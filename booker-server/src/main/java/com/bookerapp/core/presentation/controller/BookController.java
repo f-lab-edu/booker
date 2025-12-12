@@ -18,7 +18,7 @@ import java.net.URI;
 @RestController
 @RequestMapping("/api/v1/books")
 @RequiredArgsConstructor
-public class BookRestController {
+public class BookController {
 
     private final BookService bookService;
 
@@ -36,7 +36,7 @@ public class BookRestController {
                     .toUri();
             return ResponseEntity.created(location).body(response);
         } catch (Exception e) {
-            System.err.println("=== BookRestController.createBook 에러 발생 ===");
+            System.err.println("=== BookController.createBook 에러 발생 ===");
             System.err.println("Exception type: " + e.getClass().getName());
             System.err.println("Exception message: " + e.getMessage());
             e.printStackTrace();
