@@ -2,6 +2,7 @@ package com.bookerapp.core.presentation.controller;
 
 import com.bookerapp.core.application.WorkLogService;
 import com.bookerapp.core.domain.model.WorkLog;
+import com.bookerapp.core.domain.model.WorkLogTag;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class WorkLogController {
     @PostMapping
     @Operation(summary = "Create a new work log")
     public ResponseEntity<WorkLog> createLog(@RequestBody CreateWorkLogRequest request) {
-        WorkLog created = workLogService.createLog(request.getTitle(), request.getContent(), request.getAuthor());
+        WorkLog created = workLogService.createLog(request.getTitle(), request.getContent(), request.getAuthor(), request.getTags());
         
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -35,9 +36,9 @@ public class WorkLogController {
     }
 
     @GetMapping
-    @Operation(summary = "List all work logs")
-    public ResponseEntity<List<WorkLog>> getAllLogs() {
-        return ResponseEntity.ok(workLogService.getAllLogs());
+    @Operation(summary = "List all work logs (optionally filtered by tags)")
+    public ResponseEntity<List<WorkLog>> getAllLogs(@RequestParam(required = false) List<WorkLogTag> tags) {
+        return ResponseEntity.ok(workLogService.getAllLogs(tags));
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.TEXT_MARKDOWN_VALUE)
@@ -52,5 +53,6 @@ public class WorkLogController {
         private String title;
         private String content;
         private String author;
+        private List<WorkLogTag> tags;
     }
 }
