@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ShaderCanvas } from './ShaderCanvas';
 import { Sparkles } from 'lucide-react';
 
@@ -16,9 +16,48 @@ export function HeroBanner({
 }: HeroBannerProps) {
   const [mounted, setMounted] = useState(false);
 
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springConfig = { damping: 25, stiffness: 150 };
+  const mouseXSpring = useSpring(mouseX, springConfig);
+  const mouseYSpring = useSpring(mouseY, springConfig);
+
+  const background1 = useTransform(
+    [mouseXSpring, mouseYSpring],
+    (latest) => {
+      const [x, y] = latest;
+      return `radial-gradient(600px circle at ${x}px ${y}px, rgba(139, 92, 246, 0.15), transparent 80%)`;
+    }
+  );
+
+  const background2 = useTransform(
+    [mouseXSpring, mouseYSpring],
+    (latest) => {
+      const [x, y] = latest;
+      return `radial-gradient(500px circle at ${x}px ${y}px, rgba(99, 102, 241, 0.1), transparent 70%)`;
+    }
+  );
+
+  const background3 = useTransform(
+    [mouseXSpring, mouseYSpring],
+    (latest) => {
+      const [x, y] = latest;
+      return `radial-gradient(400px circle at ${x}px ${y}px, rgba(167, 139, 250, 0.08), transparent 60%)`;
+    }
+  );
+
   useEffect(() => {
     setMounted(true);
-  }, []);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
 
   if (!mounted) {
     return (
@@ -33,15 +72,36 @@ export function HeroBanner({
   }
 
   return (
-    <section className="relative min-h-screen w-full bg-black flex items-end overflow-hidden">
-      {/* WebGL Shader Background */}
-      <div className="absolute inset-0">
-        <ShaderCanvas />
-      </div>
+    <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden" style={{
+      background: 'radial-gradient(ellipse at top left, #1e3a5f 0%, #2d1b4e 30%, #1a1625 60%, #0a0a0f 100%)'
+    }}>
+      {/* Cursor Light Effect - Ripple 1 */}
+      <motion.div
+        className="pointer-events-none fixed inset-0 z-10"
+        style={{
+          background: background1
+        }}
+      />
 
-      {/* Main Content - Bottom Left */}
-      <main className="absolute bottom-8 left-8 z-20 max-w-2xl px-6">
-        <div className="text-left">
+      {/* Cursor Light Effect - Ripple 2 (Delayed) */}
+      <motion.div
+        className="pointer-events-none fixed inset-0 z-10"
+        style={{
+          background: background2
+        }}
+      />
+
+      {/* Cursor Light Effect - Ripple 3 (Most Delayed) */}
+      <motion.div
+        className="pointer-events-none fixed inset-0 z-10"
+        style={{
+          background: background3
+        }}
+      />
+
+      {/* Main Content - Center */}
+      <main className="relative z-20 max-w-5xl px-6">
+        <div className="text-center">
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -60,11 +120,9 @@ export function HeroBanner({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-5xl md:text-6xl lg:text-7xl tracking-tight font-light text-white mb-6 leading-tight"
+            className="text-6xl md:text-7xl lg:text-8xl tracking-tight font-bold text-white mb-8 leading-tight"
           >
             모든 지식을 한 곳에서
-            <br />
-            <span className="font-normal">BOOKER</span>
           </motion.h1>
 
           {/* Description */}
@@ -72,7 +130,7 @@ export function HeroBanner({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-sm font-light text-white/70 mb-6 leading-relaxed max-w-xl"
+            className="text-lg md:text-xl font-light text-white/70 mb-16 leading-relaxed max-w-2xl mx-auto"
           >
             간편한 도서 대출과 반납으로 팀의 생산성을 높이고,
             테크톡과 이벤트로 지식을 공유하는 스마트한 플랫폼.
@@ -84,23 +142,23 @@ export function HeroBanner({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="flex items-center gap-6 mb-8"
+              className="flex items-center justify-center gap-6 mb-8"
             >
               {totalBooks > 0 && (
                 <div>
-                  <div className="text-3xl font-light text-white mb-1">
+                  <div className="text-5xl md:text-6xl font-light text-white mb-2">
                     {totalBooks.toLocaleString()}
                   </div>
-                  <div className="text-xs text-white/60">전체 도서</div>
+                  <div className="text-sm text-white/60">전체 도서</div>
                 </div>
               )}
 
               {activeLoanCount > 0 && (
                 <div>
-                  <div className="text-3xl font-light text-violet-400 mb-1">
+                  <div className="text-5xl md:text-6xl font-light text-violet-400 mb-2">
                     {activeLoanCount.toLocaleString()}
                   </div>
-                  <div className="text-xs text-white/60">대출 중</div>
+                  <div className="text-sm text-white/60">대출 중</div>
                 </div>
               )}
             </motion.div>
@@ -111,17 +169,17 @@ export function HeroBanner({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex items-center gap-4 flex-wrap"
+            className="flex items-center justify-center gap-4 flex-wrap"
           >
             <a
               href="/books"
-              className="px-8 py-3 rounded-full bg-white text-black font-normal text-xs transition-all duration-200 hover:bg-white/90"
+              className="px-10 py-4 rounded-full bg-white text-black font-medium text-base transition-all duration-200 hover:bg-white/90"
             >
               도서 검색하기
             </a>
             <a
               href="/events"
-              className="px-8 py-3 rounded-full bg-transparent border border-white/30 text-white font-normal text-xs transition-all duration-200 hover:bg-white/10 hover:border-white/50"
+              className="px-10 py-4 rounded-full bg-transparent border border-white/30 text-white font-medium text-base transition-all duration-200 hover:bg-white/10 hover:border-white/50"
             >
               이벤트 보기
             </a>
