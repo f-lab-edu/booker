@@ -69,3 +69,6 @@ clean-rebuild.sh
 *-local.sh
 
 db/*
+
+
+booker-client/node_modules

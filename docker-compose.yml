@@ -65,6 +65,27 @@ services:
       - ./work-logs:/app/work-logs
     restart: unless-stopped
 
+  nextjs:
+    build:
+      context: booker-client
+      dockerfile: Dockerfile
+    container_name: booker_nextjs
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8084
+    depends_on:
+      - springboot
+    restart: unless-stopped
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
