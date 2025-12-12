@@ -65,11 +65,11 @@ services:
       - ./work-logs:/app/work-logs
     restart: unless-stopped
 
-  nextjs:
+  booker-client:
     build:
       context: booker-client
       dockerfile: Dockerfile
-    container_name: booker_nextjs
+    container_name: booker-client
     deploy:
       resources:
         limits:
@@ -81,7 +81,8 @@ services:
     ports:
       - "3001:3000"
     environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8084
+      - NEXT_PUBLIC_API_BASE_URL=http://springboot:8084
+      - NODE_ENV=production
     depends_on:
       - springboot
     restart: unless-stopped
