@@ -49,6 +49,6 @@ echo $USER_TOKEN | jq -R 'split(".") | .[1] | @base64d | fromjson | .realm_acces
 
 # API 요청 보내기
 curl -X 'GET' \
-  "http://localhost:8084/api/v1/loans?statuses=PENDING&page=0&size=1" \
+  "http://localhost:8084/loans?statuses=PENDING&page=0&size=1" \
   -H 'accept: */*' \
   -H "Authorization: Bearer ${USER_TOKEN}" | jq '.'

@@ -1,3 +1,10 @@
+// docker run --rm --network booker_default \
+//     -v ./k6-script:/scripts \
+//     grafana/k6:latest run /scripts/book-loan-load-test.js \
+//     --out influxdb=http://influxdb:8086/myk6db
+
+
+
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { randomIntBetween } from "https://jslib.k6.io/k6-utils/1.1.0/index.js";
@@ -11,39 +18,14 @@ export let options = {
     },
 };
 
-const KEYCLOAK_URL = 'http://localhost:8083';
-const BOOKER_API_URL = 'http://localhost:8084';
-const CLIENT_ID = 'springboot-client';
-const CLIENT_SECRET = 'springboot-secret';
-const REALM = 'myrealm';
 
-// 토큰 획득 함수
+const BOOKER_API_URL = 'http://springboot:8084';
+
+// 더미 토큰 반환 (현재 서버는 토큰 검증을 하지 않음)
+// JwtAuthInterceptor에서 Bearer 토큰 존재 여부만 확인
 function getClientToken() {
-    const tokenParams = {
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-    };
-
-    const tokenBody = `grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}`;
-
-    const tokenResponse = http.post(
-        `${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token`,
-        tokenBody,
-        tokenParams
-    );
-
-    check(tokenResponse, {
-        'token request successful': (r) => r.status === 200,
-    });
-
-    if (tokenResponse.status === 200) {
-        const tokenData = JSON.parse(tokenResponse.body);
-        return tokenData.access_token;
-    }
-
-    console.error('토큰 획득 실패:', tokenResponse.status, tokenResponse.body);
-    return null;
+    // 실제 JWT 형식의 더미 토큰 (검증 안 됨)
+    return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXIiLCJuYW1lIjoiSzYgTG9hZCBUZXN0ZXIiLCJpYXQiOjE1MTYyMzkwMjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
 }
 
 // 이용 가능한 책 목록 조회
@@ -55,7 +37,7 @@ function getAvailableBooks(token) {
         },
     };
 
-    const response = http.get(`${BOOKER_API_URL}/api/v1/books?page=0&size=50`, params);
+    const response = http.get(`${BOOKER_API_URL}/books?page=0&size=50`, params);
 
     if (response.status === 200) {
         const data = JSON.parse(response.body);
@@ -113,7 +95,7 @@ export default function () {
     };
 
     // 도서 대출 신청 POST 요청
-    const response = http.post(`${BOOKER_API_URL}/api/v1/loans`, body, params);
+    const response = http.post(`${BOOKER_API_URL}/loans`, body, params);
 
     // 응답 확인
     const checkResult = check(response, {
@@ -165,7 +147,6 @@ export default function () {
 // setup 함수 - 테스트 시작 전 실행
 export function setup() {
     console.log('=== K6 도서 대출 성능 테스트 시작 ===');
-    console.log(`Keycloak URL: ${KEYCLOAK_URL}`);
     console.log(`Booker API URL: ${BOOKER_API_URL}`);
 
     // 초기 토큰 테스트
