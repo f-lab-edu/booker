@@ -16,12 +16,17 @@ export const mainNavigation: NavigationItem[] = [
     description: '사내 이벤트 및 테크톡',
   },
   {
-    label: '내 대출',
-    href: '/my-loans',
-    description: '내 대출 현황',
+    label: '비즈니스',
+    href: '/business',
+    description: '비즈니스 도서 및 자료',
   },
   {
-    label: '프로필',
+    label: '기술',
+    href: '/tech',
+    description: '기술 도서 및 자료',
+  },
+  {
+    label: '내 프로필',
     href: '/profile',
     description: '내 정보 관리',
   },
