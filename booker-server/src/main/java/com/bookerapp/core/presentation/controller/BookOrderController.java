@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/book-orders")
+@RequestMapping("/book-orders")
 @Tag(name = "BookOrder", description = "도서 주문 요청 관리 APIs")
 @RequiredArgsConstructor
 public class BookOrderController {

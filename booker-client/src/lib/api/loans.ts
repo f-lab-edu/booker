@@ -12,21 +12,21 @@ export const loanApi = {
     if (params?.size !== undefined) searchParams.append('size', params.size.toString());
 
     const query = searchParams.toString();
-    return apiClient<Page<BookLoan>>(`/api/v1/loans${query ? `?${query}` : ''}`);
+    return apiClient<Page<BookLoan>>(`/loans${query ? `?${query}` : ''}`);
   },
 
   /**
    * Get loan details by ID
    */
   getLoan: async (loanId: number): Promise<BookLoan> => {
-    return apiClient<BookLoan>(`/api/v1/loans/${loanId}`);
+    return apiClient<BookLoan>(`/loans/${loanId}`);
   },
 
   /**
    * Create a new loan (borrow a book)
    */
   createLoan: async (bookId: number): Promise<BookLoan> => {
-    return apiClient<BookLoan>('/api/v1/loans', {
+    return apiClient<BookLoan>('/loans', {
       method: 'POST',
       body: JSON.stringify({ bookId }),
     });
@@ -36,7 +36,7 @@ export const loanApi = {
    * Return a book
    */
   returnBook: async (loanId: number): Promise<BookLoan> => {
-    return apiClient<BookLoan>(`/api/v1/loans/${loanId}/return`, {
+    return apiClient<BookLoan>(`/loans/${loanId}/return`, {
       method: 'POST',
     });
   },
@@ -45,7 +45,7 @@ export const loanApi = {
    * Extend loan period
    */
   extendLoan: async (loanId: number): Promise<BookLoan> => {
-    return apiClient<BookLoan>(`/api/v1/loans/${loanId}/extend`, {
+    return apiClient<BookLoan>(`/loans/${loanId}/extend`, {
       method: 'POST',
     });
   },

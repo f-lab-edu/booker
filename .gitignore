@@ -70,6 +70,5 @@ clean-rebuild.sh
 
 db/*
 
-
 booker-client/node_modules
 k6-script/results

@@ -16,7 +16,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/api/v1/books")
+@RequestMapping("/books")
 @RequiredArgsConstructor
 public class BookController {
 
