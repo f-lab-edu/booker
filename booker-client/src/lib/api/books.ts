@@ -14,21 +14,21 @@ export const bookApi = {
     if (params?.size !== undefined) searchParams.append('size', params.size.toString());
 
     const query = searchParams.toString();
-    return apiClient<Page<Book>>(`/api/v1/books${query ? `?${query}` : ''}`);
+    return apiClient<Page<Book>>(`/books${query ? `?${query}` : ''}`);
   },
 
   /**
    * Get a book by ID
    */
   getBook: async (id: number): Promise<Book> => {
-    return apiClient<Book>(`/api/v1/books/${id}`);
+    return apiClient<Book>(`/books/${id}`);
   },
 
   /**
    * Create a new book (admin only)
    */
   createBook: async (book: Omit<Book, 'id'>): Promise<Book> => {
-    return apiClient<Book>('/api/v1/books', {
+    return apiClient<Book>('/books', {
       method: 'POST',
       body: JSON.stringify(book),
     });
@@ -38,7 +38,7 @@ export const bookApi = {
    * Update a book (admin only)
    */
   updateBook: async (id: number, book: Partial<Book>): Promise<Book> => {
-    return apiClient<Book>(`/api/v1/books/${id}`, {
+    return apiClient<Book>(`/books/${id}`, {
       method: 'PUT',
       body: JSON.stringify(book),
     });
@@ -48,7 +48,7 @@ export const bookApi = {
    * Delete a book (admin only)
    */
   deleteBook: async (id: number): Promise<void> => {
-    return apiClient<void>(`/api/v1/books/${id}`, {
+    return apiClient<void>(`/books/${id}`, {
       method: 'DELETE',
     });
   },

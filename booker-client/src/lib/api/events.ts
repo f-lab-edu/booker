@@ -11,21 +11,21 @@ export const eventApi = {
     params.append('page', page.toString());
     params.append('size', size.toString());
 
-    return apiClient<Page<Event>>(`/api/events?${params.toString()}`);
+    return apiClient<Page<Event>>(`/events?${params.toString()}`);
   },
 
   /**
    * Get event by ID
    */
   getEvent: async (id: number): Promise<Event> => {
-    return apiClient<Event>(`/api/events/${id}`);
+    return apiClient<Event>(`/events/${id}`);
   },
 
   /**
    * Create a new event
    */
   createEvent: async (event: Omit<Event, 'id' | 'presenter' | 'participants' | 'currentParticipants'>): Promise<Event> => {
-    return apiClient<Event>('/api/events', {
+    return apiClient<Event>('/events', {
       method: 'POST',
       body: JSON.stringify(event),
     });
@@ -35,7 +35,7 @@ export const eventApi = {
    * Update an event
    */
   updateEvent: async (id: number, event: Partial<Event>): Promise<void> => {
-    return apiClient<void>(`/api/events/${id}`, {
+    return apiClient<void>(`/events/${id}`, {
       method: 'PUT',
       body: JSON.stringify(event),
     });
@@ -45,7 +45,7 @@ export const eventApi = {
    * Delete an event
    */
   deleteEvent: async (id: number): Promise<void> => {
-    return apiClient<void>(`/api/events/${id}`, {
+    return apiClient<void>(`/events/${id}`, {
       method: 'DELETE',
     });
   },
@@ -54,7 +54,7 @@ export const eventApi = {
    * Add a participant to an event
    */
   addParticipant: async (eventId: number, memberId: string): Promise<void> => {
-    return apiClient<void>(`/api/events/${eventId}/participants?memberId=${memberId}`, {
+    return apiClient<void>(`/events/${eventId}/participants?memberId=${memberId}`, {
       method: 'POST',
     });
   },
@@ -63,7 +63,7 @@ export const eventApi = {
    * Remove a participant from an event
    */
   removeParticipant: async (eventId: number, memberId: string): Promise<void> => {
-    return apiClient<void>(`/api/events/${eventId}/participants/${memberId}`, {
+    return apiClient<void>(`/events/${eventId}/participants/${memberId}`, {
       method: 'DELETE',
     });
   },
