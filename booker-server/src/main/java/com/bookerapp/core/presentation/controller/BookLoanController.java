@@ -17,7 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/api/v1/loans")
+@RequestMapping("/loans")
 @RequiredArgsConstructor
 @Tag(name = "Book Loan", description = "도서 대출 관련 API")
 public class BookLoanController {

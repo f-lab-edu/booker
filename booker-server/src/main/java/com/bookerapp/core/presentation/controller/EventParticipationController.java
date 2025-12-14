@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/events/participation")
+@RequestMapping("/events/participation")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Event Participation", description = "이벤트 참여 신청 API")
