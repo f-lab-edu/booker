@@ -52,7 +52,7 @@ class BookOrderControllerTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String BASE_URL = "/api/book-orders";
+    private static final String BASE_URL = "/book-orders";
     private static final String TEST_USER_ID = "test-user-id";
     private static final String TEST_USERNAME = "test-user";
     private static final String TEST_ADMIN_ID = "admin-id";

@@ -72,7 +72,7 @@ class EventParticipationControllerIntegrationTest {
                 "user1@test.com"
         );
 
-        mockMvc.perform(post("/api/v1/events/participation/synchronized")
+        mockMvc.perform(post("/events/participation/synchronized")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .requestAttr("userContext", createUserContext()))
@@ -91,7 +91,7 @@ class EventParticipationControllerIntegrationTest {
                 "user2@test.com"
         );
 
-        mockMvc.perform(post("/api/v1/events/participation/cas")
+        mockMvc.perform(post("/events/participation/cas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .requestAttr("userContext", createUserContext()))
@@ -103,7 +103,7 @@ class EventParticipationControllerIntegrationTest {
     @Test
     @DisplayName("CAS 재시도 횟수 조회 API 테스트")
     void getCasRetryCountApiTest() throws Exception {
-        mockMvc.perform(get("/api/v1/events/participation/cas/retry-count")
+        mockMvc.perform(get("/events/participation/cas/retry-count")
                         .requestAttr("userContext", createAdminUserContext()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("0"));
@@ -112,7 +112,7 @@ class EventParticipationControllerIntegrationTest {
     @Test
     @DisplayName("CAS 재시도 횟수 초기화 API 테스트")
     void resetCasRetryCountApiTest() throws Exception {
-        mockMvc.perform(post("/api/v1/events/participation/cas/reset-retry-count")
+        mockMvc.perform(post("/events/participation/cas/reset-retry-count")
                         .requestAttr("userContext", createAdminUserContext()))
                 .andExpect(status().isOk());
     }
@@ -127,7 +127,7 @@ class EventParticipationControllerIntegrationTest {
                 "user3@test.com"
         );
 
-        mockMvc.perform(post("/api/v1/events/participation/synchronized")
+        mockMvc.perform(post("/events/participation/synchronized")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .requestAttr("userContext", createUserContext()))
@@ -146,7 +146,7 @@ class EventParticipationControllerIntegrationTest {
                     "user" + i + "@test.com"
             );
 
-            mockMvc.perform(post("/api/v1/events/participation/synchronized")
+            mockMvc.perform(post("/events/participation/synchronized")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
                             .requestAttr("userContext", createUserContext()))
@@ -162,7 +162,7 @@ class EventParticipationControllerIntegrationTest {
                 "waiting@test.com"
         );
 
-        mockMvc.perform(post("/api/v1/events/participation/synchronized")
+        mockMvc.perform(post("/events/participation/synchronized")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(waitingRequest))
                         .requestAttr("userContext", createUserContext()))
@@ -183,7 +183,7 @@ class EventParticipationControllerIntegrationTest {
         );
 
         // 첫 번째 참여 신청
-        mockMvc.perform(post("/api/v1/events/participation/synchronized")
+        mockMvc.perform(post("/events/participation/synchronized")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .requestAttr("userContext", createUserContext()))
@@ -191,7 +191,7 @@ class EventParticipationControllerIntegrationTest {
                 .andExpect(jsonPath("$.status").value("CONFIRMED"));
 
         // 두 번째 참여 신청 (중복)
-        mockMvc.perform(post("/api/v1/events/participation/synchronized")
+        mockMvc.perform(post("/events/participation/synchronized")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .requestAttr("userContext", createUserContext()))
