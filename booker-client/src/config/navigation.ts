@@ -26,8 +26,8 @@ export const mainNavigation: NavigationItem[] = [
     description: '기술 도서 및 자료',
   },
   {
-    label: '내 프로필',
-    href: '/profile',
-    description: '내 정보 관리',
+    label: '개발자센터',
+    href: '/developer',
+    description: 'API 문서 및 개발 가이드',
   },
 ];
