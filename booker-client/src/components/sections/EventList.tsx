@@ -45,9 +45,9 @@ const mockEvents: Event[] = [
 
 const eventTypeColors: Record<string, string> = {
   TECH_TALK: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  WORKSHOP: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-  MEETUP: 'bg-green-500/10 text-green-400 border-green-500/20',
-  OTHER: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+  WORKSHOP: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  MEETUP: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  OTHER: 'bg-green-500/10 text-green-400 border-green-500/20',
 };
 
 const eventTypeLabels: Record<string, string> = {
@@ -81,9 +81,9 @@ export function EventList() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 mb-4">
-            <Calendar size={20} className="text-violet-400 mr-2" />
-            <span className="text-violet-400 text-sm font-medium">이벤트 목록</span>
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 mb-4">
+            <Calendar size={20} className="text-green-400 mr-2" />
+            <span className="text-green-400 text-sm font-medium">이벤트 목록</span>
           </div>
           <p className="text-white/60 text-sm">다가오는 이벤트에 참여하세요</p>
         </motion.div>
@@ -107,7 +107,7 @@ export function EventList() {
             {duplicatedEvents.map((event, index) => (
               <div
                 key={`${event.id}-${index}`}
-                className="group relative p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-violet-500/30 transition-all duration-300 cursor-pointer flex-shrink-0 w-80"
+                className="group relative p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-green-500/30 transition-all duration-300 cursor-pointer flex-shrink-0 w-80"
               >
                 {/* Event Type Badge */}
                 <div className="mb-4">
@@ -117,7 +117,7 @@ export function EventList() {
                 </div>
 
                 {/* Event Title */}
-                <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-violet-400 transition-colors">
+                <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-green-400 transition-colors">
                   {event.title}
                 </h3>
 
@@ -161,7 +161,7 @@ export function EventList() {
         >
           <a
             href="/events"
-            className="inline-block px-8 py-3 rounded-full bg-white/5 border border-white/10 text-white font-medium text-sm hover:bg-white/10 hover:border-violet-500/30 transition-all duration-200"
+            className="inline-block px-8 py-3 rounded-full bg-white/5 border border-white/10 text-white font-medium text-sm hover:bg-white/10 hover:border-green-500/30 transition-all duration-200"
           >
             전체 이벤트 보기
           </a>

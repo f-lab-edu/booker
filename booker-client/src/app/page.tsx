@@ -7,7 +7,7 @@ import { ValueProposition } from '@/components/sections/ValueProposition';
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-black">
+    <main className="min-h-screen">
       <Header />
       <HeroBanner totalBooks={247} activeLoanCount={38} />
       <BookList />

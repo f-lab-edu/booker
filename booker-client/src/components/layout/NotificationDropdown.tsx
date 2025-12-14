@@ -154,7 +154,7 @@ export function NotificationDropdown() {
                       {notification.link && (
                         <a
                           href={notification.link}
-                          className="text-violet-400 text-sm hover:text-violet-300 transition-colors inline-flex items-center gap-1"
+                          className="text-green-400 text-sm hover:text-green-300 transition-colors inline-flex items-center gap-1"
                         >
                           자세히 보기
                           <svg
