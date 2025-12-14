@@ -20,7 +20,7 @@ public class EventParticipation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Event event;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Member participant;
 
     @Enumerated(EnumType.STRING)
@@ -68,4 +68,4 @@ public class EventParticipation extends BaseEntity {
     public void notifyStatusChange() {
         // TODO: Implement notification logic
     }
-} 
+}

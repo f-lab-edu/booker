@@ -26,7 +26,21 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max-connections=500
+      - --innodb-buffer-pool-size=768M
+      - --innodb-log-file-size=128M
+      - --innodb-flush-log-at-trx-commit=2
+      - --innodb-flush-method=O_DIRECT
+      - --wait-timeout=600
+      - --interactive-timeout=600
+      - --net-read-timeout=60
+      - --net-write-timeout=60
+      - --connect-timeout=30
+      - --max-allowed-packet=64M
+      - --innodb-lock-wait-timeout=120
 
   mysql-exporter:
     container_name: mysql-exporter
@@ -54,6 +68,7 @@ services:
           memory: 1024M
     ports:
       - "8084:8084"
+      - "8085:8085"  # Actuator metrics endpoint
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/booker?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
       - SPRING_DATASOURCE_USERNAME=booker
@@ -88,7 +103,6 @@ services:
       - "3001:3000"
     environment:
       - NEXT_PUBLIC_API_BASE_URL=http://springboot:8084
-      - NODE_ENV=dev
     depends_on:
       - springboot
     restart: unless-stopped
@@ -100,16 +114,34 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
     restart: always
+    depends_on:
+      - springboot
+      - mysql-exporter
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:latest
     container_name: grafana
     ports:
       - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=redis-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
     restart: always
     depends_on:
       - prometheus
+      - influxdb
     privileged: true
 
   influxdb:
@@ -120,7 +152,26 @@ services:
     environment:
       - INFLUXDB_DB=myk6db
       - INFLUXDB_HTTP_AUTH_ENABLED=false
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+    restart: always
 
+  k6:
+    image: grafana/k6:latest
+    ports:
+      - "6565:6565"
+    volumes:
+      - ./k6-script:/scripts
+    command: [
+      "run",
+      "/scripts/book-loan-load-test.js",
+      "--out",
+      "influxdb=http://influxdb:8086/myk6db"
+    ]
+    network_mode: host
 
 volumes:
   mysql_data:
+  prometheus_data:
+  grafana_data:
+  influxdb_data:
