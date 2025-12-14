@@ -64,6 +64,12 @@ services:
     volumes:
       - ./work-logs:/app/work-logs
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/prometheus"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   booker-client:
     build:
@@ -82,7 +88,7 @@ services:
       - "3001:3000"
     environment:
       - NEXT_PUBLIC_API_BASE_URL=http://springboot:8084
-      - NODE_ENV=production
+      - NODE_ENV=dev
     depends_on:
       - springboot
     restart: unless-stopped
@@ -114,21 +120,6 @@ services:
     environment:
       - INFLUXDB_DB=myk6db
       - INFLUXDB_HTTP_AUTH_ENABLED=false
-
-  k6:
-    image: grafana/k6:latest
-    ports:
-      - "6565:6565"
-    volumes:
-      - ./k6-script:/scripts
-    command: [
-      "run",
-      "/scripts/book-loan-load-test.js",
-      "--out",
-      "influxdb=http://influxdb:8086/myk6db"
-    ]
-
-    network_mode: host
 
 
 volumes:
