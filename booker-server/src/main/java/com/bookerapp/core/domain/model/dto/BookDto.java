@@ -78,15 +78,17 @@ public class BookDto {
     @Getter
     @Setter
     @NoArgsConstructor
-    @Schema(name = "LocationRequest")
+    @Schema(name = "LocationRequest", description = "도서 위치 정보 (선택사항)")
     public static class LocationRequest {
-        @Schema(description = "층수", example = "FOURTH", allowableValues = {"FOURTH", "TWELFTH"})
-        private String floor;
+        @Schema(description = "층수", example = "FOURTH",
+                allowableValues = {"FOURTH", "TWELFTH"},
+                defaultValue = "FOURTH")
+        private String floor = "FOURTH";
 
-        @Schema(description = "구역", example = "A")
+        @Schema(description = "구역", example = "A", defaultValue = "A")
         private String section = "A";
 
-        @Schema(description = "서가", example = "1")
+        @Schema(description = "서가", example = "1", defaultValue = "1")
         private String shelf = "1";
     }
 
@@ -125,10 +127,20 @@ public class BookDto {
     @Setter
     @Schema(name = "BookSearchRequest")
     public static class SearchRequest {
+        @Schema(description = "도서 제목 (부분 검색 가능)", example = "스프링")
         private String title;
+
+        @Schema(description = "저자명 (부분 검색 가능)", example = "김영한")
         private String author;
+
+        @Schema(description = "도서 상태", example = "AVAILABLE",
+                allowableValues = {"AVAILABLE", "LOANED", "PROCESSING", "RESERVED", "UNAVAILABLE"})
         private BookStatus status;
+
+        @Schema(description = "페이지 번호 (0부터 시작)", example = "0", defaultValue = "0")
         private int page = 0;
+
+        @Schema(description = "페이지 크기", example = "20", defaultValue = "20")
         private int size = 20;
     }
 }
