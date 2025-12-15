@@ -1,10 +1,7 @@
 package com.bookerapp.core.presentation.controller;
 
 import com.bookerapp.core.domain.model.dto.BookDto;
-import com.bookerapp.core.domain.model.auth.Role;
-import com.bookerapp.core.domain.model.auth.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import com.bookerapp.core.domain.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/books")
+@RequestMapping("/api/v1/books")
 @RequiredArgsConstructor
 public class BookController {
 
@@ -25,10 +22,9 @@ public class BookController {
     @PostMapping
     @Operation(summary = "도서 생성")
     public ResponseEntity<BookDto.Response> createBook(
-            @Valid @RequestBody BookDto.Request request,
-            @Parameter(hidden = true) UserContext userContext) {
+            @Valid @RequestBody BookDto.Request request) {
         try {
-            BookDto.Response response = bookService.createBook(request, userContext);
+            BookDto.Response response = bookService.createBook(request, null);
             URI location = ServletUriComponentsBuilder
                     .fromCurrentRequest()
                     .path("/{id}")
@@ -46,17 +42,13 @@ public class BookController {
 
     @GetMapping("/{id}")
     @Operation(summary = "도서 조회")
-    public ResponseEntity<BookDto.Response> getBook(
-            @PathVariable Long id,
-            @Parameter(hidden = true) UserContext userContext) {
+    public ResponseEntity<BookDto.Response> getBook(@PathVariable Long id) {
         return ResponseEntity.ok(bookService.getBook(id));
     }
 
     @GetMapping
     @Operation(summary = "도서 검색")
-    public ResponseEntity<Page<BookDto.Response>> searchBooks(
-            BookDto.SearchRequest request,
-            @Parameter(hidden = true) UserContext userContext) {
+    public ResponseEntity<Page<BookDto.Response>> searchBooks(BookDto.SearchRequest request) {
         return ResponseEntity.ok(bookService.searchBooks(request));
     }
 
@@ -64,16 +56,13 @@ public class BookController {
     @Operation(summary = "도서 수정")
     public ResponseEntity<BookDto.Response> updateBook(
             @PathVariable Long id,
-            @Valid @RequestBody BookDto.Request request,
-            @Parameter(hidden = true) UserContext userContext) {
+            @Valid @RequestBody BookDto.Request request) {
         return ResponseEntity.ok(bookService.updateBook(id, request));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "도서 삭제")
-    public ResponseEntity<Void> deleteBook(
-            @PathVariable Long id,
-            @Parameter(hidden = true) UserContext userContext) {
+    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
         return ResponseEntity.noContent().build();
     }
