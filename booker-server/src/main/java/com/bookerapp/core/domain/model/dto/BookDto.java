@@ -125,7 +125,7 @@ public class BookDto {
 
     @Getter
     @Setter
-    @Schema(name = "BookSearchRequest")
+    @Schema(name = "BookSearchRequest", description = "도서 검색 요청")
     public static class SearchRequest {
         @Schema(description = "도서 제목 (부분 검색 가능)", example = "스프링")
         private String title;
@@ -142,5 +142,8 @@ public class BookDto {
 
         @Schema(description = "페이지 크기", example = "20", defaultValue = "20")
         private int size = 20;
+
+        @Schema(description = "정렬 기준 (예: title,asc)", example = "title,asc", defaultValue = "title,asc")
+        private String sort = "title,asc";
     }
 }

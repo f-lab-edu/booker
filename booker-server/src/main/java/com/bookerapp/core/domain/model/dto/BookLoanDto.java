@@ -59,10 +59,18 @@ public class BookLoanDto {
     @Getter
     @Setter
     @NoArgsConstructor
-    @Schema(name = "BookLoanSearchRequest")
+    @Schema(name = "BookLoanSearchRequest", description = "대출 검색 요청")
     public static class SearchRequest {
+        @Schema(description = "대출 상태 목록 (복수 선택 가능)", example = "[\"ACTIVE\", \"WAITING\"]")
         private List<LoanStatus> statuses;
+
+        @Schema(description = "페이지 번호 (0부터 시작)", example = "0", defaultValue = "0")
         private int page = 0;
-        private int size = 10;
+
+        @Schema(description = "페이지 크기", example = "20", defaultValue = "20")
+        private int size = 20;
+
+        @Schema(description = "정렬 기준 (예: createdAt,desc)", example = "createdAt,desc", defaultValue = "createdAt,desc")
+        private String sort = "createdAt,desc";
     }
 }
