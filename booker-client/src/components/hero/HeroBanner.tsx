@@ -27,7 +27,7 @@ export function HeroBanner({
     [mouseXSpring, mouseYSpring],
     (latest) => {
       const [x, y] = latest;
-      return `radial-gradient(600px circle at ${x}px ${y}px, rgba(139, 92, 246, 0.15), transparent 80%)`;
+      return `radial-gradient(600px circle at ${x}px ${y}px, rgba(16, 185, 129, 0.15), transparent 80%)`;
     }
   );
 
@@ -35,7 +35,7 @@ export function HeroBanner({
     [mouseXSpring, mouseYSpring],
     (latest) => {
       const [x, y] = latest;
-      return `radial-gradient(500px circle at ${x}px ${y}px, rgba(99, 102, 241, 0.1), transparent 70%)`;
+      return `radial-gradient(500px circle at ${x}px ${y}px, rgba(5, 150, 105, 0.1), transparent 70%)`;
     }
   );
 
@@ -43,7 +43,7 @@ export function HeroBanner({
     [mouseXSpring, mouseYSpring],
     (latest) => {
       const [x, y] = latest;
-      return `radial-gradient(400px circle at ${x}px ${y}px, rgba(167, 139, 250, 0.08), transparent 60%)`;
+      return `radial-gradient(400px circle at ${x}px ${y}px, rgba(52, 211, 153, 0.08), transparent 60%)`;
     }
   );
 
@@ -61,7 +61,9 @@ export function HeroBanner({
 
   if (!mounted) {
     return (
-      <section className="relative min-h-screen w-full bg-black flex items-end overflow-hidden">
+      <section className="relative min-h-screen w-full flex items-end overflow-hidden" style={{
+        background: 'linear-gradient(135deg, #0a2f1f 0%, #001a0a 50%, #000000 100%)'
+      }}>
         <div className="absolute bottom-8 left-8 z-10 max-w-2xl">
           <h1 className="text-5xl md:text-6xl text-white font-light tracking-tight">
             BOOKER
@@ -73,8 +75,16 @@ export function HeroBanner({
 
   return (
     <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden" style={{
-      background: 'radial-gradient(ellipse at top left, #1e3a5f 0%, #2d1b4e 30%, #1a1625 60%, #0a0a0f 100%)'
+      background: 'linear-gradient(135deg, #0a2f1f 0%, #001a0a 50%, #000000 100%)'
     }}>
+      {/* Center Spotlight Effect */}
+      <div
+        className="pointer-events-none absolute inset-0 z-5"
+        style={{
+          background: 'radial-gradient(ellipse 800px 600px at 50% 50%, rgba(16, 185, 129, 0.15), transparent 70%)'
+        }}
+      />
+
       {/* Cursor Light Effect - Ripple 1 */}
       <motion.div
         className="pointer-events-none fixed inset-0 z-10"
@@ -155,7 +165,7 @@ export function HeroBanner({
 
               {activeLoanCount > 0 && (
                 <div>
-                  <div className="text-5xl md:text-6xl font-light text-violet-400 mb-2">
+                  <div className="text-5xl md:text-6xl font-light text-green-400 mb-2">
                     {activeLoanCount.toLocaleString()}
                   </div>
                   <div className="text-sm text-white/60">대출 중</div>

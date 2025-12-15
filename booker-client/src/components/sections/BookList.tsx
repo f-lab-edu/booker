@@ -35,9 +35,9 @@ export function BookList() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 mb-4">
-            <BookOpen size={20} className="text-violet-400 mr-2" />
-            <span className="text-violet-400 text-sm font-medium">도서 목록</span>
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 mb-4">
+            <BookOpen size={20} className="text-green-400 mr-2" />
+            <span className="text-green-400 text-sm font-medium">도서 목록</span>
           </div>
           <p className="text-white/60 text-sm">최근 등록된 도서를 확인하세요</p>
         </motion.div>
@@ -51,15 +51,15 @@ export function BookList() {
           className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16"
         >
           <div className="text-center">
-            <div className="text-4xl font-bold text-violet-400 mb-2">24/7</div>
+            <div className="text-4xl font-bold text-green-400 mb-2">24/7</div>
             <div className="text-white/60 text-sm">언제든지 대출 가능</div>
           </div>
           <div className="text-center">
-            <div className="text-4xl font-bold text-blue-400 mb-2">2주</div>
+            <div className="text-4xl font-bold text-yellow-200 mb-2">2주</div>
             <div className="text-white/60 text-sm">대출 기간 (연장 가능)</div>
           </div>
           <div className="text-center">
-            <div className="text-4xl font-bold text-purple-300 mb-2">무료</div>
+            <div className="text-4xl font-bold text-green-300 mb-2">무료</div>
             <div className="text-white/60 text-sm">모든 서비스 이용료</div>
           </div>
         </motion.div>
@@ -83,10 +83,10 @@ export function BookList() {
             {duplicatedBooks.map((book, index) => (
               <div
                 key={`${book.id}-${index}`}
-                className="group relative p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-violet-500/30 transition-all duration-300 cursor-pointer flex-shrink-0 w-80"
+                className="group relative p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-green-500/30 transition-all duration-300 cursor-pointer flex-shrink-0 w-80"
               >
                 {/* Book Title */}
-                <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-violet-400 transition-colors">
+                <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-green-400 transition-colors">
                   {book.title}
                 </h3>
 
@@ -124,7 +124,7 @@ export function BookList() {
         >
           <a
             href="/books"
-            className="inline-block px-8 py-3 rounded-full bg-white/5 border border-white/10 text-white font-medium text-sm hover:bg-white/10 hover:border-violet-500/30 transition-all duration-200"
+            className="inline-block px-8 py-3 rounded-full bg-white/5 border border-white/10 text-white font-medium text-sm hover:bg-white/10 hover:border-green-500/30 transition-all duration-200"
           >
             전체 도서 보기
           </a>

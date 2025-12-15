@@ -16,13 +16,13 @@ export function ValueProposition() {
           {/* Main Message */}
           <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-wide" style={{ lineHeight: '1.35' }}>
             <span className="text-white/90">활발한 </span>
-            <span className="text-violet-500">공유,</span>
+            <span className="text-green-500">공유,</span>
             <br />
             <span className="text-white/90">간편한 </span>
-            <span className="text-violet-400/75">대출,</span>
+            <span className="text-green-400/75">대출,</span>
             <br />
             <span className="text-white/90">빠른 </span>
-            <span className="text-violet-300/50">반납.</span>
+            <span className="text-green-300/50">반납.</span>
           </h2>
 
           {/* Sub Message */}

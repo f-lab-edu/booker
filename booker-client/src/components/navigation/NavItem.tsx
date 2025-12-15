@@ -20,7 +20,7 @@ export function NavItem({ label, href, className = '' }: NavItemProps) {
         relative px-7 py-2.5 rounded-lg text-xl font-normal transition-all duration-200
         ${isActive
           ? 'text-white bg-white/10'
-          : 'text-white/70 hover:text-violet-400 hover:bg-white/5'
+          : 'text-white/70 hover:text-green-400 hover:bg-white/5'
         }
         ${className}
       `}

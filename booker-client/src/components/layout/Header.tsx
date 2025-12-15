@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { mainNavigation } from '@/config/navigation';
 import { NavigationMenu } from '@/components/navigation/NavigationMenu';
+import { NotificationDropdown } from '@/components/layout/NotificationDropdown';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useState } from 'react';
 
@@ -38,10 +39,16 @@ export function Header() {
           </div>
         </Link>
 
-        {/* Navigation Menu */}
-        <NavigationMenu items={mainNavigation} />
+        {/* Center: Notification + Navigation Menu */}
+        <div className="flex items-center gap-8">
+          {/* Notification Bell */}
+          <NotificationDropdown />
 
-        {/* Auth Button */}
+          {/* Navigation Menu */}
+          <NavigationMenu items={mainNavigation} />
+        </div>
+
+        {/* Right Side: Auth Button */}
         {isAuthenticated ? (
           <div className="flex items-center gap-4">
             <span className="text-white/80 text-sm">{user?.name}</span>

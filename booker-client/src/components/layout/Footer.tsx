@@ -9,7 +9,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Brand Section */}
           <div>
-            <h3 className="text-2xl font-bold text-violet-400 mb-3">BOOKER</h3>
+            <h3 className="text-2xl font-bold text-green-400 mb-3">BOOKER</h3>
             <p className="text-white/60 text-sm">
               사내 도서 대출 및 이벤트 관리 시스템
             </p>
