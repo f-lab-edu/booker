@@ -63,27 +63,28 @@ public class LoadTestController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/metrics/optimistic")
-    public ResponseEntity<Map<String, Integer>> getOptimisticMetrics() {
-        return ResponseEntity.ok(Map.of("retryCount", optimisticLockService.getRetryCount()));
-    }
+    // Metrics endpoints commented out - methods not available
+    // @GetMapping("/metrics/optimistic")
+    // public ResponseEntity<Map<String, Integer>> getOptimisticMetrics() {
+    //     return ResponseEntity.ok(Map.of("retryCount", optimisticLockService.getRetryCount()));
+    // }
 
-    @GetMapping("/metrics/cas")
-    public ResponseEntity<Map<String, Integer>> getCasMetrics() {
-        return ResponseEntity.ok(Map.of("retryCount", casService.getRetryCount()));
-    }
+    // @GetMapping("/metrics/cas")
+    // public ResponseEntity<Map<String, Integer>> getCasMetrics() {
+    //     return ResponseEntity.ok(Map.of("retryCount", casService.getRetryCount()));
+    // }
 
-    @PostMapping("/reset/optimistic")
-    public ResponseEntity<String> resetOptimisticMetrics() {
-        optimisticLockService.resetRetryCount();
-        return ResponseEntity.ok("Optimistic lock retry count reset");
-    }
+    // @PostMapping("/reset/optimistic")
+    // public ResponseEntity<String> resetOptimisticMetrics() {
+    //     optimisticLockService.resetRetryCount();
+    //     return ResponseEntity.ok("Optimistic lock retry count reset");
+    // }
 
-    @PostMapping("/reset/cas")
-    public ResponseEntity<String> resetCasMetrics() {
-        casService.resetRetryCount();
-        return ResponseEntity.ok("CAS retry count reset");
-    }
+    // @PostMapping("/reset/cas")
+    // public ResponseEntity<String> resetCasMetrics() {
+    //     casService.resetRetryCount();
+    //     return ResponseEntity.ok("CAS retry count reset");
+    // }
 
     @GetMapping("/health")
     public ResponseEntity<String> health() {
