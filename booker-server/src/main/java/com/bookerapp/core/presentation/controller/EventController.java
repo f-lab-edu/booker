@@ -1,5 +1,6 @@
 package com.bookerapp.core.presentation.controller;
 
+import com.bookerapp.core.domain.model.dto.PageResponse;
 import com.bookerapp.core.domain.model.event.Event;
 import com.bookerapp.core.domain.model.event.EventType;
 import com.bookerapp.core.domain.model.event.Member;
@@ -146,16 +147,19 @@ public class EventController {
                       "- 최신순 조회: GET /api/v1/events?page=0&size=10&sort=startTime,desc\n" +
                       "- WORKSHOP만 조회: GET /api/v1/events?type=WORKSHOP&sort=startTime,desc"
     )
-    public ResponseEntity<Page<EventDto.Response>> getEvents(
+    public ResponseEntity<PageResponse<EventDto.Response>> getEvents(
             @RequestParam(required = false) EventType type,
-            @Parameter(description = "페이징 및 정렬 파라미터 (예: page=0&size=20&sort=startTime,desc)",
-                      example = "page=0&size=20&sort=startTime,desc")
+            @Parameter(
+                description = "페이징 및 정렬",
+                example = "{ \"page\": 0, \"size\": 20, \"sort\": [\"startTime,desc\"] }",
+                schema = @io.swagger.v3.oas.annotations.media.Schema(defaultValue = "startTime,desc")
+            )
             @PageableDefault(size = 20, sort = "startTime", direction = org.springframework.data.domain.Sort.Direction.DESC)
             Pageable pageable) {
         Page<Event> events = type != null ?
             defaultEventService.findEventsByType(type, pageable) :
             defaultEventService.findAllEvents(pageable);
-        return ResponseEntity.ok(events.map(EventDto.Response::from));
+        return ResponseEntity.ok(PageResponse.of(events.map(EventDto.Response::from)));
     }
 
     @GetMapping("/{id}")

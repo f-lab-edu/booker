@@ -2,6 +2,7 @@ package com.bookerapp.core.presentation.controller;
 
 import com.bookerapp.core.application.dto.BookOrderDto;
 import com.bookerapp.core.application.service.BookOrderService;
+import com.bookerapp.core.domain.model.dto.PageResponse;
 import com.bookerapp.core.domain.model.entity.BookOrder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -62,16 +63,20 @@ public class BookOrderController {
                       "- sort: 정렬 기준 (기본값: createdAt,desc)\n\n" +
                       "**예시:** GET /api/v1/book-orders/my?page=0&size=20&sort=createdAt,desc"
     )
-    public ResponseEntity<Page<BookOrderDto.Response>> getMyBookOrders(
+    public ResponseEntity<PageResponse<BookOrderDto.Response>> getMyBookOrders(
             @RequestParam(required = false, defaultValue = "test-user") String userId,
-            @Parameter(description = "페이징 및 정렬 (예: page=0&size=20&sort=createdAt,desc)")
+            @Parameter(
+                description = "페이징 및 정렬",
+                example = "{ \"page\": 0, \"size\": 20, \"sort\": [\"createdAt,desc\"] }",
+                schema = @io.swagger.v3.oas.annotations.media.Schema(defaultValue = "createdAt,desc")
+            )
             @PageableDefault(size = 20, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC)
             Pageable pageable
     ) {
         logger.info("내 도서 주문 요청 목록 조회: 사용자 {}, 페이지: {}", userId, pageable);
 
         Page<BookOrderDto.Response> orders = bookOrderService.getBookOrdersByUser(userId, pageable);
-        return ResponseEntity.ok(orders);
+        return ResponseEntity.ok(PageResponse.of(orders));
     }
 
     @GetMapping
@@ -88,9 +93,13 @@ public class BookOrderController {
                       "- 모든 주문 조회: GET /api/v1/book-orders?page=0&size=20&sort=createdAt,desc\n" +
                       "- 승인된 주문만 조회: GET /api/v1/book-orders?status=APPROVED&sort=createdAt,desc"
     )
-    public ResponseEntity<Page<BookOrderDto.Response>> getAllBookOrders(
+    public ResponseEntity<PageResponse<BookOrderDto.Response>> getAllBookOrders(
             @RequestParam(required = false) BookOrder.BookOrderStatus status,
-            @Parameter(description = "페이징 및 정렬 (예: page=0&size=20&sort=createdAt,desc)")
+            @Parameter(
+                description = "페이징 및 정렬",
+                example = "{ \"page\": 0, \"size\": 20, \"sort\": [\"createdAt,desc\"] }",
+                schema = @io.swagger.v3.oas.annotations.media.Schema(defaultValue = "createdAt,desc")
+            )
             @PageableDefault(size = 20, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC)
             Pageable pageable
     ) {
@@ -100,7 +109,7 @@ public class BookOrderController {
             bookOrderService.getBookOrdersByStatus(status, pageable) :
             bookOrderService.getAllBookOrders(pageable);
 
-        return ResponseEntity.ok(orders);
+        return ResponseEntity.ok(PageResponse.of(orders));
     }
 
     @GetMapping("/{id}")

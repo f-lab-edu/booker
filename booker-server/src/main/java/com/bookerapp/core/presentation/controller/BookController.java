@@ -1,6 +1,7 @@
 package com.bookerapp.core.presentation.controller;
 
 import com.bookerapp.core.domain.model.dto.BookDto;
+import com.bookerapp.core.domain.model.dto.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import com.bookerapp.core.domain.service.BookService;
 import jakarta.validation.Valid;
@@ -48,8 +49,8 @@ public class BookController {
 
     @GetMapping
     @Operation(summary = "도서 검색")
-    public ResponseEntity<Page<BookDto.Response>> searchBooks(BookDto.SearchRequest request) {
-        return ResponseEntity.ok(bookService.searchBooks(request));
+    public ResponseEntity<PageResponse<BookDto.Response>> searchBooks(BookDto.SearchRequest request) {
+        return ResponseEntity.ok(PageResponse.of(bookService.searchBooks(request)));
     }
 
     @PutMapping("/{id}")

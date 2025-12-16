@@ -1,6 +1,7 @@
 package com.bookerapp.core.presentation.controller;
 
 import com.bookerapp.core.domain.model.dto.BookLoanDto;
+import com.bookerapp.core.domain.model.dto.PageResponse;
 import com.bookerapp.core.domain.service.BookLoanService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -75,10 +76,10 @@ public class BookLoanController {
         summary = "내 대출 목록 조회",
         description = "본인의 도서 대출 목록을 조회합니다. 상태별 필터링 및 페이징을 지원합니다."
     )
-    public ResponseEntity<Page<BookLoanDto.Response>> getMyLoans(
+    public ResponseEntity<PageResponse<BookLoanDto.Response>> getMyLoans(
             @Valid BookLoanDto.SearchRequest request,
             @RequestParam(required = false, defaultValue = "test-user") String userId) {
-        return ResponseEntity.ok(bookLoanService.getMyLoans(userId, request));
+        return ResponseEntity.ok(PageResponse.of(bookLoanService.getMyLoans(userId, request)));
     }
 
     @GetMapping("/{loanId}")
