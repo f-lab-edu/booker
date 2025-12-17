@@ -4,10 +4,12 @@ import { Footer } from '@/components/layout/Footer';
 import { BookList } from '@/components/sections/BookList';
 import { EventList } from '@/components/sections/EventList';
 import { ValueProposition } from '@/components/sections/ValueProposition';
+import { GoogleOneTap } from '@/components/auth/GoogleOneTap';
 
 export default function HomePage() {
   return (
     <main className="min-h-screen">
+      <GoogleOneTap />
       <Header />
       <HeroBanner totalBooks={247} activeLoanCount={38} />
       <BookList />

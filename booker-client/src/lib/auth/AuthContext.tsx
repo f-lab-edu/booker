@@ -1,18 +1,19 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { setAuthToken } from '@/lib/api/client';
+import { CredentialResponse, GoogleOAuthProvider } from '@react-oauth/google';
 
 interface User {
   id: string;
   name: string;
   email: string;
+  picture?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: (credentialResponse: CredentialResponse) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -24,46 +25,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing token in localStorage
-    const token = localStorage.getItem('auth_token');
+    // Check for existing user data in localStorage
     const userData = localStorage.getItem('user_data');
+    const googleToken = localStorage.getItem('google_token');
 
-    if (token && userData) {
-      setAuthToken(token);
+    if (userData && googleToken) {
       setUser(JSON.parse(userData));
     }
 
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
-    // TODO: Replace with actual authentication API call
-    // For now, mock authentication since backend JWT validation is not implemented
+  const loginWithGoogle = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      console.error('No credential in response');
+      return;
+    }
 
-    // Mock delay to simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      // Google ID Token을 백엔드로 보내서 검증
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8084';
+      const response = await fetch(`${apiUrl}/api/v1/auth/google/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idToken: credentialResponse.credential,
+        }),
+      });
 
-    // Create mock token and user
-    const mockToken = `mock_token_${Date.now()}`;
-    const mockUser: User = {
-      id: 'user123',
-      name: 'Test User',
-      email: email,
-    };
+      const data = await response.json();
 
-    // Store in localStorage
-    localStorage.setItem('auth_token', mockToken);
-    localStorage.setItem('user_data', JSON.stringify(mockUser));
+      if (data.authenticated) {
+        const userData: User = {
+          id: data.userId,
+          name: data.name,
+          email: data.email,
+          picture: data.picture,
+        };
 
-    // Update state
-    setAuthToken(mockToken);
-    setUser(mockUser);
+        // Store in localStorage
+        localStorage.setItem('google_token', credentialResponse.credential);
+        localStorage.setItem('user_data', JSON.stringify(userData));
+
+        // Update state
+        setUser(userData);
+
+        console.log('Login successful:', userData);
+      } else {
+        console.error('Authentication failed');
+      }
+    } catch (error) {
+      console.error('Failed to verify Google token:', error);
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('google_token');
     localStorage.removeItem('user_data');
-    setAuthToken(null);
     setUser(null);
   };
 
@@ -72,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         isAuthenticated: !!user,
-        login,
+        loginWithGoogle,
         logout,
         isLoading,
       }}
@@ -88,4 +108,19 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+}
+
+// Wrapper component with GoogleOAuthProvider
+export function GoogleAuthProvider({ children }: { children: ReactNode }) {
+  const clientId = process.env.GOOGLE_CLIENT_ID || '';
+
+  if (!clientId) {
+    console.warn('GOOGLE_CLIENT_ID is not set');
+  }
+
+  return (
+    <GoogleOAuthProvider clientId={clientId}>
+      <AuthProvider>{children}</AuthProvider>
+    </GoogleOAuthProvider>
+  );
 }
