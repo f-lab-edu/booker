@@ -35,6 +35,7 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     operationsSorter: method
+    tagsSorter: alpha
   api-docs:
     path: /v3/api-docs
   packages-to-scan: com.bookerapp.core.presentation.controller
@@ -70,3 +71,5 @@ google:
     credentials-file-path: ${GOOGLE_CALENDAR_CREDENTIALS_PATH}
     application-name: Booker
     calendar-id: ${GOOGLE_CALENDAR_ID}
+  oauth:
+    client-id: ${GOOGLE_OAUTH_CLIENT_ID:501106777252-lhecscbm2btvhr6n7d3jc4t4aju2vtne.apps.googleusercontent.com}
