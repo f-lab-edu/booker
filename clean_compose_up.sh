@@ -1,6 +1,6 @@
 docker-compose stop springboot
 
-docker-compose build --no-cache springboot
+docker-compose build springboot
 
 docker-compose up -d springboot
 

@@ -5,6 +5,16 @@
 
 set -e  # 에러 발생시 스크립트 중단
 
+# .env 파일 로드
+if [ -f .env ]; then
+    echo "Loading environment variables from .env file..."
+    set -a
+    source .env
+    set +a
+else
+    echo "Warning: .env file not found. Please create one with GOOGLE_CLIENT_ID and other required variables."
+fi
+
 # 색상 정의
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -38,7 +48,7 @@ if docker ps --format '{{.Names}}' | grep -q '^booker-client$'; then
         echo -e "${GREEN}=====================================${NC}"
         echo -e "${GREEN}   접속 정보${NC}"
         echo -e "${GREEN}=====================================${NC}"
-        echo -e "웹 클라이언트: ${GREEN}http://localhost:3001${NC}"
+        echo -e "웹 클라이언트: ${GREEN}http://localhost:3000${NC}"
         echo -e "API 서버:      ${GREEN}http://localhost:8084${NC}"
         echo -e "${GREEN}=====================================${NC}"
         echo ""
@@ -77,17 +87,10 @@ else
 fi
 echo ""
 
-# 3. 이미지 확인 및 빌드
-echo -e "${YELLOW}[3/4] 이미지 확인 및 컨테이너 실행 중...${NC}"
-
-# 이미지가 존재하는지 확인
-if docker images --format '{{.Repository}}:{{.Tag}}' | grep -q "^${IMAGE_NAME}"; then
-    echo "기존 이미지를 사용합니다. (빌드 스킵)"
-    docker-compose up -d booker-client
-else
-    echo "이미지가 없습니다. 빌드를 시작합니다..."
-    docker-compose up -d --build booker-client
-fi
+# 3. 이미지 재빌드 및 컨테이너 실행
+echo -e "${YELLOW}[3/4] 이미지 빌드 및 컨테이너 실행 중...${NC}"
+echo "최신 코드 변경사항을 반영하기 위해 이미지를 재빌드합니다..."
+docker-compose up -d --build booker-client
 
 # 실행 결과 확인
 if [ $? -eq 0 ]; then
@@ -108,7 +111,7 @@ if docker ps --format '{{.Names}}' | grep -q '^booker-client$'; then
     echo -e "${GREEN}=====================================${NC}"
     echo -e "${GREEN}   접속 정보${NC}"
     echo -e "${GREEN}=====================================${NC}"
-    echo -e "웹 클라이언트: ${GREEN}http://localhost:3001${NC}"
+    echo -e "웹 클라이언트: ${GREEN}http://localhost:3000${NC}"
     echo -e "API 서버:      ${GREEN}http://localhost:8084${NC}"
     echo -e "${GREEN}=====================================${NC}"
     echo ""

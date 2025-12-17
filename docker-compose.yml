@@ -90,6 +90,9 @@ services:
     build:
       context: booker-client
       dockerfile: Dockerfile
+      args:
+        - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+        - API_BASE_URL=${API_BASE_URL:-http://localhost:8084}
     container_name: booker-client
     deploy:
       resources:
@@ -100,9 +103,11 @@ services:
           cpus: '0.5'
           memory: 512M
     ports:
-      - "3001:3000"
+      - "3000:3000"
+    env_file:
+      - .env.local
     environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://springboot:8084
+      - PORT=3000
     depends_on:
       - springboot
     restart: unless-stopped
@@ -111,7 +116,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
-      - "9090:9090"
+      - "9091:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -129,7 +134,7 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3000:3000"
+      - "9090:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
