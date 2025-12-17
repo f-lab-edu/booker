@@ -4,6 +4,15 @@ import com.bookerapp.core.application.WorkLogService;
 import com.bookerapp.core.domain.model.WorkLog;
 import com.bookerapp.core.domain.model.WorkLogTag;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -15,44 +24,124 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/work-logs")
+@RequestMapping("/api/v1/work-logs")
 @RequiredArgsConstructor
+@Tag(name = "6. WorkLog", description = "작업 로그 관리 API")
 public class WorkLogController {
 
     private final WorkLogService workLogService;
 
     @PostMapping
-    @Operation(summary = "Create a new work log")
-    public ResponseEntity<WorkLog> createLog(@RequestBody CreateWorkLogRequest request) {
-        WorkLog created = workLogService.createLog(request.getTitle(), request.getContent(), request.getAuthor(), request.getTags());
-        
+    @Operation(summary = "작업 로그 생성", description = """
+            ## 개요
+            새로운 작업 로그를 Markdown 형식으로 생성합니다.
+            개발 작업, 회의록, 학습 내용 등을 체계적으로 기록할 수 있습니다.
+
+            ## 주요 파라미터
+            - `title`: 작업 로그 제목 (필수)
+            - `content`: Markdown 형식의 본문 내용 (필수)
+            - `author`: 작성자 이름 (필수)
+            - `tags`: 분류를 위한 태그 목록 (선택)
+
+            ## 응답 데이터
+            생성된 작업 로그의 전체 정보와 고유 ID를 반환합니다.
+            Location 헤더에 생성된 리소스 URL이 포함됩니다.
+
+            ## 제약사항
+            - 제목, 내용, 작성자는 필수 입력 항목입니다
+            - Content는 Markdown 형식을 권장합니다
+            """)
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "작업 로그 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = WorkLog.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 (필수 필드 누락 또는 유효성 검증 실패)", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\": \"Validation failed\", \"details\": [\"title: must not be blank\"]}"))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    public ResponseEntity<WorkLog> createLog(@Valid @RequestBody CreateWorkLogRequest request) {
+        WorkLog created = workLogService.createLog(
+                request.getTitle(),
+                request.getContent(),
+                request.getAuthor(),
+                request.getTags());
+
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(created.getId())
                 .toUri();
-                
+
         return ResponseEntity.created(location).body(created);
     }
 
     @GetMapping
-    @Operation(summary = "List all work logs (optionally filtered by tags)")
-    public ResponseEntity<List<WorkLog>> getAllLogs(@RequestParam(required = false) List<WorkLogTag> tags) {
+    @Operation(summary = "작업 로그 목록 조회", description = """
+            ## 개요
+            모든 작업 로그를 조회하거나, 특정 태그로 필터링하여 조회합니다.
+
+            ## 주요 파라미터
+            - `tags`: 필터링할 태그 목록 (선택)
+              - 미지정 시: 모든 작업 로그 반환
+              - 지정 시: 해당 태그를 포함하는 작업 로그만 반환
+
+            ## 응답 데이터
+            작업 로그 목록을 배열로 반환합니다.
+            각 항목에는 ID, 제목, 작성자, 태그, 생성일시 등이 포함됩니다.
+
+            ## 제약사항
+            - 태그는 DEVELOPMENT, MEETING, LEARNING, BUG_FIX, DEPLOYMENT 중 선택
+            - 여러 태그를 동시에 필터링 가능
+            """)
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = WorkLog.class))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    public ResponseEntity<List<WorkLog>> getAllLogs(
+            @Parameter(description = "필터링할 태그 목록 (예: DEVELOPMENT, MEETING)", example = "DEVELOPMENT") @RequestParam(required = false) List<WorkLogTag> tags) {
         return ResponseEntity.ok(workLogService.getAllLogs(tags));
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.TEXT_MARKDOWN_VALUE)
-    @Operation(summary = "Get raw markdown content of a log")
-    public ResponseEntity<String> getLogContent(@PathVariable String id) {
+    @Operation(summary = "작업 로그 원본 조회", description = """
+            ## 개요
+            특정 작업 로그의 Markdown 원본 내용을 조회합니다.
+            Content-Type이 text/markdown으로 반환되어 직접 렌더링 가능합니다.
+
+            ## 주요 파라미터
+            - `id`: 조회할 작업 로그의 고유 ID
+
+            ## 응답 데이터
+            Markdown 형식의 원본 텍스트를 반환합니다.
+
+            ## 제약사항
+            - ID는 작업 로그 생성 시 반환된 값을 사용
+            - 존재하지 않는 ID 조회 시 404 오류 발생
+            """)
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = "text/markdown", examples = @ExampleObject(value = "# 작업 내용\n\n- API 엔드포인트 추가\n- 테스트 코드 작성"))),
+            @ApiResponse(responseCode = "404", description = "작업 로그를 찾을 수 없음"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    public ResponseEntity<String> getLogContent(
+            @Parameter(description = "작업 로그 ID", example = "20251217-103000-abc123") @PathVariable String id) {
         WorkLog log = workLogService.getLog(id);
         return ResponseEntity.ok(log.getContent());
     }
 
+    @Schema(description = "작업 로그 생성 요청")
     @Data
     public static class CreateWorkLogRequest {
+        @Schema(description = "작업 로그 제목", example = "Spring Boot API 개발", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "제목은 필수입니다")
         private String title;
+
+        @Schema(description = "Markdown 형식의 본문 내용", example = "# 작업 내용\n\n- API 엔드포인트 추가\n- Swagger 문서화\n- 테스트 코드 작성", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "내용은 필수입니다")
         private String content;
+
+        @Schema(description = "작성자 이름", example = "홍길동", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "작성자는 필수입니다")
         private String author;
+
+        @Schema(description = "태그 목록 (DEVELOPMENT, MEETING, LEARNING, BUG_FIX, DEPLOYMENT)", example = "[\"DEVELOPMENT\", \"API\"]")
         private List<WorkLogTag> tags;
     }
 }

@@ -30,10 +30,7 @@ public class BookDto {
         private String publisher;
 
         @NotBlank(message = "ISBN은 필수입니다")
-        @Schema(description = "ISBN (10자리 또는 13자리 숫자)",
-                example = "9791158392826",
-                pattern = "^\\d{10}|\\d{13}$",
-                required = true)
+        @Schema(description = "ISBN (10자리 또는 13자리 숫자)", example = "9791158392826", pattern = "^\\d{10}|\\d{13}$", required = true)
         private String isbn;
 
         @Schema(description = "도서 표지 이미지 URL", example = "https://example.com/book-cover.jpg")
@@ -80,9 +77,8 @@ public class BookDto {
     @NoArgsConstructor
     @Schema(name = "LocationRequest", description = "도서 위치 정보 (선택사항)")
     public static class LocationRequest {
-        @Schema(description = "층수", example = "FOURTH",
-                allowableValues = {"FOURTH", "TWELFTH"},
-                defaultValue = "FOURTH")
+        @Schema(description = "층수", example = "FOURTH", allowableValues = { "FOURTH",
+                "TWELFTH" }, defaultValue = "FOURTH")
         private String floor = "FOURTH";
 
         @Schema(description = "구역", example = "A", defaultValue = "A")
@@ -127,23 +123,23 @@ public class BookDto {
     @Setter
     @Schema(name = "BookSearchRequest", description = "도서 검색 요청")
     public static class SearchRequest {
-        @Schema(description = "도서 제목 (부분 검색 가능)", example = "스프링")
+        @Schema(description = "도서 제목 (부분 검색 가능)", example = "클린", nullable = true)
         private String title;
 
-        @Schema(description = "저자명 (부분 검색 가능)", example = "김영한")
+        @Schema(description = "저자명 (부분 검색 가능)", example = "마틴", nullable = true)
         private String author;
 
-        @Schema(description = "도서 상태", example = "AVAILABLE",
-                allowableValues = {"AVAILABLE", "LOANED", "PROCESSING", "RESERVED", "UNAVAILABLE"})
+        @Schema(description = "도서 상태로 필터링", example = "AVAILABLE", allowableValues = { "AVAILABLE", "LOANED",
+                "PROCESSING", "RESERVED", "UNAVAILABLE" }, nullable = true)
         private BookStatus status;
 
         @Schema(description = "페이지 번호 (0부터 시작)", example = "0", defaultValue = "0")
         private int page = 0;
 
-        @Schema(description = "페이지 크기", example = "20", defaultValue = "20")
+        @Schema(description = "페이지 크기 (최대 100)", example = "20", defaultValue = "20")
         private int size = 20;
 
-        @Schema(description = "정렬 기준 (예: title,asc)", example = "title,asc", defaultValue = "title,asc")
+        @Schema(description = "정렬 기준 (필드명,방향)", example = "title,asc", defaultValue = "title,asc")
         private String sort = "title,asc";
     }
 }

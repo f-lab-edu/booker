@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/events/participation")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Event Participation", description = "이벤트 참여 신청 API")
+@Tag(name = "5. Event Participation", description = "이벤트 참여 신청 API")
 public class EventParticipationController {
 
     private final SynchronizedEventParticipationService synchronizedEventParticipationService;

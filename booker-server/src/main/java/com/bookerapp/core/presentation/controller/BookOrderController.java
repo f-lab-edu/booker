@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/book-orders")
-@Tag(name = "BookOrder", description = "도서 주문 요청 관리 APIs")
+@Tag(name = "3. BookOrder", description = "도서 주문 요청 관리 API")
 @RequiredArgsConstructor
 public class BookOrderController {
 

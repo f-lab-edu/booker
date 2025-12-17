@@ -17,7 +17,7 @@ import java.net.URI;
 @RestController
 @RequestMapping("/api/v1/loans")
 @RequiredArgsConstructor
-@Tag(name = "Book Loan", description = "도서 대출 관련 API")
+@Tag(name = "2. Book Loan", description = "도서 대출 관련 API")
 public class BookLoanController {
 
     private final BookLoanService bookLoanService;

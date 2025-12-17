@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/events")
 @RequiredArgsConstructor
-@Tag(name = "Event", description = "이벤트 관리 API")
+@Tag(name = "4. Event", description = "이벤트 관리 API")
 public class EventController {
 
     private final DefaultEventService defaultEventService;

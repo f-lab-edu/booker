@@ -11,6 +11,7 @@ import com.bookerapp.core.domain.model.event.EventType;
 import com.bookerapp.core.domain.model.event.Member;
 import com.bookerapp.core.domain.repository.EventRepository;
 import com.bookerapp.core.domain.repository.MemberRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.Map;
 @RequestMapping("/api/load-test")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "7. LoadTest", description = "부하 테스트 API")
 public class LoadTestController {
 
     private final OptimisticLockEventParticipationService optimisticLockService;
