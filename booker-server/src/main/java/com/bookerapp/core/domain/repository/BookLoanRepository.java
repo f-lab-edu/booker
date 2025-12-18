@@ -34,4 +34,8 @@ public interface BookLoanRepository extends JpaRepository<BookLoan, Long> {
     default long countWaitingListByBookId(Long bookId, LoanStatus status) {
         return countByBookIdAndStatus(bookId, status);
     }
+
+    @Query("SELECT COUNT(bl) + 1 FROM BookLoan bl WHERE bl.book.id = :bookId " +
+           "AND bl.status = 'WAITING' AND bl.createdAt < :createdAt")
+    Integer findWaitingPosition(@Param("bookId") Long bookId, @Param("createdAt") java.time.LocalDateTime createdAt);
 }

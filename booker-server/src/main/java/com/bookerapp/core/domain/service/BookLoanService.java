@@ -39,9 +39,20 @@ public class BookLoanService {
         } else {
             loan.setStatus(LoanStatus.WAITING);
         }
-        
+
         BookLoan savedLoan = bookLoanRepository.save(loan);
-        return BookLoanDto.Response.from(savedLoan);
+        BookLoanDto.Response response = BookLoanDto.Response.from(savedLoan);
+
+        // WAITING 상태인 경우 대기 순서 계산
+        if (savedLoan.getStatus() == LoanStatus.WAITING) {
+            Integer position = bookLoanRepository.findWaitingPosition(
+                savedLoan.getBook().getId(),
+                savedLoan.getCreatedAt()
+            );
+            response.setWaitingPosition(position);
+        }
+
+        return response;
     }
 
     @Transactional
@@ -95,7 +106,18 @@ public class BookLoanService {
                 memberId,
                 statuses,
                 PageRequest.of(request.getPage(), request.getSize())
-        ).map(BookLoanDto.Response::from);
+        ).map(loan -> {
+            BookLoanDto.Response response = BookLoanDto.Response.from(loan);
+            // WAITING 상태인 경우 대기 순서 계산
+            if (loan.getStatus() == LoanStatus.WAITING) {
+                Integer position = bookLoanRepository.findWaitingPosition(
+                    loan.getBook().getId(),
+                    loan.getCreatedAt()
+                );
+                response.setWaitingPosition(position);
+            }
+            return response;
+        });
     }
 
     @Transactional(readOnly = true)
@@ -107,7 +129,18 @@ public class BookLoanService {
             throw new IllegalStateException("본인의 대출 기록만 조회할 수 있습니다.");
         }
 
-        return BookLoanDto.Response.from(loan);
+        BookLoanDto.Response response = BookLoanDto.Response.from(loan);
+
+        // WAITING 상태인 경우 대기 순서 계산
+        if (loan.getStatus() == LoanStatus.WAITING) {
+            Integer position = bookLoanRepository.findWaitingPosition(
+                loan.getBook().getId(),
+                loan.getCreatedAt()
+            );
+            response.setWaitingPosition(position);
+        }
+
+        return response;
     }
 
     @Transactional(readOnly = true)

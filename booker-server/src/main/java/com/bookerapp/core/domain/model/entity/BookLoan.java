@@ -43,9 +43,13 @@ public class BookLoan extends BaseEntity {
     @Column(nullable = false)
     private LoanStatus status = LoanStatus.PENDING;
 
+    @Column(name = "extension_count", nullable = false)
+    private int extensionCount = 0;
+
     private final int DEFAULT_LOAN_DURATION = 2;
     private final int EXTEND_DURATION = 1;
     private final int WARNING_DUE_DAY = 3;
+    private static final int OVERDUE_FEE_PER_DAY = 100;
 
     public BookLoan(Book book, String memberId) {
         this.book = book;
@@ -90,7 +94,20 @@ public class BookLoan extends BaseEntity {
         if (isOverdue()) {
             throw new IllegalStateException("연체 중인 도서는 연장할 수 없습니다.");
         }
+        if (this.extensionCount >= 1) {
+            throw new IllegalStateException("최대 연장 횟수(1회)를 초과했습니다.");
+        }
         this.dueDate = this.dueDate.plusWeeks(EXTEND_DURATION);
+        this.extensionCount++;
+    }
+
+    public int calculateOverdueFee() {
+        if (!isOverdue() || returnDate != null) {
+            return 0;
+        }
+
+        long overdueDays = java.time.temporal.ChronoUnit.DAYS.between(dueDate, LocalDateTime.now());
+        return (int) (overdueDays * OVERDUE_FEE_PER_DAY);
     }
 
     public boolean isOverdue() {
