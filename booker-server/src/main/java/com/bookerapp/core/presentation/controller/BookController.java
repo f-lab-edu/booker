@@ -2,11 +2,13 @@ package com.bookerapp.core.presentation.controller;
 
 import com.bookerapp.core.domain.model.dto.BookDto;
 import com.bookerapp.core.domain.model.dto.PageResponse;
+import com.bookerapp.core.domain.model.enums.BookStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -51,13 +53,87 @@ public class BookController {
                         - 위치 정보의 floor는 FOURTH 또는 TWELFTH만 허용
                         """)
         @ApiResponses({
-                        @ApiResponse(responseCode = "201", description = "도서 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookDto.Response.class))),
+                        @ApiResponse(responseCode = "201", description = "도서 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookDto.Response.class), examples = @ExampleObject(name = "생성된 도서 예시", value = """
+                                {
+                                  "id": 1,
+                                  "title": "Clean Code",
+                                  "author": "Robert C. Martin",
+                                  "isbn": "9780132350884",
+                                  "publisher": "Prentice Hall",
+                                  "coverImageUrl": "https://images.example.com/books/clean-code-cover.jpg",
+                                  "status": "AVAILABLE",
+                                  "location": {
+                                    "id": 1,
+                                    "floor": "FOURTH",
+                                    "section": "A",
+                                    "shelf": "1"
+                                  },
+                                  "locationDisplay": "4"
+                                }
+                                """))),
                         @ApiResponse(responseCode = "400", description = "잘못된 요청 (필수 필드 누락 또는 유효성 검증 실패)", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\": \"Validation failed\", \"details\": [\"title: must not be blank\"]}"))),
                         @ApiResponse(responseCode = "409", description = "중복된 ISBN"),
                         @ApiResponse(responseCode = "500", description = "서버 내부 오류")
         })
         public ResponseEntity<BookDto.Response> createBook(
-                        @Valid @RequestBody BookDto.Request request) {
+                        @RequestBody(description = "도서 생성 요청 데이터", required = true, content = @Content(
+                                mediaType = "application/json",
+                                schema = @Schema(implementation = BookDto.Request.class),
+                                examples = {
+                                        @ExampleObject(
+                                                name = "Clean Code 예시",
+                                                summary = "클린 코드 도서 등록",
+                                                description = "로버트 C. 마틴의 Clean Code 도서를 4층 A구역 1서가에 등록하는 예시입니다",
+                                                value = """
+                                                {
+                                                  "title": "Clean Code",
+                                                  "author": "Robert C. Martin",
+                                                  "isbn": "9780132350884",
+                                                  "publisher": "Prentice Hall",
+                                                  "coverImageUrl": "https://images.example.com/books/clean-code-cover.jpg",
+                                                  "location": {
+                                                    "floor": "FOURTH",
+                                                    "section": "A",
+                                                    "shelf": "1"
+                                                  }
+                                                }
+                                                """
+                                        ),
+                                        @ExampleObject(
+                                                name = "Effective Java 예시",
+                                                summary = "이펙티브 자바 도서 등록",
+                                                description = "조슈아 블로크의 Effective Java 도서를 12층 B구역 3서가에 등록하는 예시입니다",
+                                                value = """
+                                                {
+                                                  "title": "Effective Java",
+                                                  "author": "Joshua Bloch",
+                                                  "isbn": "9780134685991",
+                                                  "publisher": "Addison-Wesley",
+                                                  "coverImageUrl": "https://images.example.com/books/effective-java-cover.jpg",
+                                                  "location": {
+                                                    "floor": "TWELFTH",
+                                                    "section": "B",
+                                                    "shelf": "3"
+                                                  }
+                                                }
+                                                """
+                                        ),
+                                        @ExampleObject(
+                                                name = "위치 정보 없이 등록",
+                                                summary = "기본 위치로 도서 등록",
+                                                description = "위치 정보를 생략하면 기본값(4층-A구역-1서가)으로 설정됩니다",
+                                                value = """
+                                                {
+                                                  "title": "Design Patterns",
+                                                  "author": "Gang of Four",
+                                                  "isbn": "9780201633610",
+                                                  "publisher": "Addison-Wesley"
+                                                }
+                                                """
+                                        )
+                                }
+                        ))
+                        @Valid @org.springframework.web.bind.annotation.RequestBody BookDto.Request request) {
                 try {
                         BookDto.Response response = bookService.createBook(request, null);
                         URI location = ServletUriComponentsBuilder
@@ -94,12 +170,29 @@ public class BookController {
                         - 존재하지 않는 ID 조회 시 404 오류 발생
                         """)
         @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookDto.Response.class))),
+                        @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookDto.Response.class), examples = @ExampleObject(name = "조회된 도서 예시", value = """
+                                {
+                                  "id": 1,
+                                  "title": "Clean Code",
+                                  "author": "Robert C. Martin",
+                                  "isbn": "9780132350884",
+                                  "publisher": "Prentice Hall",
+                                  "coverImageUrl": "https://images.example.com/books/clean-code-cover.jpg",
+                                  "status": "AVAILABLE",
+                                  "location": {
+                                    "id": 1,
+                                    "floor": "FOURTH",
+                                    "section": "A",
+                                    "shelf": "1"
+                                  },
+                                  "locationDisplay": "4"
+                                }
+                                """))),
                         @ApiResponse(responseCode = "404", description = "도서를 찾을 수 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\": \"Book not found\", \"id\": 999}"))),
                         @ApiResponse(responseCode = "500", description = "서버 내부 오류")
         })
         public ResponseEntity<BookDto.Response> getBook(
-                        @Parameter(description = "도서 ID", example = "1", required = true) @PathVariable Long id) {
+                        @Parameter(description = "조회할 도서의 고유 ID - 데이터베이스에 실제 존재하는 ID를 입력하세요", example = "1", required = true) @PathVariable Long id) {
                 return ResponseEntity.ok(bookService.getBook(id));
         }
 
@@ -139,11 +232,67 @@ public class BookController {
                         - 정렬 기준은 도서 필드명과 방향(asc/desc)을 쉼표로 구분
                         """)
         @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "검색 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = PageResponse.class))),
+                        @ApiResponse(responseCode = "200", description = "검색 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = PageResponse.class), examples = @ExampleObject(name = "검색 결과 예시", value = """
+                                {
+                                  "content": [
+                                    {
+                                      "id": 1,
+                                      "title": "Clean Code",
+                                      "author": "Robert C. Martin",
+                                      "isbn": "9780132350884",
+                                      "publisher": "Prentice Hall",
+                                      "coverImageUrl": "https://images.example.com/books/clean-code-cover.jpg",
+                                      "status": "AVAILABLE",
+                                      "location": {
+                                        "id": 1,
+                                        "floor": "FOURTH",
+                                        "section": "A",
+                                        "shelf": "1"
+                                      },
+                                      "locationDisplay": "4"
+                                    },
+                                    {
+                                      "id": 2,
+                                      "title": "Clean Architecture",
+                                      "author": "Robert C. Martin",
+                                      "isbn": "9780134494166",
+                                      "publisher": "Prentice Hall",
+                                      "coverImageUrl": "https://images.example.com/books/clean-architecture-cover.jpg",
+                                      "status": "AVAILABLE",
+                                      "location": {
+                                        "id": 2,
+                                        "floor": "FOURTH",
+                                        "section": "A",
+                                        "shelf": "2"
+                                      },
+                                      "locationDisplay": "4"
+                                    }
+                                  ],
+                                  "page": 0,
+                                  "size": 20,
+                                  "totalElements": 2,
+                                  "totalPages": 1,
+                                  "first": true,
+                                  "last": true
+                                }
+                                """))),
                         @ApiResponse(responseCode = "400", description = "잘못된 검색 파라미터", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\": \"Invalid parameter\", \"message\": \"Page size must not exceed 100\"}"))),
                         @ApiResponse(responseCode = "500", description = "서버 내부 오류")
         })
-        public ResponseEntity<PageResponse<BookDto.Response>> searchBooks(BookDto.SearchRequest request) {
+        public ResponseEntity<PageResponse<BookDto.Response>> searchBooks(
+                        @Parameter(description = "도서 제목으로 검색 (부분 일치)", example = "Clean") @RequestParam(required = false) String title,
+                        @Parameter(description = "저자명으로 검색 (부분 일치)", example = "Martin") @RequestParam(required = false) String author,
+                        @Parameter(description = "도서 상태로 필터링 (AVAILABLE, LOANED 등)", example = "AVAILABLE") @RequestParam(required = false) BookStatus status,
+                        @Parameter(description = "페이지 번호 (0부터 시작)", example = "0") @RequestParam(defaultValue = "0") int page,
+                        @Parameter(description = "페이지 크기 (기본값: 20, 최대: 100)", example = "20") @RequestParam(defaultValue = "20") int size,
+                        @Parameter(description = "정렬 기준 (예: title,asc 또는 author,desc)", example = "title,asc") @RequestParam(defaultValue = "title,asc") String sort) {
+                BookDto.SearchRequest request = new BookDto.SearchRequest();
+                request.setTitle(title);
+                request.setAuthor(author);
+                request.setStatus(status);
+                request.setPage(page);
+                request.setSize(size);
+                request.setSort(sort);
                 return ResponseEntity.ok(PageResponse.of(bookService.searchBooks(request)));
         }
 
@@ -172,14 +321,75 @@ public class BookController {
                         - ISBN 형식 검증 필요 (10자리 또는 13자리)
                         """)
         @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "수정 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookDto.Response.class))),
+                        @ApiResponse(responseCode = "200", description = "수정 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookDto.Response.class), examples = @ExampleObject(name = "수정된 도서 예시", value = """
+                                {
+                                  "id": 1,
+                                  "title": "Clean Code (2nd Edition)",
+                                  "author": "Robert C. Martin",
+                                  "isbn": "9780132350884",
+                                  "publisher": "Prentice Hall",
+                                  "coverImageUrl": "https://images.example.com/books/clean-code-2nd-cover.jpg",
+                                  "status": "AVAILABLE",
+                                  "location": {
+                                    "id": 1,
+                                    "floor": "TWELFTH",
+                                    "section": "B",
+                                    "shelf": "5"
+                                  },
+                                  "locationDisplay": "12"
+                                }
+                                """))),
                         @ApiResponse(responseCode = "400", description = "잘못된 요청 (필수 필드 누락 또는 유효성 검증 실패)", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\": \"Validation failed\", \"details\": [\"isbn: must match pattern\"]}"))),
                         @ApiResponse(responseCode = "404", description = "도서를 찾을 수 없음"),
                         @ApiResponse(responseCode = "500", description = "서버 내부 오류")
         })
         public ResponseEntity<BookDto.Response> updateBook(
-                        @Parameter(description = "도서 ID", example = "1", required = true) @PathVariable Long id,
-                        @Valid @RequestBody BookDto.Request request) {
+                        @Parameter(description = "수정할 도서의 고유 ID - 실제 존재하는 도서 ID를 입력하세요", example = "1", required = true) @PathVariable Long id,
+                        @RequestBody(description = "도서 수정 요청 데이터 (전체 필드 입력 필요)", required = true, content = @Content(
+                                mediaType = "application/json",
+                                schema = @Schema(implementation = BookDto.Request.class),
+                                examples = {
+                                        @ExampleObject(
+                                                name = "제목 및 위치 수정",
+                                                summary = "도서 제목과 보관 위치 변경",
+                                                description = "도서 제목을 'Clean Code (2nd Edition)'으로 변경하고 12층 B구역 5서가로 이동하는 예시입니다",
+                                                value = """
+                                                {
+                                                  "title": "Clean Code (2nd Edition)",
+                                                  "author": "Robert C. Martin",
+                                                  "isbn": "9780132350884",
+                                                  "publisher": "Prentice Hall",
+                                                  "coverImageUrl": "https://images.example.com/books/clean-code-2nd-cover.jpg",
+                                                  "location": {
+                                                    "floor": "TWELFTH",
+                                                    "section": "B",
+                                                    "shelf": "5"
+                                                  }
+                                                }
+                                                """
+                                        ),
+                                        @ExampleObject(
+                                                name = "표지 이미지 업데이트",
+                                                summary = "도서 표지 이미지 URL 변경",
+                                                description = "표지 이미지 URL만 변경하는 경우에도 모든 필수 필드를 입력해야 합니다",
+                                                value = """
+                                                {
+                                                  "title": "Effective Java",
+                                                  "author": "Joshua Bloch",
+                                                  "isbn": "9780134685991",
+                                                  "publisher": "Addison-Wesley",
+                                                  "coverImageUrl": "https://images.example.com/books/effective-java-new-cover.jpg",
+                                                  "location": {
+                                                    "floor": "FOURTH",
+                                                    "section": "A",
+                                                    "shelf": "1"
+                                                  }
+                                                }
+                                                """
+                                        )
+                                }
+                        ))
+                        @Valid @org.springframework.web.bind.annotation.RequestBody BookDto.Request request) {
                 return ResponseEntity.ok(bookService.updateBook(id, request));
         }
 
@@ -208,7 +418,7 @@ public class BookController {
                         @ApiResponse(responseCode = "500", description = "서버 내부 오류")
         })
         public ResponseEntity<Void> deleteBook(
-                        @Parameter(description = "도서 ID", example = "1", required = true) @PathVariable Long id) {
+                        @Parameter(description = "삭제할 도서의 고유 ID - 실제 존재하며 대출 중이지 않은 도서 ID를 입력하세요", example = "1", required = true) @PathVariable Long id) {
                 bookService.deleteBook(id);
                 return ResponseEntity.noContent().build();
         }
