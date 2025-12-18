@@ -1,6 +1,7 @@
 package com.bookerapp.core.domain.model.event;
 
 import com.bookerapp.core.domain.model.entity.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -44,6 +45,7 @@ public class Event extends BaseEntity {
     private Member presenter;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnoreProperties("event")
     private List<EventParticipation> participants = new ArrayList<>();
 
     public Event(String title, String description, EventType type, LocalDateTime startTime,
