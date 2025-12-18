@@ -1,6 +1,7 @@
 package com.bookerapp.core.domain.model.event;
 
 import com.bookerapp.core.domain.model.entity.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,6 +19,7 @@ public class EventParticipation extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     private Event event;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
