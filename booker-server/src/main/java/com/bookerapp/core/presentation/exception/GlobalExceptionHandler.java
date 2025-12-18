@@ -6,6 +6,7 @@ import com.bookerapp.core.domain.exception.DeletedBookOrderException;
 import com.bookerapp.core.domain.exception.DuplicateIsbnException;
 import com.bookerapp.core.domain.exception.InvalidBookException;
 import com.bookerapp.core.domain.exception.InvalidFloorException;
+import com.bookerapp.core.domain.exception.WorkLogNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -101,6 +102,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(
+            IllegalStateException e, HttpServletRequest request) {
+        logger.warn("IllegalStateException: {}", e.getMessage());
+        ErrorResponse errorResponse = ErrorResponse.of(
+                HttpStatus.BAD_REQUEST,
+                "잘못된 요청",
+                e.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
 
     @ExceptionHandler(BookOrderNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleBookOrderNotFoundException(BookOrderNotFoundException e) {
@@ -186,6 +200,19 @@ public class GlobalExceptionHandler {
                 "NotApprovedStatusException"
         );
         return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(WorkLogNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleWorkLogNotFoundException(
+            WorkLogNotFoundException e, HttpServletRequest request) {
+        logger.warn("작업 로그를 찾을 수 없음: {}", e.getMessage());
+        ErrorResponse errorResponse = ErrorResponse.of(
+                HttpStatus.NOT_FOUND,
+                "작업 로그를 찾을 수 없음",
+                e.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
 }
