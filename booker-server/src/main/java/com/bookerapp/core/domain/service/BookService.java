@@ -38,6 +38,7 @@ public class BookService {
         }
     }
 
+    @Transactional(readOnly = true)
     public BookDto.Response getBook(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("도서를 찾을 수 없습니다: " + id));
@@ -56,9 +57,14 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("도서를 찾을 수 없습니다: " + id));
 
-        if (!book.getIsbn().equals(request.getIsbn()) &&
-                bookRepository.findByIsbn(request.getIsbn()).isPresent()) {
-            throw new DuplicateIsbnException(request.getIsbn());
+        // ISBN이 변경되는 경우에만 중복 체크
+        if (!book.getIsbn().equals(request.getIsbn())) {
+            bookRepository.findByIsbn(request.getIsbn()).ifPresent(existingBook -> {
+                throw new DuplicateIsbnException(
+                    String.format("이미 등록된 ISBN입니다: %s (도서 ID: %d, 제목: %s)",
+                        request.getIsbn(), existingBook.getId(), existingBook.getTitle())
+                );
+            });
         }
 
         BookLocation bookLocation = null;
