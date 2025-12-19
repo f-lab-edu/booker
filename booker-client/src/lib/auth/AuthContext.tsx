@@ -112,10 +112,10 @@ export function useAuth() {
 
 // Wrapper component with GoogleOAuthProvider
 export function GoogleAuthProvider({ children }: { children: ReactNode }) {
-  const clientId = process.env.GOOGLE_CLIENT_ID || '';
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
   if (!clientId) {
-    console.warn('GOOGLE_CLIENT_ID is not set');
+    console.warn('NEXT_PUBLIC_GOOGLE_CLIENT_ID is not set');
   }
 
   return (
