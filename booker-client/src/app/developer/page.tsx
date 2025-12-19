@@ -7,7 +7,7 @@ import { TabHeader } from '@/components/layout/TabHeader';
 import { GuideSidebar } from '@/components/guide/GuideSidebar';
 import { ArticleCard } from '@/components/guide/ArticleCard';
 
-type MainTab = 'guide' | 'api' | 'sandbox' | 'community' | 'blog';
+type MainTab = 'guide' | 'sandbox';
 type SandboxTab = 'html' | 'css' | 'javascript';
 
 const defaultHTML = `<div class="card">
@@ -55,11 +55,8 @@ const defaultJS = `document.getElementById('btn').addEventListener('click', () =
 });`;
 
 const DEVELOPER_TABS = [
-  { id: 'guide', label: '가이드' },
-  { id: 'api', label: 'API & SDK' },
+  { id: 'guide', label: '팀 블로그' },
   { id: 'sandbox', label: '샌드박스' },
-  { id: 'community', label: '커뮤니티·지원' },
-  { id: 'blog', label: '블로그' },
 ];
 
 const GUIDE_SIDEBAR_ITEMS = [
@@ -150,13 +147,6 @@ BOOKER는 안전하고 편리한 결제 시스템을 제공합니다. 이 가이
             </div>
           )}
 
-          {mainTab === 'api' && (
-            <div className="text-center py-20">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">API & SDK</h2>
-              <p className="text-gray-600">준비 중입니다.</p>
-            </div>
-          )}
-
           {mainTab === 'sandbox' && (
             <div>
               <div className="mb-6">
@@ -228,20 +218,6 @@ BOOKER는 안전하고 편리한 결제 시스템을 제공합니다. 이 가이
                   💡 <strong>Tip:</strong> 코드를 수정하면 실시간으로 프리뷰가 업데이트됩니다. 샌드박스는 격리된 환경에서 실행됩니다.
                 </p>
               </div>
-            </div>
-          )}
-
-          {mainTab === 'community' && (
-            <div className="text-center py-20">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">커뮤니티·지원</h2>
-              <p className="text-gray-600">준비 중입니다.</p>
-            </div>
-          )}
-
-          {mainTab === 'blog' && (
-            <div className="text-center py-20">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">블로그</h2>
-              <p className="text-gray-600">준비 중입니다.</p>
             </div>
           )}
         </div>

@@ -16,18 +16,9 @@ export const mainNavigation: NavigationItem[] = [
     description: '사내 이벤트 및 테크톡',
   },
   {
-    label: '비즈니스',
-    href: '/business',
-    description: '비즈니스 도서 및 자료',
-  },
-  {
-    label: '기술',
-    href: '/tech',
-    description: '기술 도서 및 자료',
-  },
-  {
     label: '개발자센터',
     href: '/developer',
     description: 'API 문서 및 개발 가이드',
   },
 ];
+
